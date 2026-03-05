@@ -1,0 +1,127 @@
+---
+# # POST /users
+# POST_users:
+#     request:
+#         payload:
+#             email: String
+#     response:
+#         status: 200
+#         id: Number
+#         email: String
+# POST /login
+POST_login:
+    request:
+        payload:
+            email: String
+            password: String
+            confirm_password: String
+    response:
+        token: String
+        user:
+            status: 200
+            id: Number
+            email: String
+# POST /register
+POST_register:
+    request:
+        payload:
+            - email: String
+            - password: String
+            - confirm_password: String
+            - name: String
+            - age: Number
+    response:
+        status: 201
+        token: String
+        user:
+            id: Number
+            email: String
+# POST /books
+POST_books:
+    request:
+        payload:
+            title: String
+            descripcion: String
+            price: Number
+            category: String
+            stock: Number
+    response:
+        status: 201
+        id: Number
+# GET /profile
+GET_profile:
+    request:
+        headers:
+            Authorization: String
+    response:
+        status: 200
+        profile:
+            id: Number
+            email: String
+            name: String
+            age: Number
+            privileges: String
+            # admin, seller, user
+# GET /books
+GET_books:
+    request:
+        parameters:
+            page: Number
+            filters:
+                category: String
+                price_range:
+                    min: Number
+                    max: Number
+    response:
+        status: 200
+        books:
+            #10 libros por página o según diseño
+            first_x_items:
+                json:
+                    id: Number
+                    title: String
+                    descripcion: String
+                    price: Number
+                    category: String
+                    stock: Number
+# PUT /book/:id
+PUT_book_id:
+    request:
+        headers:
+            Authorization: String
+        payload:
+            title: String
+            descripcion: String
+            price: Number
+            category: String
+            stock: Number
+    response:
+        status: 200
+
+#GET /cart
+GET_cart:
+    request:
+        headers:
+            Authorization: String
+    response:
+        status: 200
+        cart:
+            items:
+            #se retorna un json con la lista de libros en el carrito
+                json:
+                    book_id: Number
+                    title: String
+                    price: Number
+                    quantity: Number
+
+# DELETE /book/:id se verifica que el usuario tenga permisos para eliminar el libro (publicador o admin)
+DELETE_book_id:
+    request:
+        headers:
+            Authorization: String
+        data:
+            id: Number
+    response:
+        status: 200
+        #tal vez un mensaje de confirmación que se eliminó
+
