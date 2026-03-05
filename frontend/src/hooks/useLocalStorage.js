@@ -1,14 +1,20 @@
 import { useEffect, useState } from "react";
-import {CryptoJs} from 'crpto-js';
+import CryptoJs from 'crypto-js';
 
-const decrypt = (ciphetext) => {
+const SECRET_KEY = import.meta.env.VITE_CRYPTO_SECRET;
+
+const encrypt = (data) => {
+    return CryptoJs.AES.encrypt(JSON.stringify(data), SECRET_KEY).toString();
+}
+
+const decrypt = (cipherText) => {
     try {
-        const bytes = CryptoJS.AES.decrypt(ciphetext, SECRET_KEY);
+        const bytes = CryptoJS.AES.decrypt(cipherText, SECRET_KEY);
 
-        return JSON.parse(bytes.toString(CryptoJs))
+        return JSON.parse(bytes.toString(CryptoJs.enc.Utf8))
     }
     catch {
-
+        return null
     }
 }
 
@@ -24,9 +30,9 @@ export const useLocalStorage = (key, initialValue, encryptedData = false) => {
         }
     });
 
-    useEffect(()=> {
+    useEffect(() => {
         try {
-            if(storedValue === undefined || storedValue ===null) {
+            if (storedValue === undefined || storedValue === null) {
                 localStorage.removeItem(key);
                 return;
             }
@@ -36,7 +42,7 @@ export const useLocalStorage = (key, initialValue, encryptedData = false) => {
         catch (error) {
             console.error('Error saving value to local storage');
         }
-    }, [])
+    }, [key, storedValue, encryptedData])
     const removeValue = () => {
         setStoredValue(undefined);
         localStorage.removeItem(key);
