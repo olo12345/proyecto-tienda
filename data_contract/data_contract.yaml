@@ -124,4 +124,3 @@ DELETE_book_id:
     response:
         status: 200
         #tal vez un mensaje de confirmación que se eliminó
-
