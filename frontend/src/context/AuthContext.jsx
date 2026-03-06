@@ -3,9 +3,9 @@ import { useLocalStorage } from './../hooks/useLocalStorage';
 import { setupInterceptors } from './../services/api';
 import { getUsers } from './../services/users';
 
-export const AuthContext = createContext();
+const AuthContext = createContext();
 
-export const AuthProvider = ({ children }) => {
+const AuthProvider = ({ children }) => {
 
     const [user, setUser, removeUser] = useLocalStorage('user', null, true);
     const [initialLoading, setInitialLoading] = useState(true);
@@ -17,7 +17,7 @@ export const AuthProvider = ({ children }) => {
 
     useEffect(() => {
         setupInterceptors(logout)
-    }, []);
+    },);
 
     const login = async (email, password) => {
         setAuthLoading(true);
@@ -57,3 +57,7 @@ export const AuthProvider = ({ children }) => {
         </AuthContext.Provider>
     )
 }
+
+export default AuthProvider
+
+export { AuthContext }

@@ -2,9 +2,9 @@
 import { createContext } from "react";
 import { useLocalStorage } from './../hooks/useLocalStorage';
 
-export const FavoritesContext = createContext;
+const FavoritesContext = createContext();
 
-export const FavoritesProvider = ({ children }) => {
+const FavoritesProvider = ({ children }) => {
 
     const [favorites, setFavorites] = useLocalStorage('Favorites', []);
 
@@ -39,3 +39,7 @@ export const FavoritesProvider = ({ children }) => {
         </FavoritesContext.Provider>
     )
 }
+
+export default FavoritesProvider
+
+export { FavoritesContext }

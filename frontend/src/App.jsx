@@ -8,21 +8,29 @@ import Profile from "./pages/Profile/Profile"
 import Gallery from "./pages/Gallery/Gallery"
 import CreatePost from "./pages/CreatePost"
 import PostDetail from "./pages/PostDetail"
+import CartProvider from "./context/CartContext"
+import FavoritesProvider from "./context/FavoritesContext"
+
 
 function App() {
   return (
     <>
-      <Navbar />
+        <CartProvider>
+          <FavoritesProvider>
 
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/gallery" element={<Gallery />} />
-        <Route path="/create" element={<CreatePost />} />
-        <Route path="/post/:id" element={<PostDetail />} />
-      </Routes>
+            <Navbar />
+
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/gallery" element={<Gallery />} />
+              <Route path="/create" element={<CreatePost />} />
+              <Route path="/post/:id" element={<PostDetail />} />
+            </Routes>
+          </FavoritesProvider>
+        </CartProvider>
     </>
   )
 }
