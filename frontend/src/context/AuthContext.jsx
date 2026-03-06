@@ -3,7 +3,7 @@ import { useLocalStorage } from './../hooks/useLocalStorage';
 import { setupInterceptors } from './../services/api';
 import { getUsers } from './../services/users';
 
-export const AuthContext = createContext;
+export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
 
