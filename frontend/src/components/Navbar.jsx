@@ -1,4 +1,5 @@
 import { useContext } from "react";
+import { Link } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 
 function Navbar() {
@@ -6,17 +7,22 @@ function Navbar() {
   const { user, logout } = useContext(AuthContext);
 
   return (
-    <nav style={{ padding: "10px", borderBottom: "1px solid #ccc" }}>
-      
-      <h2>Proyecto Tienda</h2>
+    <nav style={{display:"flex", gap:"15px", padding:"10px", borderBottom:"1px solid #ccc"}}>
 
-      {user ? (
+      <Link to="/">Proyecto Tienda</Link>
+
+      {!user && (
+        <>
+          <Link to="/login">Login</Link>
+          <Link to="/register">Registro</Link>
+        </>
+      )}
+
+      {user && (
         <>
           <span>Bienvenido {user.name}</span>
-          <button onClick={logout}>Cerrar sesión</button>
+          <button onClick={logout}>Logout</button>
         </>
-      ) : (
-        <span>No has iniciado sesión</span>
       )}
 
     </nav>
