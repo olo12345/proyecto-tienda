@@ -1,12 +1,12 @@
 import axios from 'axios';
 
 export const apiProducts = axios.create({
-    baseUrl: 'https://devsapihub.com/api-ecommerce'
+    baseURL: 'https://devsapihub.com/api-ecommerce'
     // withCredentials:true
 });
 
 export const apiUsers = axios.create({
-    baseUrl: 'https://devsapihub.com/api-users'
+    baseURL: 'https://devsapihub.com/api-users'
     // withCredentials:true
 });
 

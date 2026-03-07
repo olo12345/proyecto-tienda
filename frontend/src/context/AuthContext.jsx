@@ -26,6 +26,7 @@ const AuthProvider = ({ children }) => {
             //No será necesario cuando haya backend
             const users = await getUsers();
             const foundUser = users.data.find((user) => user.email === email);
+            console.log(email, password, users)
             if (foundUser && password === '123456') {
                 setUser(foundUser);
                 return { success: true };

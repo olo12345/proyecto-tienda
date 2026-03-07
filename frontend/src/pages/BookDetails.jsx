@@ -1,4 +1,4 @@
-function PostDetail() {
+function BookDetails() {
   return (
     <div>
       <h1>Vista detalle de publicación</h1>
@@ -6,4 +6,4 @@ function PostDetail() {
   )
 }
 
-export default PostDetail
+export default BookDetails

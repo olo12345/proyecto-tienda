@@ -1,6 +1,6 @@
 import { useContext } from "react";
-import { Link } from "react-router-dom";
-import { AuthContext } from "../context/AuthContext";
+import { Link, NavLink } from "react-router-dom";
+import { AuthContext } from "./../context/AuthContext";
 
 function Navbar() {
 
@@ -9,12 +9,12 @@ function Navbar() {
   return (
     <nav style={{display:"flex", gap:"15px", padding:"10px", borderBottom:"1px solid #ccc"}}>
 
-      <Link to="/">Proyecto Tienda</Link>
+      <NavLink to="/">Proyecto Tienda</NavLink>
 
       {!user && (
         <>
-          <Link to="/login">Login</Link>
-          <Link to="/register">Registro</Link>
+          <NavLink to="/login">Login</NavLink>
+          <NavLink to="/register">Registro</NavLink>
         </>
       )}
 

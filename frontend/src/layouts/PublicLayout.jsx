@@ -5,15 +5,15 @@ import Navbar from './../components/Navbar';
 const { Content, Footer } = Layout;
 
 const UserLayout = () => {
-  return (
-    <Layout>
-      <Navbar />
-      <Content>
-        <Outlet />
-      </Content>
-      <Footer> User Layout </Footer>
-    </Layout>
-  )
+    return (
+        <Layout>
+            <Navbar />
+            <Content>
+                <Outlet />
+            </Content>
+            <Footer> Public Layout </Footer>
+        </Layout>
+    )
 }
 
 export default UserLayout

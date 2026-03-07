@@ -39,10 +39,10 @@ export const useLocalStorage = (key, initialValue, encryptedData = false) => {
             const valueToStore = encryptedData
                 ? encrypt(storedValue)
                 : JSON.stringify(storedValue);
-            localStorage.setItem(valueToStore);
+            localStorage.setItem(key, valueToStore);
         }
-        catch {
-            console.error('Error saving to local storage');
+        catch (error) {
+            console.error('Error saving to local storage', error);
         }
     }, [key, storedValue, encryptedData]);
 
