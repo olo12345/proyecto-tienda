@@ -54,5 +54,6 @@ If you are developing a production application, we recommend using TypeScript wi
  - Se genera conexión del Home con el Detalle del libro
  - Se modifica el Navbar para que soporte acceso a la tienda
     - PENDIENTE: Revisar los layouts (verificar que se muestren todas las veces que son convocados)
+    - RESUELTO: Problema se encontraba en footer, corregido.
  - Se conecta el ProductList.jsx (el admin) con el CreatePost.jsx para poder agregar, editar o eliminar libro
  - Se actualiza el cart.jsx para que reciba el token que ya implementamos en el AuthContext.jsx

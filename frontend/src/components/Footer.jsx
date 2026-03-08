@@ -7,11 +7,11 @@ function Footer() {
 
   let layoutMessage = "";
 
-  if (path === "/" || path === "/login" || path === "/register" || path === "/Store") {
+  if (path === "/" || path === "/login" || path === "/register" || path === "/store") {
     layoutMessage = "Public Layout";
-  } else if (path === "/profile" || path === "/Cart") {
+  } else if (path === "/Profile" || path === "/Cart") {
     layoutMessage = "User Layout";
-  } else if (path === "/ProductList") {
+  } else if (path === "/admin/store" || path === "/CreatePost" || path === "/EditPost/:id") {
     layoutMessage = "Admin Layout";
   }
 
