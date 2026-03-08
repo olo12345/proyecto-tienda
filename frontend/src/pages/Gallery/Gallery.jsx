@@ -26,7 +26,6 @@ function Gallery() {
 
   const handleAddToCart = (book) => {
     if (!user) {
-      // se envia al log in si user es falso
       navigate("/login");
     } else {
       // Si hay usuario, agregamos al carrito
@@ -34,7 +33,6 @@ function Gallery() {
       // Ver la logica del carrito por aquí
     }
   };
-
 
   return (
     <div style={{ padding: "20px" }}>
