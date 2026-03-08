@@ -1,0 +1,4 @@
+@import 'tailwindcss'; 
+
+/* se importa tailwindcss para usarlo en el proyecto
+/* al instalarlo con npm, se modifica el package-lock.json, el package.json y se incorpora el archivo vite.config.js

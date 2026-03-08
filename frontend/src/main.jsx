@@ -2,7 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import App from "./App.jsx";
-import "./index.css";
+import "./index.css"; // listo la instalación de tailwind y la importo aquí para que esté disponible en toda la aplicación
 
 import AuthProvider from "./context/AuthContext";
 
