@@ -4,7 +4,9 @@ function Register() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    password: ""
+    age: "",
+    password: "",
+    confirm_password: ""
   });
 
   const handleChange = (e) => {
@@ -16,8 +18,14 @@ function Register() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Registro Exisotos:", formData);
-    // ver lo de axios - - - - >>>>>> axios.post('/register', formData)...
+
+    const payloadToSend = {
+      ...formData,
+      age: Number(formData.age) // El contrato exige que la edad sea un número (Vlidado con esto)
+    };
+
+    console.log("Registro Exisotos:", payloadToSend);
+    // ver lo de axios - - - - >>>>>> axios.post('/register', payloadToSend)...
   };
   
   return (
@@ -46,6 +54,17 @@ function Register() {
       </div>
 
       <div>
+          <label>Edad:</label>
+          <input 
+            type="number" 
+            name="age" 
+            value={formData.age} 
+            onChange={handleChange} 
+            required
+          />
+        </div>
+
+      <div>
         <label>Contraseña:</label>
         <input 
           type="password" 
@@ -54,6 +73,17 @@ function Register() {
           onChange={handleChange} 
         />
       </div>
+
+      <div>
+          <label>Confirmar Contraseña:</label>
+          <input 
+            type="password" 
+            name="confirm_password" 
+            value={formData.confirm_password} 
+            onChange={handleChange} 
+            required
+          />
+        </div>
 
       <button type="submit">Crear cuenta</button>                                        {/*Recordar que el boton de submit es "crear cuenta"*/}
     </form>

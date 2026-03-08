@@ -4,58 +4,85 @@ import { AuthContext } from "./../../context/AuthContext"
 
 function Login() {
 
-  const { login } = useContext(AuthContext)
+  const [formData, setFormData] = useState({
+    email: "",
+    password: ""
+  });
+  
+  const [error, setError] = useState("");
 
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
+  const { login } = useContext(AuthContext);
+  const navigate = useNavigate();
 
-  const navigate = useNavigate()
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
+    setError(""); // agregamos esto para limpiar el error
 
-    const result = await login(email, password)
+    const result = await login(formData.email, formData.password);
 
     if (result.success) {
-      navigate("/")
+      console.log("Login exitoso, redirigiendo...");
+      navigate("/store"); 
     } else {
-      alert(result.error)
+      setError(result.error || "Error al iniciar sesión");
     }
-  }
+  };
+
 
   return (
-    <div>
+<div style={{ padding: "20px", maxWidth: "400px", margin: "0 auto" }}>
+      <h1 style={{ textAlign: "center" }}>Iniciar Sesión</h1>
 
-      <h1>Inicio de sesión</h1>
+      {/* Renderizado condicional del error */}
+      {error && (
+        <div style={{ backgroundColor: "#ffe6e6", color: "#d9534f", padding: "10px", borderRadius: "4px", marginBottom: "15px", textAlign: "center" }}>
+          {error}
+        </div>
+      )}
 
       <form onSubmit={handleSubmit}>
+        <div style={{ marginBottom: "15px" }}>
+          <label>Email:</label>
+          <input 
+            type="email" 
+            name="email" 
+            value={formData.email} 
+            onChange={handleChange} 
+            required 
+            style={{ width: "100%", padding: "8px", marginTop: "5px", boxSizing: "border-box" }}
+          />
+        </div>
 
-        <input
-          type="email"
-          placeholder="Correo"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
+        <div style={{ marginBottom: "15px" }}>
+          <label>Contraseña:</label>
+          <input 
+            type="password" 
+            name="password" 
+            value={formData.password} 
+            onChange={handleChange} 
+            required 
+            style={{ width: "100%", padding: "8px", marginTop: "5px", boxSizing: "border-box" }}
+          />
+        </div>
 
-        <br /><br />
-
-        <input
-          type="password"
-          placeholder="Contraseña"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-
-        <br /><br />
-
-        <button type="submit">
-          Iniciar sesión
+        <button 
+          type="submit" 
+          style={{ width: "100%", padding: "10px", marginTop: "10px", cursor: "pointer", backgroundColor: "#4A90E2", color: "white", border: "none", borderRadius: "4px" }}
+        >
+          Ingresar
         </button>
 
       </form>
-
+      
     </div>
-  )
+  );
 }
 
 export default Login

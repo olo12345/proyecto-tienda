@@ -8,9 +8,9 @@ function Home() {
   // fake libros (los colocaremos con el fetch real luego)
   useEffect(() => {
     const data = [
-      { id: 1, title: "Libro 1", price: 15000, rating: 4, img: "url_1" },
-      { id: 2, title: "Libro 2", price: 23000, rating: 4, img: "url_2" },
-      { id: 3, title: "Libro 3", price: 9990, rating: 5, img: "url_3" },
+      { id: 1, title: "Libro 1", price: 25000, rating: 4, img: "url_1" },
+      { id: 2, title: "Libro 2", price: 15000, rating: 4, img: "url_2" },
+      { id: 3, title: "Libro 3", price: 32000, rating: 5, img: "url_3" },
     ];
     setBooks(data);
   }, []);
@@ -24,7 +24,7 @@ function Home() {
       <section style={{ textAlign: "center", padding: "50px", background: "#f5f5f5" }}>
         <div style={{ border: "1px solid #ccc", padding: "40px" }}>
         <h1>The Passenger Books</h1>
-        <button onClick={() => navigate("/Store")}>Compra Ahora</button>
+        <button onClick={() => navigate("/store")}>Compra Ahora</button>
         </div>
       </section>
 
@@ -33,7 +33,7 @@ function Home() {
         <h2 style={{ textAlign: "center" }}>Productos Destacados</h2>
         <div style={{ display: "flex", flexWrap: "wrap", gap: "20px", justifyContent: "center" }}>
           {featuredBooks.map(book => (
-            <div key={book.id} style={{ width: "200px", border: "1px solid #eee", padding: "10px" }}>
+            <div key={book.id} onClick={() => navigate(`/store/book/${book.id}`)} style={{ width: "200px", border: "1px solid #eee", padding: "10px", cursor: "pointer" }}>
               <div style={{ background: "#ddd", height: "150px", marginBottom: "10px" }}>Foto</div>
               <h4>{book.title}</h4>
               <p>${book.price}</p>

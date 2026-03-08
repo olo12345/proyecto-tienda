@@ -14,12 +14,23 @@ export const getUsers = async () => {       // ----------------- Recordar coment
     {
       id: 1,
       name: "Carlos",
-      email: "carlos@test1.com"
+      email: "carlos@test1.com",
+      age: 33,
+      role: "admin"
     },
     {
       id: 2,
       name: "Orlando",
-      email: "lando@test1.com"
+      email: "lando@test1.com",
+      age: 31,
+      role: ""
+    },
+    {
+      id: 3,
+      name: "Carlos Papá",
+      email: "papa@test1.com",
+      age: 57,
+      role: ""
     },
   ]
 

@@ -4,22 +4,23 @@ import { AuthContext } from "./../../context/AuthContext";
 
 function Cart() {
   const { cart, increase, decrease, total, clearCart } = useContext(CartContext);
-  const { user } = useContext(AuthContext); // Ahora validamos con 'user'
+  const { user, token } = useContext(AuthContext); // Ahora validamos con 'user' 
   const [message, setMessage] = useState("");
   const [showConfirm, setShowConfirm] = useState(false);
+  
 
   const handleCheckout = async () => {
     // Simulación rápida de éxito ya que aún no conectamos el backend
     setMessage("✅ Pedido enviado correctamente!");
     setShowConfirm(true);
 
-    /* Lógica preparada para cuando se retome el desarrollo en Node.js:
+    /* Lógica preparada para cuando se retomemos el desarrollo en Node.js:
     try {
       const res = await fetch("http://localhost:5001/api/checkouts", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${user.token}`,
+          Authorization: `Bearer ${token}`,            ------------------->>>>>> aquí dejamos listo para cuando ya podamos usar el back
         },
         body: JSON.stringify({ items: cart, total }),
       });

@@ -1,59 +1,60 @@
 //, useEffect, useState Falta agregar posibles useState
-import { createContext } from "react";
+import { createContext, useState, useEffect } from "react";
 import { useLocalStorage } from './../hooks/useLocalStorage';
 
 const CartContext = createContext();
 
-export const CartProvider = ({ children }) => {
+const CartProvider = ({ children }) => {
+const [cart, setCart] = useState([]); // usamos el useState acá parap amnejar el estado del carrito
+const [total, setTotal] = useState(0);
 
-    const [cart, setCart] = useLocalStorage('cart', []);
+useEffect(() => { //aquí para que recalcule cada que cambie el carrito
+    const nuevoTotal = cart.reduce((acumulador, item) => acumulador + (item.price * item.count), 0);
+    setTotal(nuevoTotal);
+  }, [cart]);
 
-    const addToCart = (product) => {
-        setCart((prev) => {
-            const exists = prev.find((item) => item.id === product.id)
-            if (exists) {
-                return prev.map((item) => item.id === product.id
-                    ? { ...item, quantity: item.quantity + 1 }
-                    : item)
-            }
-        }
-        )
-    }
-
-    const removeFromCart = (productId) => {
-        setCart((prev) => prev.filter((item) => item.id !== productId))
-    }
-
-    const updateQuantity = (productId, quantity) => {
-        setCart((prev) => prev.map((item) => item.id === productId
-            ? { ...item, quantity: Math.max(1, quantity) }
-            : item,
-        ),
+  const addToCart = (book) => {
+    setCart((prevCart) => {
+      const existingBook = prevCart.find((item) => item.id === book.id);
+      
+      if (existingBook) {
+        // Si ya existe, recorremos el carrito y le sumamos 1 a la cantidad (count)
+        return prevCart.map((item) =>
+          item.id === book.id ? { ...item, count: item.count + 1 } : item
         );
-    };
+      } else {
+        // Si no existe, lo agregamos al final del arreglo con count inicial de 1
+        return [...prevCart, { ...book, count: 1 }];
+      }
+    });
+  };
 
-    const clearCart = () => setCart([]);
+  const increase = (id) => {
+    setCart((prevCart) =>
+      prevCart.map((item) =>
+        item.id === id ? { ...item, count: item.count + 1 } : item
+      )
+    );
+  };
 
-    const totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
-    const totalPrice = cart.reduce((acc, item) => acc + item.quantity * item.price, 0);
+  const decrease = (id) => {
+    setCart((prevCart) =>
+      prevCart.map((item) =>
+        item.id === id ? { ...item, count: item.count - 1 } : item
+      ).filter((item) => item.count > 0) // aqupi también manejamos la eliminación si el num es menor a 0
+    );
+  };
 
+  const clearCart = () => {
+    setCart([]);
+  };
 
-    return (
-        <CartContext.Provider
-            value={{
-                cart,
-                addToCart,
-                removeFromCart,
-                updateQuantity,
-                clearCart,
-                totalItems,
-                totalPrice
-            }}>
-            {children}
-        </CartContext.Provider>
-    )
-}
+  return (
+    <CartContext.Provider value={{ cart, total, addToCart, increase, decrease, clearCart }}>
+      {children}
+    </CartContext.Provider>
+  );
+};
 
-export default CartProvider
-
-export { CartContext }
+export default CartProvider;
+export { CartContext };
