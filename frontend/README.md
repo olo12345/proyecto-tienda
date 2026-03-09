@@ -57,3 +57,7 @@ If you are developing a production application, we recommend using TypeScript wi
     - RESUELTO: Problema se encontraba en footer, corregido.
  - Se conecta el ProductList.jsx (el admin) con el CreatePost.jsx para poder agregar, editar o eliminar libro
  - Se actualiza el cart.jsx para que reciba el token que ya implementamos en el AuthContext.jsx
+
+ - Empezamos el proceso de beutificación de la web
+ - Se incorporas nuevas fonts específicas para la página
+ - Se deja todo estilizado

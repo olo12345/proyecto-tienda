@@ -5,11 +5,14 @@ import Footer from './../components/Footer';
 
 const { Content } = Layout;
 
-const UserLayout = () => {
+// Corregido el nombre de la constante para que coincida con el export
+const AdminLayout = () => {
     return (
-        <Layout>
+        /* Forzamos el alto completo y el fondo espacial del Layout */
+        <Layout style={{ minHeight: "100vh", backgroundColor: "transparent" }}>
             <Navbar />
-            <Content>
+            {/* Hacemos el contenido transparente y flexible */}
+            <Content style={{ backgroundColor: "transparent", display: "flex", flexDirection: "column" }}>
                 <Outlet />
             </Content>
             <Footer />
@@ -17,4 +20,4 @@ const UserLayout = () => {
     )
 }
 
-export default UserLayout
+export default AdminLayout;

@@ -38,40 +38,74 @@ function Cart() {
   };
 
   return (
-    <div style={{ padding: "20px", maxWidth: "600px", margin: "0 auto" }}>
-      <h2>🛒 Carrito</h2>
+    <div style={{ padding: "40px 20px", maxWidth: "800px", margin: "0 auto", color: "var(--text-light)", minHeight: "80vh" }}>
+      <h2 style={{ color: "var(--accent-cyan)", letterSpacing: "1px", fontSize: "2.5rem", textTransform: "uppercase", borderBottom: "1px solid var(--bg-border)", paddingBottom: "15px", marginBottom: "30px" }}>
+        🛒 Carrito
+      </h2>
 
       {cart.length === 0 ? (
-        <p>El carrito está vacío.</p>
+        <div style={{ 
+          backgroundColor: "var(--bg-card)", 
+          padding: "40px", 
+          borderRadius: "8px", 
+          border: "1px solid var(--bg-border)",
+          textAlign: "center"
+        }}>
+          <p style={{ color: "var(--text-muted)", fontSize: "1.2rem", margin: 0 }}>El carrito está vacío.</p>
+        </div>
       ) : (
-        <div>
+        <div style={{ 
+          backgroundColor: "var(--bg-card)", 
+          padding: "30px", 
+          borderRadius: "8px", 
+          border: "1px solid var(--bg-border)",
+          boxShadow: "0 8px 30px rgba(0,0,0,0.3)"
+        }}>
           {/* Mapeamos los libros */}
           {cart.map((book) => (
-            <div key={book.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #ccc", paddingBottom: "10px", marginBottom: "10px" }}>
+            <div key={book.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid var(--bg-border)", paddingBottom: "20px", marginBottom: "20px" }}>
               
-              <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
-                <img src={book.img} alt={book.title} style={{ width: "60px", height: "60px", objectFit: "cover", borderRadius: "4px" }} />
+              <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
+                <div style={{ width: "70px", height: "70px", backgroundColor: "var(--bg-space)", borderRadius: "4px", border: "1px solid var(--bg-border)", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <img src={book.img} alt={book.title} style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.9 }} 
+                    onError={(e) => { e.target.style.display = 'none'; }}
+                  />
+                </div>
                 <div>
-                  <h3 style={{ margin: "0 0 5px 0", fontSize: "16px" }}>{book.title}</h3>
-                  <p style={{ margin: 0, color: "#666" }}>
+                  <h3 style={{ margin: "0 0 8px 0", fontSize: "1.1rem", color: "var(--text-light)" }}>{book.title}</h3>
+                  <p style={{ margin: 0, color: "var(--accent-gold)", fontWeight: "bold", fontSize: "1.1rem" }}>
                     ${book.price.toLocaleString("es-CL")}
                   </p>
                 </div>
               </div>
 
-              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                <button onClick={() => decrease(book.id)} style={{ padding: "5px 10px", cursor: "pointer" }}>-</button>
-                <span style={{ fontWeight: "bold" }}>{book.count}</span>
-                <button onClick={() => increase(book.id)} style={{ padding: "5px 10px", cursor: "pointer" }}>+</button>
+              <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
+                <button 
+                  onClick={() => decrease(book.id)} 
+                  style={{ padding: "5px 12px", cursor: "pointer", backgroundColor: "transparent", color: "var(--accent-cyan)", border: "1px solid var(--accent-cyan)", borderRadius: "4px", fontWeight: "bold", transition: "all 0.2s ease" }}
+                  onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "var(--accent-cyan)"; e.currentTarget.style.color = "var(--bg-space)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "transparent"; e.currentTarget.style.color = "var(--accent-cyan)"; }}
+                >
+                  -
+                </button>
+                <span style={{ fontWeight: "bold", fontSize: "1.2rem", minWidth: "20px", textAlign: "center" }}>{book.count}</span>
+                <button 
+                  onClick={() => increase(book.id)} 
+                  style={{ padding: "5px 12px", cursor: "pointer", backgroundColor: "transparent", color: "var(--accent-cyan)", border: "1px solid var(--accent-cyan)", borderRadius: "4px", fontWeight: "bold", transition: "all 0.2s ease" }}
+                  onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "var(--accent-cyan)"; e.currentTarget.style.color = "var(--bg-space)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "transparent"; e.currentTarget.style.color = "var(--accent-cyan)"; }}
+                >
+                  +
+                </button>
               </div>
 
             </div>
           ))}
 
           {/* Total */}
-          <div style={{ display: "flex", justifyContent: "space-between", marginTop: "20px", fontSize: "18px", fontWeight: "bold" }}>
-            <span>Total:</span>
-            <span style={{ color: "#d9534f" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", marginTop: "30px", fontSize: "1.5rem", fontWeight: "bold" }}>
+            <span style={{ color: "var(--text-light)" }}>Total:</span>
+            <span style={{ color: "var(--accent-gold)", textShadow: "0 0 10px rgba(245, 166, 35, 0.2)" }}>
               ${total.toLocaleString("es-CL")}
             </span>
           </div>
@@ -83,13 +117,23 @@ function Cart() {
               onClick={handleCheckout}
               style={{
                 width: "100%",
-                padding: "10px",
-                marginTop: "20px",
-                backgroundColor: user ? "#4A90E2" : "#ccc",
-                color: "white",
+                padding: "15px",
+                marginTop: "30px",
+                backgroundColor: user ? "var(--accent-cyan)" : "var(--bg-border)",
+                color: user ? "var(--bg-space)" : "var(--text-muted)",
                 border: "none",
                 borderRadius: "4px",
-                cursor: user ? "pointer" : "not-allowed"
+                cursor: user ? "pointer" : "not-allowed",
+                fontWeight: "bold",
+                textTransform: "uppercase",
+                letterSpacing: "2px",
+                transition: "all 0.3s ease"
+              }}
+              onMouseEnter={(e) => {
+                if(user) e.currentTarget.style.boxShadow = "0 0 15px rgba(0, 229, 255, 0.4)";
+              }}
+              onMouseLeave={(e) => {
+                if(user) e.currentTarget.style.boxShadow = "none";
               }}
             >
               Pagar 💳
@@ -98,10 +142,34 @@ function Cart() {
 
           {/* Mensaje de feedback */}
           {message && (
-            <div style={{ marginTop: "15px", textAlign: "center", fontWeight: "bold" }}>
-              <p>{message}</p>
+            <div style={{ 
+              marginTop: "25px", 
+              textAlign: "center", 
+              fontWeight: "bold",
+              padding: "20px",
+              backgroundColor: "rgba(0, 229, 255, 0.1)",
+              border: "1px solid var(--accent-cyan)",
+              borderRadius: "4px"
+            }}>
+              <p style={{ color: "var(--accent-cyan)", fontSize: "1.2rem", margin: "0 0 15px 0" }}>{message}</p>
               {showConfirm && (
-                <button onClick={handleConfirm} style={{ marginTop: "10px", padding: "5px 15px", cursor: "pointer", backgroundColor: "#28a745", color: "white", border: "none", borderRadius: "4px" }}>
+                <button 
+                  onClick={handleConfirm} 
+                  style={{ 
+                    padding: "10px 30px", 
+                    cursor: "pointer", 
+                    backgroundColor: "transparent", 
+                    color: "var(--text-light)", 
+                    border: "1px solid var(--text-light)", 
+                    borderRadius: "4px",
+                    fontWeight: "bold",
+                    textTransform: "uppercase",
+                    letterSpacing: "1px",
+                    transition: "all 0.2s ease"
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "var(--text-light)"; e.currentTarget.style.color = "var(--bg-space)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "transparent"; e.currentTarget.style.color = "var(--text-light)"; }}
+                >
                   OK
                 </button>
               )}

@@ -7,9 +7,11 @@ const { Content } = Layout;
 
 const UserLayout = () => {
   return (
-    <Layout>
+    /* Forzamos el alto de pantalla completa y el fondo espacial en el contenedor principal */
+    <Layout style={{ minHeight: "100vh", backgroundColor: "transparent" }}>
       <Navbar />
-      <Content>
+      {/* Hacemos transparente el contenido para que herede el fondo oscuro del Layout */}
+      <Content style={{ backgroundColor: "transparent", display: "flex", flexDirection: "column" }}>
         <Outlet />
       </Content>
       <Footer />

@@ -20,10 +20,13 @@ function Navbar() {
     window.location.href = "/"; // tuvimos que colocar esto para evitar conflictos con el protectedroute que nos expulsaba antes de nosotros redirigir
   };
 
+  // Estilo base para los enlaces de navegación comunes
+  const navLinkStyle = { color: "var(--text-light)", textDecoration: "none" };
+
   if (location.pathname === "/register" || location.pathname === "/login") {
     return (
-      <nav style={{ display: "flex", padding: "10px", borderBottom: "1px solid #ccc" }}>
-        <NavLink to="/">The Passenger Books</NavLink>
+      <nav style={{ display: "flex", padding: "15px 20px", borderBottom: "1px solid var(--bg-border)", backgroundColor: "var(--bg-space)", alignItems: "center" }}>
+        <NavLink to="/" style={{ fontFamily: "'The Foregen', sans-serif", color: "var(--accent-cyan)", textDecoration: "none", fontSize: "1.5rem", letterSpacing: "1px", textTransform: "uppercase" }}>The Passenger Books</NavLink>
       </nav>
     );
   }
@@ -31,12 +34,12 @@ function Navbar() {
  
 
   return (
-    <nav style={{display:"flex", gap:"15px", padding:"10px", borderBottom:"1px solid #ccc"}}>
+    <nav style={{display:"flex", gap:"20px", padding:"15px 20px", borderBottom:"1px solid var(--bg-border)", backgroundColor: "var(--bg-space)", alignItems: "center"}}>
 
-      <NavLink to="/">The Passenger Books</NavLink>
+      <NavLink to="/" style={{ fontFamily: "'The Foregen', sans-serif", color: "var(--accent-cyan)", textDecoration: "none", fontSize: "1.5rem", letterSpacing: "1px", textTransform: "uppercase", whiteSpace: "nowrap" }}>The Passenger Books</NavLink>
 
       <div style={{ position: "relative", flex: "1", maxWidth: "400px", display: "flex", alignItems: "center", marginLeft: "20px" }}>
-      <span style={{ position: "absolute", left: "12px", color: "#888" }}>🔍</span>
+      <span style={{ position: "absolute", left: "12px", color: "var(--text-muted)" }}>🔍</span>
       <input 
       type="text" 
       placeholder="Search..." 
@@ -46,7 +49,9 @@ function Navbar() {
       width: "100%",
       padding: "8px 12px 8px 35px",
       borderRadius: "20px", 
-      border: "1px solid #ccc",
+      border: "1px solid var(--bg-border)",
+      backgroundColor: "var(--bg-card)",
+      color: "var(--text-light)",
       outline: "none",
       fontSize: "14px"
       }}
@@ -55,45 +60,59 @@ function Navbar() {
 
       {!user && (
         <>
-          <NavLink to="/store">Tienda</NavLink>
-          <NavLink to="/login">Login</NavLink>
-          <NavLink to="/register">Register</NavLink>
+          <NavLink to="/store" style={navLinkStyle}>Tienda</NavLink>
+          <NavLink to="/login" style={navLinkStyle}>Login</NavLink>
+          <NavLink to="/register" style={navLinkStyle}>Register</NavLink>
         </>
       )}
 
       {user && (
         <>
-          <span>Bienvenido {user.name}</span>
+          <span style={{ color: "var(--text-muted)" }}>Bienvenido {user.name}</span>
 
           {(user.rol === "admin" || user.role === "admin") && (           /* Aquí soportamos lo que tenemos en el mock ocmo en la futura DB*/
           <NavLink 
           to="/admin/store" 
-          style={{ color: "orange", fontWeight: "bold", textDecoration: "none" }}
+          style={{ color: "var(--accent-gold)", fontWeight: "bold", textDecoration: "none" }}
           >
           ⚙️ Panel Admin
           </NavLink>
           )}
-          <NavLink to="/store">Tienda</NavLink>
-          <NavLink to="/Profile">Perfil</NavLink>
+          <NavLink to="/store" style={navLinkStyle}>Tienda</NavLink>
+          <NavLink to="/Profile" style={navLinkStyle}>Perfil</NavLink>
           <NavLink                                                      /* Carrito queda visible sólo cuando el usuario hizo ligin*/
             to="/Cart" 
-            style={{ display: "flex", alignItems: "center", gap: "8px", textDecoration: "none" }}
+            style={{ display: "flex", alignItems: "center", gap: "8px", textDecoration: "none", color: "var(--text-light)" }}
           >
             🛒 Carrito 
             <span style={{ 
-              backgroundColor: "#f5f5f5", 
+              backgroundColor: "var(--accent-cyan)", 
               padding: "2px 8px", 
               borderRadius: "12px", 
-              border: "1px solid #ccc", 
+              border: "none", 
               fontSize: "14px", 
-              color: "#333",
+              color: "var(--bg-space)",
               fontWeight: "bold"
             }}>
               ${total.toLocaleString("es-CL")}
             </span>
           </NavLink> 
 
-          <button onClick={handleLogout}>Logout</button>
+          <button 
+            onClick={handleLogout}
+            style={{
+              backgroundColor: "transparent",
+              color: "var(--accent-danger)",
+              border: "1px solid var(--accent-danger)",
+              padding: "6px 12px",
+              borderRadius: "4px",
+              cursor: "pointer",
+              fontWeight: "bold",
+              marginLeft: "auto" /* Empuja el botón a la derecha si hay espacio */
+            }}
+          >
+            Logout
+          </button>
         </>
       )}
 

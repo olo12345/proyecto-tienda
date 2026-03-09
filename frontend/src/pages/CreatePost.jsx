@@ -58,15 +58,21 @@ function CreatePost() {
   };
 
   return (
-    <div style={{ padding: "20px", maxWidth: "600px", margin: "0 auto" }}>
-      <h1 style={{ textAlign: "center", marginBottom: "30px" }}>
+    <div style={{ padding: "40px 20px", maxWidth: "600px", margin: "0 auto", color: "var(--text-light)", minHeight: "80vh" }}>
+      <h1 style={{ textAlign: "center", marginBottom: "30px", color: "var(--accent-cyan)", letterSpacing: "1px", textTransform: "uppercase" }}>
         {isEditing ? "Editar Publicación" : "Crear Nueva Publicación"}
       </h1>
 
-      <form onSubmit={handleSubmit} style={{ backgroundColor: "#f9f9f9", padding: "20px", borderRadius: "8px", border: "1px solid #ddd" }}>
+      <form onSubmit={handleSubmit} style={{ 
+        backgroundColor: "var(--bg-card)", 
+        padding: "30px", 
+        borderRadius: "8px", 
+        border: "1px solid var(--bg-border)",
+        boxShadow: "0 8px 30px rgba(0,0,0,0.3)"
+      }}>
         
-        <div style={{ marginBottom: "15px" }}>
-          <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold" }}>Título del Libro:</label>
+        <div style={{ marginBottom: "20px" }}>
+          <label style={{ display: "block", marginBottom: "8px", fontWeight: "bold", color: "var(--text-muted)", fontSize: "0.9rem" }}>Título del Libro:</label>
           <input 
             type="text" 
             name="title" 
@@ -74,12 +80,24 @@ function CreatePost() {
             onChange={handleChange} 
             required 
             placeholder="Ej: The Art and Science of Premium Gin"
-            style={{ width: "100%", padding: "10px", borderRadius: "4px", border: "1px solid #ccc", boxSizing: "border-box" }}
+            style={{ 
+              width: "100%", 
+              padding: "12px", 
+              borderRadius: "4px", 
+              border: "1px solid var(--bg-border)", 
+              backgroundColor: "var(--bg-space)",
+              color: "var(--text-light)",
+              boxSizing: "border-box",
+              outline: "none",
+              transition: "border-color 0.2s ease"
+            }}
+            onFocus={(e) => e.target.style.borderColor = "var(--accent-cyan)"}
+            onBlur={(e) => e.target.style.borderColor = "var(--bg-border)"}
           />
         </div>
 
-        <div style={{ marginBottom: "15px" }}>
-          <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold" }}>Categoría:</label>
+        <div style={{ marginBottom: "20px" }}>
+          <label style={{ display: "block", marginBottom: "8px", fontWeight: "bold", color: "var(--text-muted)", fontSize: "0.9rem" }}>Categoría:</label>
           <input 
             type="text" 
             name="category" 
@@ -87,13 +105,25 @@ function CreatePost() {
             onChange={handleChange} 
             required 
             placeholder="Ej: Destilación, Negocios, Programación..."
-            style={{ width: "100%", padding: "10px", borderRadius: "4px", border: "1px solid #ccc", boxSizing: "border-box" }}
+            style={{ 
+              width: "100%", 
+              padding: "12px", 
+              borderRadius: "4px", 
+              border: "1px solid var(--bg-border)", 
+              backgroundColor: "var(--bg-space)",
+              color: "var(--text-light)",
+              boxSizing: "border-box",
+              outline: "none",
+              transition: "border-color 0.2s ease"
+            }}
+            onFocus={(e) => e.target.style.borderColor = "var(--accent-cyan)"}
+            onBlur={(e) => e.target.style.borderColor = "var(--bg-border)"}
           />
         </div>
 
-        <div style={{ display: "flex", gap: "15px", marginBottom: "15px" }}>
+        <div style={{ display: "flex", gap: "20px", marginBottom: "20px" }}>
           <div style={{ flex: 1 }}>
-            <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold" }}>Precio (CLP):</label>
+            <label style={{ display: "block", marginBottom: "8px", fontWeight: "bold", color: "var(--text-muted)", fontSize: "0.9rem" }}>Precio (CLP):</label>
             <input 
               type="number" 
               name="price" 
@@ -101,12 +131,24 @@ function CreatePost() {
               onChange={handleChange} 
               required 
               min="0"
-              style={{ width: "100%", padding: "10px", borderRadius: "4px", border: "1px solid #ccc", boxSizing: "border-box" }}
+              style={{ 
+                width: "100%", 
+                padding: "12px", 
+                borderRadius: "4px", 
+                border: "1px solid var(--bg-border)", 
+                backgroundColor: "var(--bg-space)",
+                color: "var(--text-light)",
+                boxSizing: "border-box",
+                outline: "none",
+                transition: "border-color 0.2s ease"
+              }}
+              onFocus={(e) => e.target.style.borderColor = "var(--accent-cyan)"}
+              onBlur={(e) => e.target.style.borderColor = "var(--bg-border)"}
             />
           </div>
 
           <div style={{ flex: 1 }}>
-            <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold" }}>Stock Inicial:</label>
+            <label style={{ display: "block", marginBottom: "8px", fontWeight: "bold", color: "var(--text-muted)", fontSize: "0.9rem" }}>Stock Inicial:</label>
             <input 
               type="number" 
               name="stock" 
@@ -114,13 +156,25 @@ function CreatePost() {
               onChange={handleChange} 
               required 
               min="0"
-              style={{ width: "100%", padding: "10px", borderRadius: "4px", border: "1px solid #ccc", boxSizing: "border-box" }}
+              style={{ 
+                width: "100%", 
+                padding: "12px", 
+                borderRadius: "4px", 
+                border: "1px solid var(--bg-border)", 
+                backgroundColor: "var(--bg-space)",
+                color: "var(--text-light)",
+                boxSizing: "border-box",
+                outline: "none",
+                transition: "border-color 0.2s ease"
+              }}
+              onFocus={(e) => e.target.style.borderColor = "var(--accent-cyan)"}
+              onBlur={(e) => e.target.style.borderColor = "var(--bg-border)"}
             />
           </div>
         </div>
 
-        <div style={{ marginBottom: "20px" }}>
-          <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold" }}>Descripción:</label>
+        <div style={{ marginBottom: "30px" }}>
+          <label style={{ display: "block", marginBottom: "8px", fontWeight: "bold", color: "var(--text-muted)", fontSize: "0.9rem" }}>Descripción:</label>
           <textarea 
             name="description" 
             value={formData.description} 
@@ -128,22 +182,66 @@ function CreatePost() {
             required 
             rows="5"
             placeholder="Escribe una descripción detallada del libro..."
-            style={{ width: "100%", padding: "10px", borderRadius: "4px", border: "1px solid #ccc", boxSizing: "border-box", resize: "vertical" }}
+            style={{ 
+              width: "100%", 
+              padding: "12px", 
+              borderRadius: "4px", 
+              border: "1px solid var(--bg-border)", 
+              backgroundColor: "var(--bg-space)",
+              color: "var(--text-light)",
+              boxSizing: "border-box", 
+              resize: "vertical",
+              outline: "none",
+              transition: "border-color 0.2s ease"
+            }}
+            onFocus={(e) => e.target.style.borderColor = "var(--accent-cyan)"}
+            onBlur={(e) => e.target.style.borderColor = "var(--bg-border)"}
           />
         </div>
 
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: "10px", borderTop: "1px solid var(--bg-border)" }}>
           <button 
             type="button" 
             onClick={() => navigate("/admin/store")}
-            style={{ padding: "10px 20px", backgroundColor: "#6c757d", color: "white", border: "none", borderRadius: "4px", cursor: "pointer" }}
+            style={{ 
+              padding: "12px 24px", 
+              backgroundColor: "transparent", 
+              color: "var(--text-muted)", 
+              border: "1px solid var(--text-muted)", 
+              borderRadius: "4px", 
+              cursor: "pointer",
+              fontWeight: "bold",
+              textTransform: "uppercase",
+              transition: "all 0.2s ease"
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = "var(--text-muted)";
+              e.currentTarget.style.color = "var(--bg-space)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = "transparent";
+              e.currentTarget.style.color = "var(--text-muted)";
+            }}
           >
             Cancelar
           </button>
 
           <button 
             type="submit" 
-            style={{ padding: "10px 20px", backgroundColor: "#28a745", color: "white", border: "none", borderRadius: "4px", cursor: "pointer", fontWeight: "bold" }}
+            style={{ 
+              padding: "12px 24px", 
+              backgroundColor: "var(--accent-cyan)", 
+              color: "var(--bg-space)", 
+              border: "none", 
+              borderRadius: "4px", 
+              cursor: "pointer", 
+              fontWeight: "bold",
+              textTransform: "uppercase",
+              letterSpacing: "1px",
+              transition: "box-shadow 0.2s ease"
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.boxShadow = "0 0 15px rgba(0, 229, 255, 0.4)"}
+            onMouseLeave={(e) => e.currentTarget.style.boxShadow = "none"}
           >
             {isEditing ? "Guardar Cambios" : "Publicar Libro"}
           </button>

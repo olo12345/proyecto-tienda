@@ -5,11 +5,13 @@ import Footer from './../components/Footer';
 
 const { Content } = Layout;
 
-const UserLayout = () => {
+const PublicLayout = () => {
     return (
-        <Layout>
+        /* Mismo tratamiento: alto completo y fondo oscuro */
+        <Layout style={{ minHeight: "100vh", backgroundColor: "transparent" }}>
             <Navbar />
-            <Content>
+            {/* Contenido transparente para no romper la inmersión */}
+            <Content style={{ backgroundColor: "transparent", display: "flex", flexDirection: "column" }}>
                 <Outlet />
             </Content>
             <Footer /> 
@@ -17,4 +19,4 @@ const UserLayout = () => {
     )
 }
 
-export default UserLayout
+export default PublicLayout;

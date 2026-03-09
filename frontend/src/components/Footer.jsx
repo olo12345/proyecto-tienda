@@ -9,7 +9,7 @@ function Footer() {
 
   if (path === "/" || path === "/login" || path === "/register" || path === "/store") {
     layoutMessage = "Public Layout";
-  } else if (path === "/Profile" || path === "/Cart") {
+  } else if (path === "/Profile" || path === "/Cart" || path === "/BookDetails/:id") {
     layoutMessage = "User Layout";
   } else if (path === "/admin/store" || path === "/CreatePost" || path === "/EditPost/:id") {
     layoutMessage = "Admin Layout";
@@ -18,17 +18,26 @@ function Footer() {
   // No olvidar probar con las vistas protegidas
 
   return (
-<footer aria-label="Pie de página" className="bg-gray-900 text-gray-200 py-4" style={{ borderTop: "1px solid #ccc", marginTop: "20px" }}>
-      <div className="max-w-7xl mx-auto px-4 text-center">
+    <footer 
+      aria-label="Pie de página" 
+      style={{ 
+        backgroundColor: "var(--bg-card)", /* Usamos el color de tarjeta para darle un leve contraste contra el fondo */
+        color: "var(--text-muted)", 
+        padding: "20px 0", 
+        borderTop: "1px solid var(--bg-border)", 
+        marginTop: "auto" 
+      }}
+    >
+      <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 20px", textAlign: "center" }}>
         
         {/* Mensaje dinamiquo aquí */}
         {layoutMessage && (
-          <p style={{ fontWeight: "bold", marginBottom: "5px", color: "#4A90E2" }}>
+          <p style={{ fontWeight: "bold", marginBottom: "10px", color: "var(--accent-cyan)", letterSpacing: "1px" }}>
             {layoutMessage}
           </p>
         )}
 
-        <p className="text-sm">
+        <p style={{ fontSize: "14px", margin: 0 }}>
           © 2026 - The Passenger Books - Todos los derechos reservados
         </p>
       </div>
