@@ -1,4 +1,4 @@
-@import 'tailwindcss'; 
+@import 'tailwindcss';
 
 /* se importa tailwindcss para usarlo en el proyecto
 /* al instalarlo con npm, se modifica el package-lock.json, el package.json y se incorpora el archivo vite.config.js
@@ -6,92 +6,119 @@
 /* 1. IMPORTACIÓN DE TIPOGRAFÍAS */
 /* Nota: Asegúrate de tener los archivos de las fuentes en tu carpeta src/assets/fonts/ y ajustar la ruta si es necesario */
 @font-face {
-    font-family: 'The Foregen';
-    src: url('./assets/fonts/TheForegen-Regular.woff2') format('woff2'),
-         url('./assets/fonts/TheForegen-Regular.woff') format('woff');
-    font-weight: normal;
-    font-style: normal;
-  }
-  
-  @font-face {
-    font-family: 'The Foregen Outline';
-    src: url('./assets/fonts/TheForegen-Outline.woff2') format('woff2'),
-         url('./assets/fonts/TheForegen-Outline.woff') format('woff');
-    font-weight: normal;
-    font-style: normal;
-  }
-  
-  /* 2. PALETA DE COLORES "THE PASSENGER" */
-  :root {
-    /* Fondos (Inspirados en el espacio profundo) */
-    --bg-space: #0b0c10;       /* Negro profundo casi vacío */
-    --bg-card: #14161f;        /* Un tono un poco más claro para las tarjetas de los libros */
-    --bg-border: #1f2233;      /* Para líneas divisorias sutiles */
-  
-    /* Textos */
-    --text-light: #e0e6ed;     /* Blanco estrella para lectura cómoda */
-    --text-muted: #8b92a5;     /* Gris espacial para descripciones o info secundaria */
-  
-    /* Acentos de la marca (Inspirados en la lámina 10 y los destilados) */
-    --accent-cyan: #00e5ff;    /* El cian vibrante de "LA ESENCIA" */
-    --accent-cyan-hover: #00b8cc; 
-    --accent-gold: #f5a623;    /* El tono ámbar de los botánicos y el líquido */
-    --accent-danger: #ff4b4b;  /* Para botones de borrar o alertas */
-  }
-  
-  /* 3. RESET GLOBAL Y ESTILOS BASE */
-  * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-  }
-  
-  body {
-    background-color: var(--bg-space);
-    /* Fondo estrellado dinámico generado con CSS */
-    background-image:
-      radial-gradient(1px 1px at 15px 15px, rgba(255, 255, 255, 0.8), transparent),
-      radial-gradient(2px 2px at 60px 20px, rgba(0, 229, 255, 0.6), transparent),
-      radial-gradient(1.5px 1.5px at 120px 80px, rgba(255, 255, 255, 0.9), transparent),
-      radial-gradient(1px 1px at 180px 40px, rgba(245, 166, 35, 0.5), transparent),
-      radial-gradient(2px 2px at 220px 130px, rgba(255, 255, 255, 0.7), transparent),
-      radial-gradient(1px 1px at 40px 160px, rgba(255, 255, 255, 0.6), transparent),
-      radial-gradient(1.5px 1.5px at 100px 190px, rgba(0, 229, 255, 0.4), transparent),
-      radial-gradient(1px 1px at 200px 180px, rgba(255, 255, 255, 0.8), transparent);
-    background-size: 250px 250px; /* Hace que el patrón de estrellas se repita */
-    background-attachment: fixed; /* Las estrellas se quedan fijas al hacer scroll */
-  
-    color: var(--text-light);
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    line-height: 1.6;
-    -webkit-font-smoothing: antialiased;
-  }
-  
-  /* NUEVO: Resplandor (Glow) de nebulosa espacial en el fondo */
-  body::before {
-    content: "";
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    /* Un gradiente radial gigante que simula el brillo cian de tu marca */
-    background: radial-gradient(circle at 50% 50%, rgba(0, 229, 255, 0.04) 0%, transparent 70%);
-    pointer-events: none; /* Evita que bloquee los clics en la página */
-    z-index: -1; /* Lo enviamos al fondo absoluto */
-  }
-  
-  /* 4. APLICACIÓN DE LA TIPOGRAFÍA DE MARCA EN TÍTULOS */
-  h1, h2, h3, h4, h5, h6 {
-    font-family: 'The Foregen', sans-serif;
-    font-weight: normal; /* Asumiendo que The Foregen ya tiene mucho peso visual */
-    letter-spacing: 1.5px;
-    color: var(--text-light);
-    text-transform: uppercase;
-  }
-  
-  /* Clase de utilidad para cuando queramos usar la versión Outline (ej. en el Hero section del Home) */
-  .title-outline {
-    font-family: 'The Foregen Outline', sans-serif;
-    color: var(--accent-cyan);
-  }
+  font-family: 'The Foregen';
+  src: url('./assets/fonts/TheForegen-Regular.woff2') format('woff2'),
+    url('./assets/fonts/TheForegen-Regular.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'The Foregen Outline';
+  src: url('./assets/fonts/TheForegen-Outline.woff2') format('woff2'),
+    url('./assets/fonts/TheForegen-Outline.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* 2. PALETA DE COLORES "THE PASSENGER" */
+:root {
+  /* Fondos (Inspirados en el espacio profundo) */
+  --bg-space: #0b0c10;
+  /* Negro profundo casi vacío */
+  --bg-card: #14161f;
+  /* Un tono un poco más claro para las tarjetas de los libros */
+  --bg-border: #1f2233;
+  /* Para líneas divisorias sutiles */
+
+  /* Textos */
+  --text-light: #e0e6ed;
+  /* Blanco estrella para lectura cómoda */
+  --text-muted: #8b92a5;
+  /* Gris espacial para descripciones o info secundaria */
+
+  /* Acentos de la marca (Inspirados en la lámina 10 y los destilados) */
+  --accent-cyan: #00e5ff;
+  /* El cian vibrante de "LA ESENCIA" */
+  --accent-cyan-hover: #00b8cc;
+  --accent-gold: #f5a623;
+  /* El tono ámbar de los botánicos y el líquido */
+  --accent-danger: #ff4b4b;
+  /* Para botones de borrar o alertas */
+}
+
+/* 3. RESET GLOBAL Y ESTILOS BASE */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-space);
+  /* Fondo estrellado dinámico generado con CSS */
+  background-image:
+    radial-gradient(1px 1px at 15px 15px, rgba(255, 255, 255, 0.8), transparent),
+    radial-gradient(2px 2px at 60px 20px, rgba(0, 229, 255, 0.6), transparent),
+    radial-gradient(1.5px 1.5px at 120px 80px, rgba(255, 255, 255, 0.9), transparent),
+    radial-gradient(1px 1px at 180px 40px, rgba(245, 166, 35, 0.5), transparent),
+    radial-gradient(2px 2px at 220px 130px, rgba(255, 255, 255, 0.7), transparent),
+    radial-gradient(1px 1px at 40px 160px, rgba(255, 255, 255, 0.6), transparent),
+    radial-gradient(1.5px 1.5px at 100px 190px, rgba(0, 229, 255, 0.4), transparent),
+    radial-gradient(1px 1px at 200px 180px, rgba(255, 255, 255, 0.8), transparent);
+  background-size: 250px 250px;
+  /* Hace que el patrón de estrellas se repita */
+  background-attachment: fixed;
+  /* Las estrellas se quedan fijas al hacer scroll */
+
+  color: var(--text-light);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* NUEVO: Resplandor (Glow) de nebulosa espacial en el fondo */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  /* Un gradiente radial gigante que simula el brillo cian de tu marca */
+  background: radial-gradient(circle at 50% 50%, rgba(0, 229, 255, 0.04) 0%, transparent 70%);
+  pointer-events: none;
+  /* Evita que bloquee los clics en la página */
+  z-index: -1;
+  /* Lo enviamos al fondo absoluto */
+}
+
+/* 4. APLICACIÓN DE LA TIPOGRAFÍA DE MARCA EN TÍTULOS */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: 'The Foregen', sans-serif;
+  font-weight: normal;
+  /* Asumiendo que The Foregen ya tiene mucho peso visual */
+  letter-spacing: 1.5px;
+  color: var(--text-light);
+  text-transform: uppercase;
+}
+
+/* Clase de utilidad para cuando queramos usar la versión Outline (ej. en el Hero section del Home) */
+.title-outline {
+  font-family: 'The Foregen Outline', sans-serif;
+  color: var(--accent-cyan);
+}
+
+NavLink {
+  text-decoration: none;
+  color: var(--text-light);
+}
+
+.active {
+    color: var(--text-muted);
+}
