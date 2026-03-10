@@ -2,6 +2,7 @@ import { useState, useEffect, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { AuthContext } from "./../context/AuthContext";
 import { CartContext } from "./../context/CartContext";
+import { getProduct } from "./../services/products";
 
 function BookDetails() {
   const { id } = useParams(); // Captura el ID de la URL
@@ -18,46 +19,22 @@ function BookDetails() {
   useEffect(() => {
     // Simulación de GET /books/:id
     const fetchBookData = () => {
-      const mockBooks = [
-        { 
-          id: "1", 
-          title: "Libro 1", 
-          description: "Breve descripción bakan", 
-          price: 25000, 
-          category: "Bakan", 
-          stock: 15,
-          img: "url_1"
-        },
-        { 
-          id: "2", 
-          title: "Libro 2", 
-          description: "Otra descripción", 
-          price: 15000, 
-          category: "Cosas", 
-          stock: 8,
-          img: "url_2"
-        },
-        { 
-          id: "3", 
-          title: "Libro 3", 
-          description: "Descripción", 
-          price: 32000, 
-          category: "Eso", 
-          stock: 18,
-          img: "url_3"
-        }
-      ];
 
-      const foundBook = mockBooks.find(b => b.id === id);
-      
-      if (foundBook) {
-        setBook(foundBook);
-        // Simulación de GET /reviews (reseñas previas)
-        setReviews([
-          { id: 101, user_name: "Ana", rating: 5, comment: "Excelente material, muy detallado." }
-        ]);
-      }
-      setLoading(false);
+      getProduct(id)
+        .then((res) => {
+          const foundBook = res.data
+          if (foundBook) {
+            setBook(foundBook);
+            // Simulación de GET /reviews (reseñas previas)
+            setReviews([
+              { id: 101, user_name: "Ana", rating: 5, comment: "Excelente material, muy detallado." }
+            ]);
+          }
+          setLoading(false);
+        })
+        .catch( (err) =>
+          console.log("Ocurrió un error al llamar el libro", err)
+        )
     };
 
     fetchBookData();
@@ -65,7 +42,7 @@ function BookDetails() {
 
   const handleReviewSubmit = (e) => {
     e.preventDefault();
-    
+
     // Validación: Solo usuarios logueados pueden comentar
     if (!user) {
       alert("Debes iniciar sesión para dejar una reseña.");
@@ -82,13 +59,13 @@ function BookDetails() {
 
     console.log("Enviando reseña al backend:", reviewPayload);
     // Aquí iría: await axios.post('/reviews', reviewPayload, { headers: ... })
-    
+
     // Actualizamos la vista temporalmente simulando el éxito
-    setReviews([...reviews, { 
-      id: Date.now(), 
-      user_name: user.name, 
-      rating: reviewPayload.rating, 
-      comment: reviewPayload.comment 
+    setReviews([...reviews, {
+      id: Date.now(),
+      user_name: user.name,
+      rating: reviewPayload.rating,
+      comment: reviewPayload.comment
     }]);
 
     setNewReview({ rating: 5, comment: "" });
@@ -99,7 +76,7 @@ function BookDetails() {
       // Si no hay usuario, lanzamos alerta y lo mandamos al login
       alert("Debes iniciar sesión para añadir productos al carrito.");
       navigate("/login");
-      return; 
+      return;
     }
 
     console.log(`Añadiendo ${book.title} al carrito`);
@@ -112,27 +89,27 @@ function BookDetails() {
 
   return (
     <div style={{ padding: "40px 20px", maxWidth: "1000px", margin: "0 auto", color: "var(--text-light)" }}>
-      
+
       {/* Sección Superior: Detalles del Libro */}
       <div style={{ display: "flex", gap: "40px", flexWrap: "wrap", marginBottom: "50px" }}>
-        
+
         {/* Contenedor de la imagen */}
         <div style={{ flex: "1", minWidth: "300px" }}>
-          <div style={{ 
-            width: "100%", 
-            height: "400px", 
-            backgroundColor: "var(--bg-card)", 
-            borderRadius: "8px", 
+          <div style={{
+            width: "100%",
+            height: "400px",
+            backgroundColor: "var(--bg-card)",
+            borderRadius: "8px",
             border: "1px solid var(--bg-border)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             overflow: "hidden"
           }}>
-            <img 
-              src={book.img} 
-              alt={book.title} 
-              style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.9 }} 
+            <img
+              src={book.img}
+              alt={book.title}
+              style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.9 }}
               onError={(e) => {
                 e.target.style.display = 'none';
                 e.target.parentElement.innerHTML = '<span style="color: var(--text-muted)">Foto del Producto</span>';
@@ -140,7 +117,7 @@ function BookDetails() {
             />
           </div>
         </div>
-        
+
         {/* Detalles del producto */}
         <div style={{ flex: "1.5", minWidth: "300px", display: "flex", flexDirection: "column" }}>
           <h1 style={{ marginTop: 0, color: "var(--accent-cyan)", fontSize: "2.5rem", marginBottom: "10px" }}>{book.title}</h1>
@@ -156,17 +133,17 @@ function BookDetails() {
           <p style={{ color: "var(--text-muted)", marginBottom: "30px" }}>
             <strong>Stock disponible:</strong> {book.stock} unidades
           </p>
-          
-          <button 
+
+          <button
             onClick={handleAddToCart}
-            style={{ 
-              padding: "15px 30px", 
-              fontSize: "1.1rem", 
-              backgroundColor: "var(--accent-cyan)", 
-              color: "var(--bg-space)", 
-              border: "none", 
-              borderRadius: "4px", 
-              cursor: "pointer", 
+            style={{
+              padding: "15px 30px",
+              fontSize: "1.1rem",
+              backgroundColor: "var(--accent-cyan)",
+              color: "var(--bg-space)",
+              border: "none",
+              borderRadius: "4px",
+              cursor: "pointer",
               fontWeight: "bold",
               textTransform: "uppercase",
               letterSpacing: "1px",
@@ -187,19 +164,19 @@ function BookDetails() {
       {/* Sección Inferior: Reseñas */}
       <div>
         <h2 style={{ color: "var(--text-light)", marginBottom: "20px" }}>Reseñas de los lectores</h2>
-        
+
         {/* Lista de reseñas existentes */}
         <div style={{ marginBottom: "40px" }}>
           {reviews.length === 0 ? (
             <p style={{ color: "var(--text-muted)" }}>Aún no hay reseñas. ¡Sé el primero en opinar!</p>
           ) : (
             reviews.map(review => (
-              <div key={review.id} style={{ 
-                border: "1px solid var(--bg-border)", 
-                padding: "20px", 
-                borderRadius: "8px", 
-                marginBottom: "15px", 
-                backgroundColor: "var(--bg-card)" 
+              <div key={review.id} style={{
+                border: "1px solid var(--bg-border)",
+                padding: "20px",
+                borderRadius: "8px",
+                marginBottom: "15px",
+                backgroundColor: "var(--bg-card)"
               }}>
                 <p style={{ margin: "0 0 10px 0", color: "var(--accent-cyan)" }}>
                   <strong>{review.user_name}</strong> <span style={{ color: "var(--text-muted)", marginLeft: "10px" }}>{"⭐".repeat(review.rating)}</span>
@@ -211,11 +188,11 @@ function BookDetails() {
         </div>
 
         {/* Formulario para nueva reseña */}
-        <div style={{ 
-          backgroundColor: "var(--bg-card)", 
-          padding: "30px", 
-          borderRadius: "8px", 
-          border: "1px solid var(--bg-border)" 
+        <div style={{
+          backgroundColor: "var(--bg-card)",
+          padding: "30px",
+          borderRadius: "8px",
+          border: "1px solid var(--bg-border)"
         }}>
           <h3 style={{ color: "var(--accent-gold)", marginBottom: "20px" }}>Deja tu reseña</h3>
           {!user ? (
@@ -226,12 +203,12 @@ function BookDetails() {
             <form onSubmit={handleReviewSubmit}>
               <div style={{ marginBottom: "20px" }}>
                 <label style={{ display: "block", marginBottom: "8px", color: "var(--text-muted)", fontWeight: "bold" }}>Calificación:</label>
-                <select 
-                  value={newReview.rating} 
-                  onChange={(e) => setNewReview({...newReview, rating: e.target.value})}
-                  style={{ 
-                    padding: "10px", 
-                    borderRadius: "4px", 
+                <select
+                  value={newReview.rating}
+                  onChange={(e) => setNewReview({ ...newReview, rating: e.target.value })}
+                  style={{
+                    padding: "10px",
+                    borderRadius: "4px",
                     border: "1px solid var(--bg-border)",
                     backgroundColor: "var(--bg-space)",
                     color: "var(--text-light)",
@@ -247,19 +224,19 @@ function BookDetails() {
                   <option value={1}>1 - Malo</option>
                 </select>
               </div>
-              
+
               <div style={{ marginBottom: "20px" }}>
                 <label style={{ display: "block", marginBottom: "8px", color: "var(--text-muted)", fontWeight: "bold" }}>Comentario:</label>
-                <textarea 
+                <textarea
                   value={newReview.comment}
-                  onChange={(e) => setNewReview({...newReview, comment: e.target.value})}
+                  onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })}
                   required
                   rows="4"
-                  style={{ 
-                    width: "100%", 
-                    padding: "12px", 
-                    borderRadius: "4px", 
-                    border: "1px solid var(--bg-border)", 
+                  style={{
+                    width: "100%",
+                    padding: "12px",
+                    borderRadius: "4px",
+                    border: "1px solid var(--bg-border)",
                     backgroundColor: "var(--bg-space)",
                     color: "var(--text-light)",
                     boxSizing: "border-box",
@@ -270,25 +247,25 @@ function BookDetails() {
                 />
               </div>
 
-              <button type="submit" style={{ 
-                padding: "12px 24px", 
-                backgroundColor: "transparent", 
-                color: "var(--accent-cyan)", 
-                border: "1px solid var(--accent-cyan)", 
-                borderRadius: "4px", 
+              <button type="submit" style={{
+                padding: "12px 24px",
+                backgroundColor: "transparent",
+                color: "var(--accent-cyan)",
+                border: "1px solid var(--accent-cyan)",
+                borderRadius: "4px",
                 cursor: "pointer",
                 fontWeight: "bold",
                 textTransform: "uppercase",
                 transition: "all 0.2s ease"
               }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = "var(--accent-cyan)";
-                e.currentTarget.style.color = "var(--bg-space)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = "transparent";
-                e.currentTarget.style.color = "var(--accent-cyan)";
-              }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = "var(--accent-cyan)";
+                  e.currentTarget.style.color = "var(--bg-space)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = "transparent";
+                  e.currentTarget.style.color = "var(--accent-cyan)";
+                }}
               >
                 Enviar Reseña
               </button>

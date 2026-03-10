@@ -63,7 +63,6 @@ function CreatePost() {
         .then((res) => {
           if (res.status === 200) {
             alert("Publicación actualizada con éxito");
-      // Aquí iría: await axios.put(`/book/${id}`, payloadToSend) estar atento
           }
         })
         .catch((err) => {
@@ -71,9 +70,11 @@ function CreatePost() {
           alert("Error al actualizar la publicación");
         });
     } else {
+      //Creación de libro
       console.log("Creando nueva publicación en backend:", payloadToSend);
       createProduct(payloadToSend)
         .then((res) => {
+          console.log(res);
           if (res.status === 201) {
             alert("Publicación creada con éxito");
           }

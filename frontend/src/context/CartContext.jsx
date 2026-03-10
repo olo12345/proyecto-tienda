@@ -16,7 +16,7 @@ useEffect(() => { //aquí para que recalcule cada que cambie el carrito
   const addToCart = (book) => {
     setCart((prevCart) => {
       const existingBook = prevCart.find((item) => item.id === book.id);
-      
+
       if (existingBook) {
         // Si ya existe, recorremos el carrito y le sumamos 1 a la cantidad (count)
         return prevCart.map((item) =>

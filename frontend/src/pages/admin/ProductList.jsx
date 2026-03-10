@@ -1,10 +1,24 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom"; //esto para poder ir a la parte de edición
-import { getProducts } from "./../../services/products";
+import { getProducts,deleteProduct } from "./../../services/products";
 
 const ProductList = () => {
   const [books, setBooks] = useState([]);
   const navigate = useNavigate();
+
+  const getBooks = () => {
+    getProducts()
+      .then((res) => {
+        console.log("Libros obtenidos:", res.data);
+        const tempBooks = res.data.map((book) => ({
+          ...book,
+          stock: book.installments,
+          category: book.style
+        }))
+        setBooks(tempBooks);
+      })
+      .catch((error) => console.log("Ocurrió un error al obtener los libros", error))
+  }
 
   // Datos imaginarios de backend
   useEffect(() => {
@@ -17,17 +31,7 @@ const ProductList = () => {
     //   setBooks(mockData);
     // };
     // fetchBooks();
-    getProducts()
-      .then((res) => {
-        console.log("Libros obtenidos:", res.data);
-        const tempBooks = res.data.map((book) => ({
-          ...book,
-          stock: book.installments,
-          category: book.style
-        }))
-        setBooks(tempBooks);
-      })
-      .catch((error) => console.log("Ocurrió un error al obtener los libros", error))
+    getBooks();
   }, []);
 
   const handleAdd = () => {
@@ -43,8 +47,16 @@ const ProductList = () => {
   const handleDelete = (id) => {
     const confirmDelete = window.confirm("¿Estás seguro de eliminar este libro?");
     if (confirmDelete) {
-      const updatedBooks = books.filter((book) => book.id !== id);
-      setBooks(updatedBooks);
+      deleteProduct(id)
+        .then((res) => {
+          console.log("Libro eliminado:", res.data);
+          // Se actualiza la lista de libros después de eliminar
+          getBooks();
+        })
+        .catch((error) => console.log("Ocurrió un error al eliminar el libro", error));
+      // Para simular la eliminación sin backend, se puede filtrar el libro eliminado:
+      // const updatedBooks = books.filter((book) => book.id !== id);
+      // setBooks(updatedBooks);
       console.log("Libro eliminado en la base de datos, ID:", id);
     }
   };
