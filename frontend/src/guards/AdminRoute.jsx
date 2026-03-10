@@ -5,7 +5,7 @@ export const AdminRoute = ({ children }) => {
     const { user, authLoading } = useAuth();
     if (authLoading) return null;
 
-    if (!user || !user.rol.includes('admin')) {
+    if (!user || !user.role.includes('admin')) {
         return (
             <Navigate
                 to="/login"

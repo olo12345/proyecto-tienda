@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom"; //esto para poder ir a la parte de edición
+import { getProducts } from "./../../services/products";
 
 const ProductList = () => {
   const [books, setBooks] = useState([]);
@@ -7,15 +8,26 @@ const ProductList = () => {
 
   // Datos imaginarios de backend
   useEffect(() => {
-    const fetchBooks = () => {
-      const mockData = [
-        { id: 1, title: "Libro 1", price: 25000, stock: 15 },
-        { id: 2, title: "Libro 2", price: 15000, stock: 8 },
-        { id: 3, title: "Ñibro 3", price: 32000, stock: 18 }
-      ];
-      setBooks(mockData);
-    };
-    fetchBooks();
+    // const fetchBooks = () => {
+    //   const mockData = [
+    //     { id: 1, title: "Libro 1", price: 25000, stock: 15 },
+    //     { id: 2, title: "Libro 2", price: 15000, stock: 8 },
+    //     { id: 3, title: "Libro 3", price: 32000, stock: 18 }
+    //   ];
+    //   setBooks(mockData);
+    // };
+    // fetchBooks();
+    getProducts()
+      .then((res) => {
+        console.log("Libros obtenidos:", res.data);
+        const tempBooks = res.data.map((book) => ({
+          ...book,
+          stock: book.installments,
+          category: book.style
+        }))
+        setBooks(tempBooks);
+      })
+      .catch((error) => console.log("Ocurrió un error al obtener los libros", error))
   }, []);
 
   const handleAdd = () => {
@@ -43,16 +55,16 @@ const ProductList = () => {
         <h1 style={{ color: "var(--accent-gold)", letterSpacing: "1px", margin: 0, fontSize: "1.8rem" }}>
           Panel de Administración: Productos
         </h1>
-        
+
         {/* Botón para Añadir */}
-        <button 
+        <button
           onClick={handleAdd}
-          style={{ 
-            padding: "12px 20px", 
-            backgroundColor: "var(--accent-cyan)", 
-            color: "var(--bg-space)", 
-            border: "none", 
-            borderRadius: "4px", 
+          style={{
+            padding: "12px 20px",
+            backgroundColor: "var(--accent-cyan)",
+            color: "var(--bg-space)",
+            border: "none",
+            borderRadius: "4px",
             cursor: "pointer",
             fontWeight: "bold",
             textTransform: "uppercase",
@@ -73,9 +85,9 @@ const ProductList = () => {
       </div>
 
       {/* Contenedor tipo tarjeta para la tabla */}
-      <div style={{ 
-        backgroundColor: "var(--bg-card)", 
-        borderRadius: "8px", 
+      <div style={{
+        backgroundColor: "var(--bg-card)",
+        borderRadius: "8px",
         border: "1px solid var(--bg-border)",
         overflowX: "auto", /* Para que no se rompa en pantallas pequeñas */
         boxShadow: "0 8px 30px rgba(0,0,0,0.3)"
@@ -102,16 +114,16 @@ const ProductList = () => {
                 <td style={{ padding: "15px", color: "var(--accent-gold)" }}>${book.price.toLocaleString("es-CL")}</td>
                 <td style={{ padding: "15px", color: "var(--text-light)" }}>{book.stock}</td>
                 <td style={{ padding: "15px", textAlign: "center", display: "flex", justifyContent: "center", gap: "10px" }}>
-                  
+
                   {/* Botón Editar */}
-                  <button 
+                  <button
                     onClick={() => handleEdit(book.id)}
-                    style={{ 
-                      padding: "6px 12px", 
-                      backgroundColor: "transparent", 
-                      color: "var(--accent-cyan)", 
-                      border: "1px solid var(--accent-cyan)", 
-                      borderRadius: "4px", 
+                    style={{
+                      padding: "6px 12px",
+                      backgroundColor: "transparent",
+                      color: "var(--accent-cyan)",
+                      border: "1px solid var(--accent-cyan)",
+                      borderRadius: "4px",
                       cursor: "pointer",
                       fontWeight: "bold",
                       transition: "all 0.2s ease"
@@ -129,14 +141,14 @@ const ProductList = () => {
                   </button>
 
                   {/* Botón Eliminar */}
-                  <button 
+                  <button
                     onClick={() => handleDelete(book.id)}
-                    style={{ 
-                      padding: "6px 12px", 
-                      backgroundColor: "transparent", 
-                      color: "var(--accent-danger)", 
-                      border: "1px solid var(--accent-danger)", 
-                      borderRadius: "4px", 
+                    style={{
+                      padding: "6px 12px",
+                      backgroundColor: "transparent",
+                      color: "var(--accent-danger)",
+                      border: "1px solid var(--accent-danger)",
+                      borderRadius: "4px",
                       cursor: "pointer",
                       fontWeight: "bold",
                       transition: "all 0.2s ease"

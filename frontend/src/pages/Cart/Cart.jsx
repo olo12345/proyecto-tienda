@@ -4,10 +4,9 @@ import { AuthContext } from "./../../context/AuthContext";
 
 function Cart() {
   const { cart, increase, decrease, total, clearCart } = useContext(CartContext);
-  const { user, token } = useContext(AuthContext); // Ahora validamos con 'user' 
   const [message, setMessage] = useState("");
   const [showConfirm, setShowConfirm] = useState(false);
-  
+
 
   const handleCheckout = async () => {
     // Simulación rápida de éxito ya que aún no conectamos el backend
@@ -33,8 +32,8 @@ function Cart() {
     if (clearCart) {
       clearCart();
     }
-    setMessage("");       
-    setShowConfirm(false); 
+    setMessage("");
+    setShowConfirm(false);
   };
 
   return (
@@ -44,30 +43,30 @@ function Cart() {
       </h2>
 
       {cart.length === 0 ? (
-        <div style={{ 
-          backgroundColor: "var(--bg-card)", 
-          padding: "40px", 
-          borderRadius: "8px", 
+        <div style={{
+          backgroundColor: "var(--bg-card)",
+          padding: "40px",
+          borderRadius: "8px",
           border: "1px solid var(--bg-border)",
           textAlign: "center"
         }}>
           <p style={{ color: "var(--text-muted)", fontSize: "1.2rem", margin: 0 }}>El carrito está vacío.</p>
         </div>
       ) : (
-        <div style={{ 
-          backgroundColor: "var(--bg-card)", 
-          padding: "30px", 
-          borderRadius: "8px", 
+        <div style={{
+          backgroundColor: "var(--bg-card)",
+          padding: "30px",
+          borderRadius: "8px",
           border: "1px solid var(--bg-border)",
           boxShadow: "0 8px 30px rgba(0,0,0,0.3)"
         }}>
           {/* Mapeamos los libros */}
           {cart.map((book) => (
             <div key={book.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid var(--bg-border)", paddingBottom: "20px", marginBottom: "20px" }}>
-              
+
               <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
                 <div style={{ width: "70px", height: "70px", backgroundColor: "var(--bg-space)", borderRadius: "4px", border: "1px solid var(--bg-border)", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <img src={book.img} alt={book.title} style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.9 }} 
+                  <img src={book.img} alt={book.title} style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.9 }}
                     onError={(e) => { e.target.style.display = 'none'; }}
                   />
                 </div>
@@ -80,8 +79,8 @@ function Cart() {
               </div>
 
               <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
-                <button 
-                  onClick={() => decrease(book.id)} 
+                <button
+                  onClick={() => decrease(book.id)}
                   style={{ padding: "5px 12px", cursor: "pointer", backgroundColor: "transparent", color: "var(--accent-cyan)", border: "1px solid var(--accent-cyan)", borderRadius: "4px", fontWeight: "bold", transition: "all 0.2s ease" }}
                   onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "var(--accent-cyan)"; e.currentTarget.style.color = "var(--bg-space)"; }}
                   onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "transparent"; e.currentTarget.style.color = "var(--accent-cyan)"; }}
@@ -89,8 +88,8 @@ function Cart() {
                   -
                 </button>
                 <span style={{ fontWeight: "bold", fontSize: "1.2rem", minWidth: "20px", textAlign: "center" }}>{book.count}</span>
-                <button 
-                  onClick={() => increase(book.id)} 
+                <button
+                  onClick={() => increase(book.id)}
                   style={{ padding: "5px 12px", cursor: "pointer", backgroundColor: "transparent", color: "var(--accent-cyan)", border: "1px solid var(--accent-cyan)", borderRadius: "4px", fontWeight: "bold", transition: "all 0.2s ease" }}
                   onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "var(--accent-cyan)"; e.currentTarget.style.color = "var(--bg-space)"; }}
                   onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "transparent"; e.currentTarget.style.color = "var(--accent-cyan)"; }}
@@ -113,27 +112,26 @@ function Cart() {
           {/* Botón Pagar */}
           {!showConfirm && (
             <button
-              disabled={!user}
               onClick={handleCheckout}
               style={{
                 width: "100%",
                 padding: "15px",
                 marginTop: "30px",
-                backgroundColor: user ? "var(--accent-cyan)" : "var(--bg-border)",
-                color: user ? "var(--bg-space)" : "var(--text-muted)",
+                backgroundColor: "var(--accent-cyan)",
+                color: "var(--bg-space)" ,
                 border: "none",
                 borderRadius: "4px",
-                cursor: user ? "pointer" : "not-allowed",
+                cursor: "pointer",
                 fontWeight: "bold",
                 textTransform: "uppercase",
                 letterSpacing: "2px",
                 transition: "all 0.3s ease"
               }}
               onMouseEnter={(e) => {
-                if(user) e.currentTarget.style.boxShadow = "0 0 15px rgba(0, 229, 255, 0.4)";
+                e.currentTarget.style.boxShadow = "0 0 15px rgba(0, 229, 255, 0.4)";
               }}
               onMouseLeave={(e) => {
-                if(user) e.currentTarget.style.boxShadow = "none";
+                e.currentTarget.style.boxShadow = "none";
               }}
             >
               Pagar 💳
@@ -142,9 +140,9 @@ function Cart() {
 
           {/* Mensaje de feedback */}
           {message && (
-            <div style={{ 
-              marginTop: "25px", 
-              textAlign: "center", 
+            <div style={{
+              marginTop: "25px",
+              textAlign: "center",
               fontWeight: "bold",
               padding: "20px",
               backgroundColor: "rgba(0, 229, 255, 0.1)",
@@ -153,14 +151,14 @@ function Cart() {
             }}>
               <p style={{ color: "var(--accent-cyan)", fontSize: "1.2rem", margin: "0 0 15px 0" }}>{message}</p>
               {showConfirm && (
-                <button 
-                  onClick={handleConfirm} 
-                  style={{ 
-                    padding: "10px 30px", 
-                    cursor: "pointer", 
-                    backgroundColor: "transparent", 
-                    color: "var(--text-light)", 
-                    border: "1px solid var(--text-light)", 
+                <button
+                  onClick={handleConfirm}
+                  style={{
+                    padding: "10px 30px",
+                    cursor: "pointer",
+                    backgroundColor: "transparent",
+                    color: "var(--text-light)",
+                    border: "1px solid var(--text-light)",
                     borderRadius: "4px",
                     fontWeight: "bold",
                     textTransform: "uppercase",

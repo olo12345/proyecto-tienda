@@ -1,6 +1,4 @@
 import { Routes, Route } from "react-router-dom"
-import Navbar from "./components/Navbar"
-import Footer from "./components/Footer"
 
 import CartProvider from "./context/CartContext"
 import FavoritesProvider from "./context/FavoritesContext"
@@ -17,7 +15,7 @@ import Login from "./pages/Login/Login"
 import Register from "./pages/Register/Register"
 import Profile from "./pages/Profile/Profile"
 import Gallery from "./pages/Gallery/Gallery"
-import CreatePost from "./pages/CreatePost"
+import CreatePost from "./pages/admin/CreatePost"
 import BookDetails from "./pages/BookDetails"
 import NotFound from "./pages/NotFound"
 import Cart from "./pages/Cart/Cart"
@@ -108,14 +106,6 @@ function App() {
               <Route
                 path="/admin/store/edit/:id"
                 element={<CreatePost />}
-              />
-              <Route
-                path="/login"
-                element={<Login />}
-              />
-              <Route
-                path="/register"
-                element={<Register />}
               />
               <Route
                 path="*"

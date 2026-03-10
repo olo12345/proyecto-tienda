@@ -1,4 +1,4 @@
-import apiProducts from './api.js';
+import {apiProducts} from './api.js';
 
 export const getProducts = () => apiProducts.get('/');
 

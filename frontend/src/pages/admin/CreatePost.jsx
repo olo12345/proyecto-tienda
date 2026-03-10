@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { getProduct, updateProduct, createProduct } from "./../../services/products";
 
 function CreatePost() {
   const navigate = useNavigate();
@@ -19,8 +20,21 @@ function CreatePost() {
   useEffect(() => {
     if (isEditing) {
       console.log("Modo edición activado para el libro con ID:", id);
-      // Simulación: fetch al backend para traer los datos del libro a editar
-      // setFormData({ title: "Libro a editar", ... });
+      getProduct(id)
+        .then((res) => {
+          if (res.status === 200) {
+            const bookData = res.data;
+            //Ajuste de datos para ajustarse a la api temporal: installments se mapea a stock y style a category
+            bookData.stock = bookData.installments;
+            bookData.category = bookData.style;
+            setFormData(res.data);
+          }
+        })
+        .catch((err) => {
+          console.error("Error al obtener el libro:", err);
+          alert("No se pudo cargar el libro para edición");
+          navigate("/admin/store");
+        });
     }
   }, [id, isEditing]);
 
@@ -45,12 +59,30 @@ function CreatePost() {
 
     if (isEditing) {
       console.log("Actualizando publicación en backend:", payloadToSend);
+      updateProduct(id, payloadToSend)
+        .then((res) => {
+          if (res.status === 200) {
+            alert("Publicación actualizada con éxito");
       // Aquí iría: await axios.put(`/book/${id}`, payloadToSend) estar atento
-      alert("Publicación actualizada con éxito");
+          }
+        })
+        .catch((err) => {
+          console.error("Error al actualizar la publicación:", err);
+          alert("Error al actualizar la publicación");
+        });
     } else {
       console.log("Creando nueva publicación en backend:", payloadToSend);
-      // Aquí iría: await axios.post('/books', payloadToSend) estar atento
-      alert("Publicación creada con éxito");
+      createProduct(payloadToSend)
+        .then((res) => {
+          if (res.status === 201) {
+            alert("Publicación creada con éxito");
+          }
+        })
+          .catch((err) => {
+            console.error("Error al crear la publicación:", err);
+            alert("Error al crear la publicación");
+          })
+          // Aquí iría: await axios.post('/books', payloadToSend) estar atento
     }
 
     // Redirigimos de vuelta al panel de administración
@@ -63,28 +95,28 @@ function CreatePost() {
         {isEditing ? "Editar Publicación" : "Crear Nueva Publicación"}
       </h1>
 
-      <form onSubmit={handleSubmit} style={{ 
-        backgroundColor: "var(--bg-card)", 
-        padding: "30px", 
-        borderRadius: "8px", 
+      <form onSubmit={handleSubmit} style={{
+        backgroundColor: "var(--bg-card)",
+        padding: "30px",
+        borderRadius: "8px",
         border: "1px solid var(--bg-border)",
         boxShadow: "0 8px 30px rgba(0,0,0,0.3)"
       }}>
-        
+
         <div style={{ marginBottom: "20px" }}>
           <label style={{ display: "block", marginBottom: "8px", fontWeight: "bold", color: "var(--text-muted)", fontSize: "0.9rem" }}>Título del Libro:</label>
-          <input 
-            type="text" 
-            name="title" 
-            value={formData.title} 
-            onChange={handleChange} 
-            required 
+          <input
+            type="text"
+            name="title"
+            value={formData.title}
+            onChange={handleChange}
+            required
             placeholder="Ej: The Art and Science of Premium Gin"
-            style={{ 
-              width: "100%", 
-              padding: "12px", 
-              borderRadius: "4px", 
-              border: "1px solid var(--bg-border)", 
+            style={{
+              width: "100%",
+              padding: "12px",
+              borderRadius: "4px",
+              border: "1px solid var(--bg-border)",
               backgroundColor: "var(--bg-space)",
               color: "var(--text-light)",
               boxSizing: "border-box",
@@ -98,18 +130,18 @@ function CreatePost() {
 
         <div style={{ marginBottom: "20px" }}>
           <label style={{ display: "block", marginBottom: "8px", fontWeight: "bold", color: "var(--text-muted)", fontSize: "0.9rem" }}>Categoría:</label>
-          <input 
-            type="text" 
-            name="category" 
-            value={formData.category} 
-            onChange={handleChange} 
-            required 
+          <input
+            type="text"
+            name="category"
+            value={formData.category}
+            onChange={handleChange}
+            required
             placeholder="Ej: Destilación, Negocios, Programación..."
-            style={{ 
-              width: "100%", 
-              padding: "12px", 
-              borderRadius: "4px", 
-              border: "1px solid var(--bg-border)", 
+            style={{
+              width: "100%",
+              padding: "12px",
+              borderRadius: "4px",
+              border: "1px solid var(--bg-border)",
               backgroundColor: "var(--bg-space)",
               color: "var(--text-light)",
               boxSizing: "border-box",
@@ -124,18 +156,18 @@ function CreatePost() {
         <div style={{ display: "flex", gap: "20px", marginBottom: "20px" }}>
           <div style={{ flex: 1 }}>
             <label style={{ display: "block", marginBottom: "8px", fontWeight: "bold", color: "var(--text-muted)", fontSize: "0.9rem" }}>Precio (CLP):</label>
-            <input 
-              type="number" 
-              name="price" 
-              value={formData.price} 
-              onChange={handleChange} 
-              required 
+            <input
+              type="number"
+              name="price"
+              value={formData.price}
+              onChange={handleChange}
+              required
               min="0"
-              style={{ 
-                width: "100%", 
-                padding: "12px", 
-                borderRadius: "4px", 
-                border: "1px solid var(--bg-border)", 
+              style={{
+                width: "100%",
+                padding: "12px",
+                borderRadius: "4px",
+                border: "1px solid var(--bg-border)",
                 backgroundColor: "var(--bg-space)",
                 color: "var(--text-light)",
                 boxSizing: "border-box",
@@ -149,18 +181,18 @@ function CreatePost() {
 
           <div style={{ flex: 1 }}>
             <label style={{ display: "block", marginBottom: "8px", fontWeight: "bold", color: "var(--text-muted)", fontSize: "0.9rem" }}>Stock Inicial:</label>
-            <input 
-              type="number" 
-              name="stock" 
-              value={formData.stock} 
-              onChange={handleChange} 
-              required 
+            <input
+              type="number"
+              name="stock"
+              value={formData.stock}
+              onChange={handleChange}
+              required
               min="0"
-              style={{ 
-                width: "100%", 
-                padding: "12px", 
-                borderRadius: "4px", 
-                border: "1px solid var(--bg-border)", 
+              style={{
+                width: "100%",
+                padding: "12px",
+                borderRadius: "4px",
+                border: "1px solid var(--bg-border)",
                 backgroundColor: "var(--bg-space)",
                 color: "var(--text-light)",
                 boxSizing: "border-box",
@@ -175,21 +207,21 @@ function CreatePost() {
 
         <div style={{ marginBottom: "30px" }}>
           <label style={{ display: "block", marginBottom: "8px", fontWeight: "bold", color: "var(--text-muted)", fontSize: "0.9rem" }}>Descripción:</label>
-          <textarea 
-            name="description" 
-            value={formData.description} 
-            onChange={handleChange} 
-            required 
+          <textarea
+            name="description"
+            value={formData.description}
+            onChange={handleChange}
+            required
             rows="5"
             placeholder="Escribe una descripción detallada del libro..."
-            style={{ 
-              width: "100%", 
-              padding: "12px", 
-              borderRadius: "4px", 
-              border: "1px solid var(--bg-border)", 
+            style={{
+              width: "100%",
+              padding: "12px",
+              borderRadius: "4px",
+              border: "1px solid var(--bg-border)",
               backgroundColor: "var(--bg-space)",
               color: "var(--text-light)",
-              boxSizing: "border-box", 
+              boxSizing: "border-box",
               resize: "vertical",
               outline: "none",
               transition: "border-color 0.2s ease"
@@ -200,15 +232,15 @@ function CreatePost() {
         </div>
 
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: "10px", borderTop: "1px solid var(--bg-border)" }}>
-          <button 
-            type="button" 
+          <button
+            type="button"
             onClick={() => navigate("/admin/store")}
-            style={{ 
-              padding: "12px 24px", 
-              backgroundColor: "transparent", 
-              color: "var(--text-muted)", 
-              border: "1px solid var(--text-muted)", 
-              borderRadius: "4px", 
+            style={{
+              padding: "12px 24px",
+              backgroundColor: "transparent",
+              color: "var(--text-muted)",
+              border: "1px solid var(--text-muted)",
+              borderRadius: "4px",
               cursor: "pointer",
               fontWeight: "bold",
               textTransform: "uppercase",
@@ -226,15 +258,15 @@ function CreatePost() {
             Cancelar
           </button>
 
-          <button 
-            type="submit" 
-            style={{ 
-              padding: "12px 24px", 
-              backgroundColor: "var(--accent-cyan)", 
-              color: "var(--bg-space)", 
-              border: "none", 
-              borderRadius: "4px", 
-              cursor: "pointer", 
+          <button
+            type="submit"
+            style={{
+              padding: "12px 24px",
+              backgroundColor: "var(--accent-cyan)",
+              color: "var(--bg-space)",
+              border: "none",
+              borderRadius: "4px",
+              cursor: "pointer",
               fontWeight: "bold",
               textTransform: "uppercase",
               letterSpacing: "1px",
