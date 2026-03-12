@@ -11,6 +11,7 @@ const RenderBooks = (param) => {
       price={book.price}
       img={book.img}
       key={new Date().getTime() +  book.id}
+      rating={book.rating}
     />
   ))
   : <div>"Cargando galería"</div>
@@ -23,11 +24,11 @@ function Gallery() {
   const getBooks = () => {
     getProducts()
       .then((res) => {
-        console.log("Libros obtenidos:", res.data);
         const tempBooks = res.data.map((book) => ({
           ...book,
           stock: book.installments,
-          category: book.style
+          category: book.style,
+          rating: Math.floor(Math.random() * 5)
         }))
         setBooks(tempBooks);
       })
@@ -37,7 +38,6 @@ function Gallery() {
   useEffect(() =>
     getBooks()
     , [])
-
 
 
   return (

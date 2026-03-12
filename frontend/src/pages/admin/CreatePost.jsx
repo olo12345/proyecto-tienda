@@ -1,42 +1,23 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useEffectEvent } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { getProduct, updateProduct, createProduct } from "./../../services/products";
+// import { getProduct, updateProduct, createProduct } from "./../../services/products";
+import { useBooks } from "./../../hooks/useBooks"
 
 function CreatePost() {
   const navigate = useNavigate();
   const { id } = useParams(); // Si hay un ID en la URL, significa que estamos editando
   const isEditing = Boolean(id);
 
- // verificado, cumple con lo que pide el contrato
+  const { book, fetchBookByID, updateBook, addBook } = useBooks();
+
+
   const [formData, setFormData] = useState({
-    title: "",
+    ...book ?? {title: "",
     description: "",
     price: "",
     category: "",
-    stock: ""
+    stock: ""}
   });
-
-  // Si estamos en modo edición, aquí cargaríamos los datos del libro
-  useEffect(() => {
-    if (isEditing) {
-      console.log("Modo edición activado para el libro con ID:", id);
-      getProduct(id)
-        .then((res) => {
-          if (res.status === 200) {
-            const bookData = res.data;
-            //Ajuste de datos para ajustarse a la api temporal: installments se mapea a stock y style a category
-            bookData.stock = bookData.installments;
-            bookData.category = bookData.style;
-            setFormData(res.data);
-          }
-        })
-        .catch((err) => {
-          console.error("Error al obtener el libro:", err);
-          alert("No se pudo cargar el libro para edición");
-          navigate("/admin/store");
-        });
-    }
-  }, [id, isEditing]);
 
   const handleChange = (e) => {
     setFormData({
@@ -45,11 +26,45 @@ function CreatePost() {
     });
   };
 
+
+  const updateFormData = useEffectEvent((book) => {
+    setFormData(book);
+  })
+
+  const updateFetchBook = useEffectEvent((id) => {
+    fetchBookByID(id)
+      .then((res) => {
+        if (res.status === 200) {
+          updateFormData(res.data);
+        }
+      })
+      .catch((err) => {
+        console.error("Error al actualizar la publicación:", err);
+        alert("Error al actualizar la publicación");
+      });
+  });
+
+
+  // Si estamos en modo edición, aquí cargaríamos los datos del libro
+  useEffect(() => {
+
+    if (isEditing) {
+      // clearForm();
+      console.log("Modo edición activado para el libro con ID:", id);
+      updateFetchBook(id);
+    }
+  }, [id, isEditing, navigate]);
+
+
+  // verificado, cumple con lo que pide el contrato
+
+
   const handleSubmit = (e) => {
     e.preventDefault();
 
     // Formateamos los datos según el contrato (price y stock deben ser números)
     const payloadToSend = {
+      ...book,
       title: formData.title,
       description: formData.description,
       price: Number(formData.price),
@@ -59,35 +74,36 @@ function CreatePost() {
 
     if (isEditing) {
       console.log("Actualizando publicación en backend:", payloadToSend);
-      updateProduct(id, payloadToSend)
-        .then((res) => {
-          if (res.status === 200) {
-            alert("Publicación actualizada con éxito");
-          }
-        })
-        .catch((err) => {
-          console.error("Error al actualizar la publicación:", err);
-          alert("Error al actualizar la publicación");
-        });
+      try {
+        const res = updateBook(payloadToSend)
+        if (res.status === 200) {
+          console.log("res", res)
+          alert("Publicación actualizada con éxito");
+        }
+      }
+      catch (err) {
+        console.error("Error al actualizar la publicación:", err, "res");
+        alert("Error al actualizar la publicación");
+      };
     } else {
       //Creación de libro
       console.log("Creando nueva publicación en backend:", payloadToSend);
-      createProduct(payloadToSend)
+      addBook(payloadToSend)
         .then((res) => {
           console.log(res);
           if (res.status === 201) {
             alert("Publicación creada con éxito");
+            navigate("/admin/store");
+            // Redirigimos de vuelta al panel de administración
           }
         })
-          .catch((err) => {
-            console.error("Error al crear la publicación:", err);
-            alert("Error al crear la publicación");
-          })
-          // Aquí iría: await axios.post('/books', payloadToSend) estar atento
+        .catch((err) => {
+          console.error("Error al crear la publicación:", err);
+          alert("Error al crear la publicación");
+        })
+      // Aquí iría: await axios.post('/books', payloadToSend) estar atento
     }
 
-    // Redirigimos de vuelta al panel de administración
-    navigate("/admin/store");
   };
 
   return (

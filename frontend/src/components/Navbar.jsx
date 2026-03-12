@@ -6,7 +6,7 @@ import { CartContext } from "./../context/CartContext"; // Esto para mostrar el 
 function Navbar() {
 
   const { user, logout } = useContext(AuthContext);
-  const { total } = useContext(CartContext); // Esto para ver lo que tiene el carrito
+  const { totalPrice } = useContext(CartContext); // Esto para ver lo que tiene el carrito
   const [searchTerm, setSearchTerm] = useState("");        /* Pendiente con ver como conectar esto*/
 
       const setActiveClass = ({isActive}) => isActive ? "active" : undefined;
@@ -58,7 +58,7 @@ function Navbar() {
         <>
           <span style={{ color: "var(--text-muted)" }}>Bienvenido {user.name}</span>
 
-          {(user.rol === "admin" || user.role === "admin") && (           /* Aquí soportamos lo que tenemos en el mock ocmo en la futura DB*/
+          {(user.role === "admin") && (           /* Aquí soportamos lo que tenemos en el mock ocmo en la futura DB*/
             <NavLink
               to="/admin/store"
               style={{ color: "var(--accent-gold)", fontWeight: "bold", textDecoration: "none" }}
@@ -82,7 +82,7 @@ function Navbar() {
               color: "var(--bg-space)",
               fontWeight: "bold"
             }}>
-              ${total.toLocaleString("es-CL")}
+              ${totalPrice.toLocaleString("es-CL")}
             </span>
           </NavLink>
 

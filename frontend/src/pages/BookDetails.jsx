@@ -1,47 +1,48 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { AuthContext } from "./../context/AuthContext";
-import { CartContext } from "./../context/CartContext";
-import { getProduct } from "./../services/products";
+import { useAuth } from "../hooks/useAuth";
+import { useCart } from "../hooks/useCart";
+import { useBooks } from "./../hooks/useBooks";
+// import { getProduct, updateProduct } from "./../services/products";
 
 function BookDetails() {
   const { id } = useParams(); // Captura el ID de la URL
-  const { user } = useContext(AuthContext);
+  const { user } = useAuth();
   const navigate = useNavigate();
-  const { addToCart } = useContext(CartContext);
+  const { addToCart } = useCart();
+  const { book, fetchBookByID, updateBook } = useBooks();
 
-  const [book, setBook] = useState(null);
-  const [reviews, setReviews] = useState([]);
+  const [reviews, setReviews] = useState([...book.sizeList]);
   const [loading, setLoading] = useState(true);
 
   const [newReview, setNewReview] = useState({ rating: 5, comment: "" });
 
-  useEffect(() => {
-    // Simulación de GET /books/:id
-    const fetchBookData = () => {
 
-      getProduct(id)
-        .then((res) => {
-          const foundBook = res.data
-          if (foundBook) {
-            setBook(foundBook);
+  useEffect(() => {
+    const fetchBookData = async (id) => {
+      fetchBookByID(id).then (()=>{
+        setLoading(false);
+      })
+
             // Simulación de GET /reviews (reseñas previas)
-            setReviews([
-              { id: 101, user_name: "Ana", rating: 5, comment: "Excelente material, muy detallado." }
-            ]);
-          }
-          setLoading(false);
-        })
-        .catch( (err) =>
+            // setReviews([
+            //   { id: 101, user_name: "Ana", rating: 5, comment: "Excelente material, muy detallado." }
+            // ]);
+        .catch((err) =>
           console.log("Ocurrió un error al llamar el libro", err)
         )
     };
+    // Simulación de GET /books/:id
+    fetchBookData(id);
+    console.log(book);
+  }, [id, reviews]);
 
-    fetchBookData();
-  }, [id]);
-
-  const handleReviewSubmit = (e) => {
+  const handleReviewSubmit = async (e) => {
     e.preventDefault();
+
+    //Se limpia el la propiedad sizeList para usar como contenedor para reviews, temporal por adaptación de api
+
+
 
     // Validación: Solo usuarios logueados pueden comentar
     if (!user) {
@@ -52,21 +53,34 @@ function BookDetails() {
 
     // Payload exacto según tu contrato API REST para POST /reviews
     const reviewPayload = {
-      book_id: Number(id),
-      rating: Number(newReview.rating),
-      comment: newReview.comment
+      ...book,
+      // sizeList: Number(newReview.rating),
+      // currency: newReview.comment
+      sizeList: [...book.sizeList,
+      {
+        user_name: user.name,
+        id: Date.now(), // ID temporal para la review, en un backend real lo asignaría el servidor
+        rating: Number(newReview.rating),
+        comment: newReview.comment
+      }]
     };
 
     console.log("Enviando reseña al backend:", reviewPayload);
     // Aquí iría: await axios.post('/reviews', reviewPayload, { headers: ... })
 
+
     // Actualizamos la vista temporalmente simulando el éxito
     setReviews([...reviews, {
       id: Date.now(),
-      user_name: user.name,
-      rating: reviewPayload.rating,
-      comment: reviewPayload.comment
+      // user_name: user.name,
+      // rating: reviewPayload.rating,
+      // comment: reviewPayload.comment
+      ...reviewPayload.sizeList[reviewPayload.sizeList.length - 1]
     }]);
+    updateBook(reviewPayload)
+      .then((res) => {
+        console.log("Se ha subido la review", res.data)
+      })
 
     setNewReview({ rating: 5, comment: "" });
   };

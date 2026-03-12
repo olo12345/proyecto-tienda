@@ -1,11 +1,13 @@
-import { useContext, useState } from "react";
-import { CartContext } from "./../../context/CartContext";
-import { AuthContext } from "./../../context/AuthContext";
+import { useState } from "react";
+import {useCart} from "./../../hooks/useCart"
 
 function Cart() {
-  const { cart, increase, decrease, total, clearCart } = useContext(CartContext);
+  const { cart, updateQuantity, removeFromCart, totalPrice, clearCart } = useCart();
   const [message, setMessage] = useState("");
   const [showConfirm, setShowConfirm] = useState(false);
+
+  const increase = (id, count) => updateQuantity(id, count + 1)
+  const decrease = (id, count) => count === 1 ? removeFromCart(id) :updateQuantity(id, count - 1)
 
 
   const handleCheckout = async () => {
@@ -80,16 +82,16 @@ function Cart() {
 
               <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
                 <button
-                  onClick={() => decrease(book.id)}
+                  onClick={() => decrease(book.id, book.quantity)}
                   style={{ padding: "5px 12px", cursor: "pointer", backgroundColor: "transparent", color: "var(--accent-cyan)", border: "1px solid var(--accent-cyan)", borderRadius: "4px", fontWeight: "bold", transition: "all 0.2s ease" }}
                   onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "var(--accent-cyan)"; e.currentTarget.style.color = "var(--bg-space)"; }}
                   onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "transparent"; e.currentTarget.style.color = "var(--accent-cyan)"; }}
                 >
                   -
                 </button>
-                <span style={{ fontWeight: "bold", fontSize: "1.2rem", minWidth: "20px", textAlign: "center" }}>{book.count}</span>
+                <span style={{ fontWeight: "bold", fontSize: "1.2rem", minWidth: "20px", textAlign: "center" }}>{book.quantity}</span>
                 <button
-                  onClick={() => increase(book.id)}
+                  onClick={() => increase(book.id, book.quantity)}
                   style={{ padding: "5px 12px", cursor: "pointer", backgroundColor: "transparent", color: "var(--accent-cyan)", border: "1px solid var(--accent-cyan)", borderRadius: "4px", fontWeight: "bold", transition: "all 0.2s ease" }}
                   onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "var(--accent-cyan)"; e.currentTarget.style.color = "var(--bg-space)"; }}
                   onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "transparent"; e.currentTarget.style.color = "var(--accent-cyan)"; }}
@@ -105,7 +107,7 @@ function Cart() {
           <div style={{ display: "flex", justifyContent: "space-between", marginTop: "30px", fontSize: "1.5rem", fontWeight: "bold" }}>
             <span style={{ color: "var(--text-light)" }}>Total:</span>
             <span style={{ color: "var(--accent-gold)", textShadow: "0 0 10px rgba(245, 166, 35, 0.2)" }}>
-              ${total.toLocaleString("es-CL")}
+              ${totalPrice.toLocaleString("es-CL")}
             </span>
           </div>
 
@@ -118,7 +120,7 @@ function Cart() {
                 padding: "15px",
                 marginTop: "30px",
                 backgroundColor: "var(--accent-cyan)",
-                color: "var(--bg-space)" ,
+                color: "var(--bg-space)",
                 border: "none",
                 borderRadius: "4px",
                 cursor: "pointer",

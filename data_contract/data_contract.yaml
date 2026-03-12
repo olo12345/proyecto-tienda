@@ -14,13 +14,17 @@ POST_login:
         payload:
             email: String
             password: String
-            confirm_password: String
     response:
         token: String
         user:
             status: 200
             id: Number
             email: String
+            name: String
+            age: Number
+            imagen: String (URL)
+            rol: String
+
 # POST /register
 POST_register:
     request:
@@ -30,12 +34,50 @@ POST_register:
             - confirm_password: String
             - name: String
             - age: Number
+            - imagen: String (URL)
     response:
         status: 201
         token: String
         user:
             id: Number
             email: String
+
+#Dejar reseña a un libro
+POST_review:
+    request:
+        headers:
+            Authorization: String
+        payload:
+            book_id: Number
+            rating: Number
+            comment: String
+    response:
+        status: 201
+        review:
+            id: Number
+            book_id: Number
+            user_id: Number
+            rating: Number
+            comment: String
+
+#Editar reseña
+PUT_review:
+    request:
+        headers:
+            Authorization: String
+        payload:
+            review_id: Number
+            rating: Number
+            comment: String
+    response:
+        status: 200
+        review:
+            id: Number
+            book_id: Number
+            user_id: Number
+            rating: Number
+            comment: String
+
 # POST /books
 POST_books:
     request:
@@ -48,6 +90,7 @@ POST_books:
     response:
         status: 201
         id: Number
+
 # GET /profile
 GET_profile:
     request:
@@ -60,13 +103,17 @@ GET_profile:
             email: String
             name: String
             age: Number
-            privileges: String
-            # admin, seller, user
-# GET /books
+            rol: String
+            # admin, user
+
+# GET /books se pueden agregar parámetros de consulta para paginación, nombre, filtrado por categoría, rango de precios, etc.
 GET_books:
     request:
         parameters:
+            order_by: String (title, price, category, rating) _ASC or _DESC
             page: Number
+            name: String
+            author: String
             filters:
                 category: String
                 price_range:
@@ -84,6 +131,8 @@ GET_books:
                     price: Number
                     category: String
                     stock: Number
+                    rating: Number (promedio de reseñas)
+
 # PUT /book/:id
 PUT_book_id:
     request:
@@ -114,7 +163,7 @@ GET_cart:
                     price: Number
                     quantity: Number
 
-# DELETE /book/:id se verifica que el usuario tenga permisos para eliminar el libro (publicador o admin)
+# DELETE /book/:id se verifica que el usuario tenga permisos para eliminar el libro (admin)
 DELETE_book_id:
     request:
         headers:

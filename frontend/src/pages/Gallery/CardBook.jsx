@@ -67,6 +67,7 @@ export const CardBook = (book) => {
                 <p style={{ fontSize: "1.3rem", fontWeight: "bold", color: "var(--accent-gold)", marginTop: "auto", paddingBottom: "10px" }}>
                     ${book.price.toLocaleString("es-CL")}
                 </p>
+                <p style={{ margin: 0,padding: 0, color: "yellow" }}>{"★".repeat(book.rating) }{"☆".repeat(5 - book.rating)}</p>
             </div>
 
             <button

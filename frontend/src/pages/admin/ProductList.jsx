@@ -1,57 +1,33 @@
-import { useState, useEffect } from "react";
+// import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom"; //esto para poder ir a la parte de edición
-import { getProducts,deleteProduct } from "./../../services/products";
+// import { getProducts, deleteProduct } from "./../../services/products";
+import { useBooks } from "./../../hooks/useBooks"
 
 const ProductList = () => {
-  const [books, setBooks] = useState([]);
+  const { books, removeBook, clearBook } = useBooks();
   const navigate = useNavigate();
 
-  const getBooks = () => {
-    getProducts()
-      .then((res) => {
-        console.log("Libros obtenidos:", res.data);
-        const tempBooks = res.data.map((book) => ({
-          ...book,
-          stock: book.installments,
-          category: book.style
-        }))
-        setBooks(tempBooks);
-      })
-      .catch((error) => console.log("Ocurrió un error al obtener los libros", error))
-  }
-
-  // Datos imaginarios de backend
-  useEffect(() => {
-    // const fetchBooks = () => {
-    //   const mockData = [
-    //     { id: 1, title: "Libro 1", price: 25000, stock: 15 },
-    //     { id: 2, title: "Libro 2", price: 15000, stock: 8 },
-    //     { id: 3, title: "Libro 3", price: 32000, stock: 18 }
-    //   ];
-    //   setBooks(mockData);
-    // };
-    // fetchBooks();
-    getBooks();
-  }, []);
 
   const handleAdd = () => {
     console.log("Abrir formulario para añadir nuevo libro"); // esto es pa ver que hace
+    clearBook(); // Limpiar el estado del libro antes de navegar a la página de creación
     navigate("/admin/store/books/new"); //esto lo hace
   };
 
   const handleEdit = (id) => {
     console.log("Editar el libro con ID:", id);
+    clearBook(); // Limpiar el estado del libro antes de navegar a la página de creación
     navigate(`/admin/store/edit/${id}`);
   };
 
   const handleDelete = (id) => {
     const confirmDelete = window.confirm("¿Estás seguro de eliminar este libro?");
     if (confirmDelete) {
-      deleteProduct(id)
+      removeBook(id)
         .then((res) => {
           console.log("Libro eliminado:", res.data);
           // Se actualiza la lista de libros después de eliminar
-          getBooks();
+          // getBooks();
         })
         .catch((error) => console.log("Ocurrió un error al eliminar el libro", error));
       // Para simular la eliminación sin backend, se puede filtrar el libro eliminado:
@@ -116,10 +92,10 @@ const ProductList = () => {
             </tr>
           </thead>
           <tbody>
-            {books.map((book) => (
+            {books && books.map((book) => (
               <tr key={book.id} style={{ borderBottom: "1px solid var(--bg-border)", transition: "background-color 0.2s ease" }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.02)"}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.02)"}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
               >
                 <td style={{ padding: "15px", color: "var(--text-muted)" }}>{book.id}</td>
                 <td style={{ padding: "15px", fontWeight: "bold" }}>{book.title}</td>
@@ -183,7 +159,7 @@ const ProductList = () => {
           </tbody>
         </table>
 
-        {books.length === 0 && (
+        {books && books.length === 0 && (
           <p style={{ textAlign: "center", padding: "30px", margin: 0, color: "var(--text-muted)" }}>No hay productos registrados.</p>
         )}
       </div>

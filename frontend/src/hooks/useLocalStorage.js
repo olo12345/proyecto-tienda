@@ -22,8 +22,13 @@ export const useLocalStorage = (key, initialValue, encryptedData = false) => {
     const [storedValue, setStoredValue] = useState(() => {
         try {
             const item = localStorage.getItem(key);
-            if (item) return encryptedData ? decrypt(item) : JSON.parse(item);
-            return initialValue instanceof Function ? initialValue() : initialValue;
+            if (item) return encryptedData
+            ? decrypt(item)
+            : JSON.parse(item);
+
+            return initialValue instanceof Function
+            ? initialValue()
+            : initialValue;
         }
         catch {
             return initialValue
@@ -39,6 +44,7 @@ export const useLocalStorage = (key, initialValue, encryptedData = false) => {
             const valueToStore = encryptedData
                 ? encrypt(storedValue)
                 : JSON.stringify(storedValue);
+                // console.log("Se guardará", key, valueToStore)
             localStorage.setItem(key, valueToStore);
         }
         catch (error) {
