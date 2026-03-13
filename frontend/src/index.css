@@ -4,7 +4,6 @@
 /* al instalarlo con npm, se modifica el package-lock.json, el package.json y se incorpora el archivo vite.config.js
 
 /* 1. IMPORTACIÓN DE TIPOGRAFÍAS */
-/* Nota: Asegúrate de tener los archivos de las fuentes en tu carpeta src/assets/fonts/ y ajustar la ruta si es necesario */
 @font-face {
   font-family: 'The Foregen';
   src: url('./assets/fonts/TheForegen-Regular.woff2') format('woff2'),
@@ -77,7 +76,7 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* NUEVO: Resplandor (Glow) de nebulosa espacial en el fondo */
+/* Resplandor (Glow) de nebulosa espacial en el fondo */
 body::before {
   content: "";
   position: fixed;
@@ -102,7 +101,7 @@ h5,
 h6 {
   font-family: 'The Foregen', sans-serif;
   font-weight: normal;
-  /* Asumiendo que The Foregen ya tiene mucho peso visual */
+  /* The Foregen ya tiene mucho peso visual */
   letter-spacing: 1.5px;
   color: var(--text-light);
   text-transform: uppercase;
