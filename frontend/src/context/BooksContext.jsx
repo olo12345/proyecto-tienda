@@ -15,6 +15,7 @@ const BooksProvider = ({ children }) => {
                 const tempBooks = res.data.map((book) =>
                 (
                     {
+                        //se medio rompe porque la api se reinicia a veces y devuelve el producto inicializado.
                         ...book,
                         //Se ajusta por uso de api, no es necesario cuando haya backend
                         stock: book.installments,
@@ -51,7 +52,7 @@ const BooksProvider = ({ children }) => {
             })
     }
 
-    const updateUpdateBook = useEffectEvent((product)=> updateBook(product));
+    const updateUpdateBook = useEffectEvent((product) => updateBook(product));
 
     //Cuando esté el backend para entregar la lista de destacados
     const getBooksByRating = () => {
@@ -59,6 +60,7 @@ const BooksProvider = ({ children }) => {
     }
 
     const fetchBookByID = async (productId) => {
+        //se medio rompe porque la api se reinicia a veces y devuelve el producto inicializado.
         return getProduct(productId)
             .then((res) => {
                 res.data = { ...res.data, stock: res.data.installments, category: res.data.style }

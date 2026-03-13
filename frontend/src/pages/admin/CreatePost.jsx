@@ -12,11 +12,13 @@ function CreatePost() {
 
 
   const [formData, setFormData] = useState({
-    ...book ?? {title: "",
-    description: "",
-    price: "",
-    category: "",
-    stock: ""}
+    ...book ?? {
+      title: "",
+      description: "",
+      price: "",
+      category: "",
+      stock: ""
+    }
   });
 
   const handleChange = (e) => {

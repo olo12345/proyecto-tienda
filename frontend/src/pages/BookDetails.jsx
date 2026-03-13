@@ -20,14 +20,14 @@ function BookDetails() {
 
   useEffect(() => {
     const fetchBookData = async (id) => {
-      fetchBookByID(id).then (()=>{
+      fetchBookByID(id).then(() => {
         setLoading(false);
       })
 
-            // Simulación de GET /reviews (reseñas previas)
-            // setReviews([
-            //   { id: 101, user_name: "Ana", rating: 5, comment: "Excelente material, muy detallado." }
-            // ]);
+        // Simulación de GET /reviews (reseñas previas)
+        // setReviews([
+        //   { id: 101, user_name: "Ana", rating: 5, comment: "Excelente material, muy detallado." }
+        // ]);
         .catch((err) =>
           console.log("Ocurrió un error al llamar el libro", err)
         )
