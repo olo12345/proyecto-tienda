@@ -1,5 +1,5 @@
 // import { readFile, writeFile } from "node:fs/promises"; en modelos anteriores leíamos de un archivo json para simular una db
-import pool from "../db/connection.js"; // con esto sí tenemos una conexión a la db
+import pool from "./../db/dbconfig.js"; // con esto sí tenemos una conexión a la db
 
 const getUserByEmail = async (email) => {
     const query = "SELECT * FROM users WHERE email = $1;";

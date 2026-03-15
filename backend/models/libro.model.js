@@ -1,5 +1,5 @@
 // import { readFile } from "node:fs/promises"; again, la forma simulada de db
-import pool from "../db/connection.js"; // con esto sí tenemos una conexión a la db
+import pool from "./../db/dbconfig.js"; // con esto sí tenemos una conexión a la db
 
 const getLibros = async () => {
     // Pedimos todos los libros a la tabla correspondiente
@@ -7,7 +7,7 @@ const getLibros = async () => {
     const { rows } = await pool.query(query);
     return rows; // Retorna el arreglo completo con el catálogo
   };
-  
+
   const getLibro = async (id) => {
     // Buscamos un libro específico por su id
     const query = "SELECT * FROM libros WHERE id = $1;";

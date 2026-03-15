@@ -1,4 +1,4 @@
-import pool from "../db/connection.js";
+import pool from "./../db/dbconfig.js";
 
 const registrarCompra = async (userId, cart) => {
   const client = await pool.connect();
@@ -12,14 +12,14 @@ const registrarCompra = async (userId, cart) => {
     const compraId = resCompra.rows[0].id;
 
     const queryDetalle = "INSERT INTO detalle_compras (compra_id, libro_id, cantidad) VALUES ($1, $2, $3);";
-    
+
     for (const item of cart) {
       await client.query(queryDetalle, [compraId, item.id, item.cantidad]);
     }
 
     // Confirmamos los cambios en PostgreSQL
     await client.query("COMMIT");
-    
+
     return compraId; // Devolvemos el número de orden generado
   } catch (error) {
     // Si algo falla, deshacemos todo
