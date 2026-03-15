@@ -14,3 +14,8 @@
  - Se modifica el cart.jsx para conectarlo con lo que espera el back
  - Se deja comentarios en el api.js
  - Se incoran los archivos test con su carpeta
+ -- Cambios 15-03 - CACB
+ - Se instala el jest supertest
+ - Cambio de test para poder ejecutar con Modules
+ - Se agrega el export de app desde index.js
+ 
