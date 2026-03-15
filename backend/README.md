@@ -13,3 +13,4 @@
     - Verificar las tablas respectivas a las compras
  - Se modifica el cart.jsx para conectarlo con lo que espera el back
  - Se deja comentarios en el api.js
+ - Se incoran los archivos test con su carpeta
