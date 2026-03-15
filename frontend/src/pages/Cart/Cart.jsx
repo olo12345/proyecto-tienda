@@ -1,5 +1,6 @@
 import { useState } from "react";
 import {useCart} from "./../../hooks/useCart"
+import { apiProducts } from "../../services/api";
 
 function Cart() {
   const { cart, updateQuantity, removeFromCart, totalPrice, clearCart } = useCart();
@@ -11,23 +12,34 @@ function Cart() {
 
 
   const handleCheckout = async () => {
-    // Simulación rápida de éxito ya que aún no conectamos el backend
-    setMessage("✅ Pedido enviado correctamente!");
-    setShowConfirm(true);
-
-    /* Lógica preparada para cuando se retomemos el desarrollo en Node.js:
     try {
-      const res = await fetch("http://localhost:5001/api/checkouts", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,            ------------------->>>>>> aquí dejamos listo para cuando ya podamos usar el back
-        },
-        body: JSON.stringify({ items: cart, total }),
-      });
-      // ... manejo de la respuesta
-    } catch (error) { ... }
-    */
+      // Rescatamos el token (hay que ubicarlo primero :|)
+      const token = localStorage.getItem("token"); // esta en el localstorage (ubicado en el api.js)
+
+      if (!token) {
+        setMessage("Debes iniciar sesión para poder comprar");
+        setShowConfirm(true);
+        return;
+      }
+
+      // Adaptamos para conectar con el back
+      // se espera "id" y "cantidad"
+      const formattedCart = cart.map((book) => ({
+        id: book.id,
+        cantidad: book.quantity // homogeneización de quantity a cantidad despue´s de error de comunicación
+      }));
+
+      // Petición a la API
+      const res = await apiProducts.post("/checkouts", formattedCart);
+
+      setMessage(`Pedido enviado correctamente! Orden N°: ${res.data.orden_id}`);
+      setShowConfirm(true);
+
+    } catch (error) {
+      console.error("Error en el checkout:", error);
+      setMessage("Error de conexión con el servidor");
+      setShowConfirm(true);
+    }
   };
 
   const handleConfirm = () => {

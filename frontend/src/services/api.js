@@ -1,12 +1,12 @@
 import axios from 'axios';
 
 export const apiProducts = axios.create({
-    baseURL: 'https://devsapihub.com/api-ecommerce'
+    baseURL: 'https://devsapihub.com/api-ecommerce'// Esta es la ruta mientras desarrollamos local 'http://localhost:5001/api'
     // withCredentials:true
 });
 
 export const apiUsers = axios.create({
-    baseURL: 'https://devsapihub.com/api-users'
+    baseURL: 'https://devsapihub.com/api-users' // Esta es la ruta mientras desarrollamos local 'http://localhost:5001/api'
     // withCredentials:true
 });
 
