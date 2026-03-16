@@ -2,98 +2,72 @@ import "dotenv/config";
 import jwt from "jsonwebtoken";
 // import { nanoid } from "nanoid"; lo usamos en proytectos pasados pero no lo necesitamos ahora (usaremos bcrypt instead)
 import bcrypt from "bcrypt";
-import { authModel } from "../models/auth.model.js";
-import { isValidEmail } from "../utils/validators/email.validate.js";
+import { authModel } from "./../models/auth.model.js";
 
-const login = async (req, res) => {
+const loginUser = async (req, res) => {
   try {
-    const { email = "", password = "" } = req.body;
-
-    if (!email.trim() || !password.trim()) {
-      return res.status(400).json({ error: "Email and password son requeridos" });
+    //crear req.user en middleware validador
+    const { email = "", password = "" } = req.user;
+    const result = await authModel.loginUserModel(email)
+    if (!result.rowCount) throw { code: 404, message: "No se encontró ningún usuario con estas credenciales" };
+    else {
+      const hashedPass = result.rows[0].password;
+      const passMatch = bcrypt.compareSync(password, hashedPass)
+      if (!passMatch) throw { code: 404, message: "No se encontró ningún usuario con estas credenciales" };
+      else {
+        const payload = { email, rol: user.rol };
+        const token = jwt.sign(payload, process.env.JWT_SECRET);
+        res.send(token);
+      }
     }
-
-    if (!isValidEmail(email)) {
-      return res.status(400).json({ error: "email invalido" });
-    }
-
-    if (password.length < 6) {
-      return res
-        .status(400)
-        .json({ error: "la contraseña debe ser de al menos 6 caratctéres" });
-    }
-
-    const user = await authModel.getUserByEmail(email);
-
-    if (!user) {
-      return res.status(400).json({ error: "Usuario no encontrado" });
-    }
-
-    //aqui es donde usamos el bcrypt para comparar con la guardada en la bd
-    const isValidPassword = await bcrypt.compare(password, user.password);
-    if (!isValidPassword) {
-      return res.status(400).json({ error: "Contraseña inválida" });
-    }
-
-    const payload = { email, id: user.id };
-    const token = jwt.sign(payload, process.env.JWT_SECRET);
-
-    return res.json({ email, token });
   } catch (error) {
     // console.log(error);
     return res.status(500).json({ error: "Server error" });
   }
 };
 
-const register = async (req, res) => {
+const createUser = async (req, res) => {
   try {
     const { email = "", password = "" } = req.body;
-
-    if (!email.trim() || !password.trim()) {
-      return res.status(400).json({ error: "Email y contraseña requeridos" });
+    if (await authModel.isEmailRegistered(email)) throw { code: 400, message: "Ya existe un usuario registrado con ese email" };
+    else {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const newUser = { ...req.body, password: hashedPassword };
+      const success = await authModel.createUserModel(newUser);
+      if (success) res.status(201).send("Se creó el usuario correctamente");
     }
-
-    if (!isValidEmail(email)) {
-      return res.status(400).json({ error: "email invalido" });
-    }
-
-    if (password.length < 6) {
-      return res
-        .status(400)
-        .json({ error: "la contraseña debe ser de al menos 6 caratctéres" });
-    }
-
-    const user = await authModel.getUserByEmail(email);
-    if (user) {
-      return res.status(400).json({ error: "El usuario ya se encuentra registrado" });
-    }
-    
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const newUserDB = await authModel.addUser({ email, password: hashedPassword });
-
-    const payload = { email, id: newUserDB.id };
-    const token = jwt.sign(payload, process.env.JWT_SECRET);
-
-    return res.json({ email, token });
   } catch (error) {
     // console.log(error);
     return res.status(500).json({ error: "Server error" });
   }
 };
 
-const me = async (req, res) => {
+const verificarCredenciales = async (req, res) => {
   try {
     const { email } = req.user;
-    const user = await authModel.getUserByEmail(email);
-    return res.json({ email, id: user.id });
-  } catch (error) {
-    // console.log(error);
-    return res.status(500).json({ error: "Server error" });
+    const result = await authModel.verificarCredencialesModel(email);
+    if (result.rowCount) console.log(`el usuario ${email} ha sido verificado correctamente`);
+    res.status(200).send(result.rows);
   }
-};
+  catch (err) {
+    res.status(500).send(err);
+  }
+}
+
+// const me = async (req, res) => {
+//   try {
+//     const { email } = req.user;
+//     const user = await authModel.getUserByEmail(email);
+//     return res.json({ email, id: user.id });
+//   } catch (error) {
+//     // console.log(error);
+//     return res.status(500).json({ error: "Server error" });
+//   }
+// };
 
 export const authController = {
-  login,
-  register,
-  me,
+  loginUser,
+  createUser,
+  verificarCredenciales,
+  // me,
 };

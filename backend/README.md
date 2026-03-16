@@ -1,3 +1,13 @@
+## Cambios 15-03 - Orlando Monagas
+ - Se agrega el Data Definition Language
+ - Se agrega el Data Modification Language
+ - Se mejoran las utilizades validadores de email y login para ser usados como middleware
+ - Se limpian el auth.controller para que tenga un código más legible y menos repetitivo
+ - Se corrigen funciones de login y create user en auth.model
+ - Se agrega función para obtener credenciales del usuario en auth.model
+
+
+
 ## Cambios 14-03 - Carlos Carrillo O.
  - Creamos el nuevo proyecto npm
  - Instalamos las dependencias
