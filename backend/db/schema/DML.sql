@@ -11,4 +11,16 @@ INSERT INTO usuarios (
         usuario_rol,
         usuario_imagen
     )
-VALUES ('%s', '%s', '%s', '%s', '%s', '%s')
+VALUES ('%s', '%s', '%s', '%s', '%s', '%s');
+-- Edit user
+UPDATE usuarios
+SET usuario_password = '%s',
+    usuario_nombre = '%s',
+    usuario_edad = '%s',
+    usuario_rol '%s',
+    usuario_imagen '%s'
+WHERE usuario_email = '%s'
+RETURNING usuario_nombre,
+    usuario_edad,
+    usuario_rol,
+    usuario_imagen;
