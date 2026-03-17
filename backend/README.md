@@ -5,6 +5,10 @@
  - Se limpian el auth.controller para que tenga un código más legible y menos repetitivo
  - Se corrigen funciones de login y create user en auth.model
  - Se agrega función para obtener credenciales del usuario en auth.model
+ - Se elimina el .stack el error de conexión a la base de datos por comando no estándar
+ - Se elimina consultas.js por falta de necesidad de archivo por funcionalidad duplicada en los models y en dbconfig.js
+ - Se elimina secreyKey.js por falta de necesidad de archivo por funcionalidad duplicada en archivo .env
+ - Se renombra y modifica middleware checkToken para compatibilizar con código del auth.controller
 
 
 

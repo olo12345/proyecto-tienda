@@ -15,7 +15,7 @@ const loginUser = async (req, res) => {
       const passMatch = bcrypt.compareSync(password, hashedPass)
       if (!passMatch) throw { code: 404, message: "No se encontró ningún usuario con estas credenciales" };
       else {
-        const payload = { email, rol: user.rol };
+        const payload = { email, rol: req.body.rol };
         const token = jwt.sign(payload, process.env.JWT_SECRET);
         res.send(token);
       }

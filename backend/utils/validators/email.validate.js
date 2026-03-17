@@ -4,7 +4,7 @@ const checkEmail = (email) => {
   return regexEmail.test(email);
 }
 
-export const isValidEmail = (req, res) => {
+export const validateEmail = (req, res, next) => {
   const { email = "" } = req.body;
   if (!checkEmail(email)) throw { code: 400, message: "email invalido" };
   next();
