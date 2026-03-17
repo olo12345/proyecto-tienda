@@ -1,0 +1,175 @@
+---
+# # POST /users
+# POST_users:
+#     request:
+#         payload:
+#             email: String
+#     response:
+#         status: 200
+#         id: Number
+#         email: String
+# POST /login
+POST_login:
+    request:
+        payload:
+            email: String
+            password: String
+    response:
+        token: String
+        user:
+            status: 200
+            id: Number
+            email: String
+            name: String
+            age: Number
+            imagen: String (URL)
+            rol: String
+
+# POST /register
+POST_register:
+    request:
+        payload:
+            - email: String
+            - password: String
+            - confirm_password: String
+            - name: String
+            - age: Number
+            - imagen: String (URL)
+    response:
+        status: 201
+        token: String
+        user:
+            id: Number
+            email: String
+
+#Dejar reseña a un libro
+POST_review:
+    request:
+        headers:
+            Authorization: String
+        payload:
+            book_id: Number
+            rating: Number
+            comment: String
+    response:
+        status: 201
+        review:
+            id: Number
+            book_id: Number
+            user_id: Number
+            rating: Number
+            comment: String
+
+#Editar reseña
+PUT_review:
+    request:
+        headers:
+            Authorization: String
+        payload:
+            review_id: Number
+            rating: Number
+            comment: String
+    response:
+        status: 200
+        review:
+            id: Number
+            book_id: Number
+            user_id: Number
+            rating: Number
+            comment: String
+
+# POST /books
+POST_books:
+    request:
+        payload:
+            title: String
+            descripcion: String
+            price: Number
+            category: String
+            stock: Number
+    response:
+        status: 201
+        id: Number
+
+# GET /profile
+GET_profile:
+    request:
+        headers:
+            Authorization: String
+    response:
+        status: 200
+        profile:
+            id: Number
+            email: String
+            name: String
+            age: Number
+            rol: String
+            # admin, user
+
+# GET /books se pueden agregar parámetros de consulta para paginación, nombre, filtrado por categoría, rango de precios, etc.
+GET_books:
+    request:
+        parameters:
+            order_by: String (title, price, category, rating) _ASC or _DESC
+            page: Number
+            name: String
+            author: String
+            filters:
+                category: String
+                price_range:
+                    min: Number
+                    max: Number
+    response:
+        status: 200
+        books:
+            #10 libros por página o según diseño
+            first_x_items:
+                json:
+                    id: Number
+                    title: String
+                    descripcion: String
+                    price: Number
+                    category: String
+                    stock: Number
+                    rating: Number (promedio de reseñas)
+
+# PUT /book/:id
+PUT_book_id:
+    request:
+        headers:
+            Authorization: String
+        payload:
+            title: String
+            descripcion: String
+            price: Number
+            category: String
+            stock: Number
+    response:
+        status: 200
+
+#GET /cart
+GET_cart:
+    request:
+        headers:
+            Authorization: String
+    response:
+        status: 200
+        cart:
+            items:
+            #se retorna un json con la lista de libros en el carrito
+                json:
+                    book_id: Number
+                    title: String
+                    price: Number
+                    quantity: Number
+
+# DELETE /book/:id se verifica que el usuario tenga permisos para eliminar el libro (admin)
+DELETE_book_id:
+    request:
+        headers:
+            Authorization: String
+        data:
+            id: Number
+    response:
+        status: 200
+        #tal vez un mensaje de confirmación que se eliminó

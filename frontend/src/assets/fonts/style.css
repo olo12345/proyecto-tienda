@@ -1,0 +1,9 @@
+@font-face {
+    font-family: 'The Foregen';
+    src: local('The Foregen Outline'), local('The-Foregen-Outline'),
+        url('TheForegenOutline.woff2') format('woff2'),
+        url('TheForegenOutline.woff') format('woff'),
+        url('TheForegenOutline.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+  }
