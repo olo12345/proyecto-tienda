@@ -1,9 +1,9 @@
 import { Router } from "express";
-import { libroController } from "../controllers/libro.controller.js";
+import { getItem, getAllItemsHateoas, getItemsHateoas, getItemsFilter } from "./../controllers/libro.controller.js";
 
 const routes = Router();
 
-routes.get("/", libroController.readLibros);
-routes.get("/:id", libroController.readLibro);
+routes.get("/", getAllItemsHateoas);
+routes.get("/:id", getItem);
 
 export default routes;

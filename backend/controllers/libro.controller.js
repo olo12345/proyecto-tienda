@@ -1,17 +1,16 @@
-import { libroModel } from "../models/libro.model.js";
-import {getAllItemsModel, getItemsModel, getItemModel, getItemsFilterModel } from "../models/libro.model.js";
+// import { libroModel } from "../models/libro.model.js";
+import { getAllItemsModel, getItemsModel, getItemModel, getItemsFilterModel } from "./../models/libro.model.js";
+// const readLibros = async (req, res) => {
+//     try {
+//   const libros = await libroModel.getLibros();
+//   res.json(libros);
+// } catch (error) {
+//     console.error(error);
+//     return res.status(500).json({ error: "Error al obtener el catálogo de libros" });
+//   }
+// };
 
-const readLibros = async (req, res) => {
-    try {
-  const libros = await libroModel.getLibros();
-  res.json(libros);
-} catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: "Error al obtener el catálogo de libros" });
-  }
-};
-
-const getLibro = async (req, res) => {
+const getItem = async (req, res) => {
     try {
   const { id } = req.params;
   const libro = await getItemModel(id);
@@ -65,7 +64,11 @@ const getItemsFilter = async (req, res) => {
     }
 }
 
-export const libroController = {
-  readLibros,
-  readLibro,
-};
+export {
+  getItem, getAllItemsHateoas, getItemsHateoas, getItemsFilter
+}
+
+// export const libroController = {
+//   readLibros,
+//   readLibro,
+// };
