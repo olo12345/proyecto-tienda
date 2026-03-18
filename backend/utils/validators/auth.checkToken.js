@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 
 const checkToken = (req, res, next) => {
     const Authorization = req.header("Authorization");
-    const token = Authorization.split("Bearer ")[1];
+    const token = Authorization?.split("Bearer ")[1];
 
     if (!token) throw {code: 401, message:"Se necesita un Token de acceso para acceder"}
     else {

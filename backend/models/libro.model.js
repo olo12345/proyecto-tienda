@@ -11,10 +11,14 @@ const getAllItemsModel = async ({ order_by = "libro_id_ASC" }) => {
 }
 
 const getItemsModel = async ({ limits = 10, order_by = "libro_id_ASC", page = 1 }) => {
-  const [prefijo, campo, direccion] = order_by.split('_');
-  direccion = direccion.toUpperCase() === "ASC" ? "ASC" : "DESC";
-  const offset = (page - 1) * limits
-  const sqlQuery = format(`${selectString} order by %s_%s %s LIMIT %s OFFSET %s`, prefijo, campo, direccion, limits, offset);
+  // const [prefijo, campo, direccion] = order_by.split('_');
+  // direccion = direccion.toUpperCase() === "ASC" ? "ASC" : "DESC";
+  // const offset = (page - 1) * limits
+  const sqlQuery = "SELECT * from libros";
+  console.log("sqlQuery", sqlQuery);
+  const result = await pool.query(sqlQuery);
+  console.log ("result",result);
+
   const { rows: libros } = await pool.query(sqlQuery);
   if (libros.length === 0) {
     return [];
@@ -80,7 +84,7 @@ const getBookComments = async (id) => {
   return (rows);
 }
 
-const getItemsFilterModel = async ({ limits = 10, page = 1, order_by = "libro_id_ASC", precio_max, precio_min, categoria, autor }) => {
+const getItemsFilterModel = async ({ limits = 10, page = 1, order_by = "libro_id_ASC", search, precio_max, precio_min, categoria, autor }) => {
   const [prefijo, campo, direccion] = order_by.split('_');
   direccion = direccion.toUpperCase() === "ASC" ? "ASC" : "DESC";
   const offset = (page - 1) * limits
@@ -88,6 +92,7 @@ const getItemsFilterModel = async ({ limits = 10, page = 1, order_by = "libro_id
   let filtros = [];
   let fValores = [];
 
+  if (search) { filtros.push("(LOWER(libro_titulo) LIKE LOWER(%s) OR LOWER(libro_autor) LIKE LOWER(%s))"); fValores.push(search, search); }
   if (precio_max) { filtros.push("libro_precio <= %s"); fValores.push(precio_max); }
   if (precio_min) { filtros.push("libro_precio >= %s"); fValores.push(precio_min); }
   if (categoria) {
@@ -126,9 +131,16 @@ const editItemModel = async (id, { titulo, autor, precio, stock, categorias, des
   return (rows[0]);
 }
 
-const addComentarioModel = async ({ libro_id, comentario, calificacion, usuario_id }) => {
+const addComentarioModel = async ({ libroId, comentario, calificacion, usuarioId }) => {
   const sqlQuery = `INSERT INTO comentarios (libro_id, comentario_texto, comentario_calificacion, usuario_id) VALUES (%s, %s, %s, %s) RETURNING *`;
-  const formattedQuery = format(sqlQuery, libro_id, comentario, calificacion, usuario_id);
+  const formattedQuery = format(sqlQuery, libroId, comentario, calificacion, usuarioId);
+  const { rows } = await pool.query(formattedQuery);
+  return (rows[0]);
+}
+
+const createCategoriaModel = async (nombreCategoria) => {
+  const sqlQuery = `INSER INTO categorias (categoria_nombre) VALUES (%s) RETURNING *`;
+  const formattedQuery = format(sqlQuery, nombreCategoria);
   const { rows } = await pool.query(formattedQuery);
   return (rows[0]);
 }
@@ -142,7 +154,8 @@ export {
   getBookComments,
   createItemModel,
   editItemModel,
-  addComentarioModel
+  addComentarioModel,
+  createCategoriaModel,
 };
 
 // export const libroModel = {

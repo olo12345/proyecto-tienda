@@ -1,15 +1,13 @@
-// import { libroModel } from "../models/libro.model.js";
-import { getAllItemsModel, getItemsModel, getItemModel, getItemsFilterModel } from "./../models/libro.model.js";
-// const readLibros = async (req, res) => {
-//     try {
-//   const libros = await libroModel.getLibros();
-//   res.json(libros);
-// } catch (error) {
-//     console.error(error);
-//     return res.status(500).json({ error: "Error al obtener el catálogo de libros" });
-//   }
-// };
-
+import {
+    getAllItemsModel,
+    getItemsModel,
+    getItemModel,
+    getItemsFilterModel,
+    createItemModel,
+    editItemModel,
+    addComentarioModel,
+    createCategoriaModel
+} from "./../models/libro.model.js";
 
 const getAllItems = async (_, res) => {
     try {
@@ -24,8 +22,8 @@ const getAllItems = async (_, res) => {
 
 const getItems = async (req, res) => {
     try {
-        const { limits, order_by, page } = req.query
-        const libros = await getItemsModel({ limits, page, order_by });
+        // const { limits, order_by, page } = req.query
+        const libros = await getItemsModel(req.query);
 
         // const librosPage = pagination ({data: libros, items:limits, page});
         // console.log("librosPage", librosPage);
@@ -87,8 +85,36 @@ const editItem = async (req, res) => {
     }
 }
 
+const addComentario = async (req, res) => {
+    try {
+        const { libroId } = req.params;
+        const { comentario, calificacion, usuarioId } = req.body;
+        const nuevoComentario = await addComentarioModel({ libroId, comentario, calificacion, usuarioId })
+        res.status(201).json(nuevoComentario);
+    } catch (error) {
+        res.status(500).json({ error: error });
+    }
+}
+
+const createCategoria = async (req, res) => {
+    try {
+        const { nombreCategoria } = req.body;
+        const nuevaCategoria = await createCategoriaModel(nombreCategoria)
+        res.status(201).json(nuevaCategoria);
+    } catch (error) {
+        res.status(500).json({ error: error });
+    }
+}
+
 export {
-    getItem, getAllItems, getItems, getItemsFilter, createItem
+    getItem,
+    getAllItems,
+    getItems,
+    getItemsFilter,
+    createItem,
+    editItem,
+    addComentario,
+    createCategoria
 }
 
 // export const libroController = {

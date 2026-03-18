@@ -10,6 +10,7 @@ const isEmailRegistered = async (email) => {
   return (result.rowCount ? true : false);
 };
 
+//Se deja abierta la inyección de rol para poder crear usuarios administradores
 const createUserModel = async ({ email, password, rol = 'user', edad, imagen = null }) => {
   const values = [email, password,nombre, edad, rol, imagen];
   const sqlQuery = "INSERT INTO usuarios ( usuario_email, usuario_password, usuario_nombre, usuario_edad, usuario_rol, usuario_imagen) VALUES ('%s', '%s', '%s, '%s, '%s, '%s')";
