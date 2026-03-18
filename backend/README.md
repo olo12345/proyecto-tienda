@@ -1,3 +1,8 @@
+## Cambios 17-03 - Orlando Monagas
+ - Se agrega data para colocar en la db en archivo Data.sql
+ - Creación de funciones en libros.model
+
+
 ## Cambios 15-03 - Orlando Monagas
  - Se agrega el Data Definition Language
  - Se agrega el Data Modification Language
@@ -9,6 +14,7 @@
  - Se elimina consultas.js por falta de necesidad de archivo por funcionalidad duplicada en los models y en dbconfig.js
  - Se elimina secreyKey.js por falta de necesidad de archivo por funcionalidad duplicada en archivo .env
  - Se renombra y modifica middleware checkToken para compatibilizar con código del auth.controller
+
 
 
 
