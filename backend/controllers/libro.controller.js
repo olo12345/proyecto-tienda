@@ -10,62 +10,85 @@ import { getAllItemsModel, getItemsModel, getItemModel, getItemsFilterModel } fr
 //   }
 // };
 
+
+const getAllItems = async (_, res) => {
+    try {
+        const libros = await getAllItemsModel({});
+        // const librosHateoas = await _HATEOAS("libros", libros);
+        res.status(200).json({ result: libros });
+    }
+    catch (error) {
+        res.status(500).json({ error: error });
+    }
+}
+
+const getItems = async (req, res) => {
+    try {
+        const { limits, order_by, page } = req.query
+        const libros = await getItemsModel({ limits, page, order_by });
+
+        // const librosPage = pagination ({data: libros, items:limits, page});
+        // console.log("librosPage", librosPage);
+        res.status(200).json(libros);
+    }
+    catch (error) {
+        res.status(500).json({ error: error });
+    }
+}
+
 const getItem = async (req, res) => {
     try {
-  const { id } = req.params;
-  const libro = await getItemModel(id);
-  console.log ("se encontró el libro con ID", id , libro)
-  if (!libro) {
-    return res.status(404).json({ message: "Libro not found" });
-  }
-  res.json(libro);
-} catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: "Error al obtener el libro" });
-  }
+        const { id } = req.params;
+        const libro = await getItemModel(id);
+        console.log("se encontró el libro con ID", id, libro)
+        if (!libro) {
+            return res.status(404).json({ message: "Libro not found" });
+        }
+        res.json(libro);
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: "Error al obtener el libro" });
+    }
 };
-
-const getAllItemsHateoas = async (_, res) => {
-    try {
-        const joyas = await getAllItemsModel({});
-        const joyasHateoas = await _HATEOAS("joyas", joyas);
-        res.status(200).json({ result: joyasHateoas });
-    }
-    catch (error) {
-        res.status(500).json({error: error});
-    }
-}
-
-const getItemsHateoas = async (req, res) => {
-    try {
-        const {limits, order_by, page} = req.query
-        const joyas = await getItemsModel({limits, page, order_by});
-
-        // const joyasPage = pagination ({data: joyas, items:limits, page});
-        // console.log("joyasPage", joyasPage);
-        const joyasHateoas = await _HATEOAS("joyas", joyas);
-        res.status(200).json(joyasHateoas);
-    }
-    catch (error) {
-        res.status(500).json({error: error});
-    }
-}
 
 const getItemsFilter = async (req, res) => {
     try {
-        const joyasFilter = await getItemsFilterModel(req.query);
-        res.status(200).json(joyasFilter)
+        const librosFilter = await getItemsFilterModel(req.query);
+        res.status(200).json(librosFilter)
     } catch (error) {
         if (error.code == 42703) {
-            res.status(400).json({error: "Valor de filtro no admitido"});
+            res.status(400).json({ error: "Valor de filtro no admitido" });
             return;
         }
         res.status(500).json(error);
     }
 }
 
+const createItem = async (req, res) => {
+    try {
+        const { titulo, autor, precio, stock, categorias, descripcion, imagen_url, libro_fecha_publicacion } = req.body;
+        const newLibro = await createItemModel({ titulo, autor, precio, stock, categorias, descripcion, imagen_url, libro_fecha_publicacion })
+        res.status(201).json(newLibro);
+
+    } catch (error) {
+        res.status(500).json({ error: error });
+    }
+}
+
+const editItem = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { titulo, autor, precio, stock, categorias, descripcion, imagen_url, libro_fecha_publicacion } = req.body;
+        const updatedLibro = await editItemModel(id, { titulo, autor, precio, stock, categorias, descripcion, imagen_url, libro_fecha_publicacion })
+        res.status(200).json(updatedLibro);
+    }
+    catch (error) {
+        res.status(500).json({ error: error });
+    }
+}
+
 export {
-  getItem, getAllItemsHateoas, getItemsHateoas, getItemsFilter
+    getItem, getAllItems, getItems, getItemsFilter, createItem
 }
 
 // export const libroController = {

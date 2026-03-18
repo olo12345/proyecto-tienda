@@ -7,8 +7,6 @@ const pagination = ({data, items, page }) => {
     initialIndex = (pageInt - 1)*itemsInt;
     finalIndex = initialIndex + itemsInt;
 
-
-
     const results = {};
 
     results.results = data.slice(initialIndex, finalIndex);
