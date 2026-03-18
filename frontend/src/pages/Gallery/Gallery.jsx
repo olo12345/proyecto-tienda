@@ -20,6 +20,12 @@ const RenderBooks = (param) => {
 function Gallery() {
 
   const [books, setBooks] = useState([]);
+  const [filter, setFilter] = useState({
+  author: "",
+  minPrice: "",
+  maxPrice: "",
+  category: ""
+});
 
   const getBooks = () => {
     getProducts()
@@ -39,6 +45,14 @@ function Gallery() {
     getBooks()
     , [])
 
+    const filteredBooks = books.filter((book) => {
+  return (
+    (filter.author === "" || book.author?.toLowerCase().includes(filter.author.toLowerCase())) &&
+    (filter.category === "" || book.category?.toLowerCase().includes(filter.category.toLowerCase())) &&
+    (filter.minPrice === "" || book.price >= Number(filter.minPrice)) &&
+    (filter.maxPrice === "" || book.price <= Number(filter.maxPrice))
+  );
+});
 
   return (
     /* CORRECCIÓN: Fondo transparente para dejar ver el universo */
@@ -46,6 +60,40 @@ function Gallery() {
       <h1 style={{ textAlign: "center", marginBottom: "40px", color: "var(--accent-cyan)", letterSpacing: "2px", fontSize: "2.5rem", textShadow: "0 2px 10px rgba(0,229,255,0.3)" }}>
         Tienda
       </h1>
+
+<div style={{ marginBottom: "20px" }}>
+  <input
+    type="text"
+    placeholder="Autor"
+    onChange={(e) =>
+      setFilter({ ...filter, author: e.target.value })
+    }
+  />
+
+  <input
+    type="number"
+    placeholder="Precio mínimo"
+    onChange={(e) =>
+      setFilter({ ...filter, minPrice: e.target.value })
+    }
+  />
+
+  <input
+    type="number"
+    placeholder="Precio máximo"
+    onChange={(e) =>
+      setFilter({ ...filter, maxPrice: e.target.value })
+    }
+  />
+
+  <input
+    type="text"
+    placeholder="Categoría"
+    onChange={(e) =>
+      setFilter({ ...filter, category: e.target.value })
+    }
+  />
+</div>
 
       {/* Tarjetas */}
       <div style={{
@@ -55,7 +103,7 @@ function Gallery() {
         maxWidth: "1200px",
         margin: "0 auto"
       }}>
-        <RenderBooks books = {books}/>
+        <RenderBooks books = {filteredBooks}/>
       </div>
     </div>
   );
