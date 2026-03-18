@@ -126,10 +126,17 @@ const editItemModel = async (id, { titulo, autor, precio, stock, categorias, des
   return (rows[0]);
 }
 
-const addComentarioModel = async ({ libro_id, comentario, calificacion, usuario_id }) => {
+const addComentarioModel = async ({ libroId, comentario, calificacion, usuarioId }) => {
   const sqlQuery = `INSERT INTO comentarios (libro_id, comentario_texto, comentario_calificacion, usuario_id) VALUES (%s, %s, %s, %s) RETURNING *`;
-  const formattedQuery = format(sqlQuery, libro_id, comentario, calificacion, usuario_id);
+  const formattedQuery = format(sqlQuery, libroId, comentario, calificacion, usuarioId);
   const { rows } = await pool.query(formattedQuery);
+  return (rows[0]);
+}
+
+const createCategoriaModel = async (nombreCategoria) => {
+  const sqlQuery = `INSER INTO categorias (categoria_nombre) VALUES (%s) RETURNING *`;
+  const formattedQuery = format(sqlQuery, nombreCategoria);
+  const {rows} = await pool.query(formattedQuery);
   return (rows[0]);
 }
 
@@ -142,7 +149,8 @@ export {
   getBookComments,
   createItemModel,
   editItemModel,
-  addComentarioModel
+  addComentarioModel,
+  createCategoriaModel,
 };
 
 // export const libroModel = {
