@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getItem, getAllItems, getItems, getItemsFilter, getAllItems, createCategoria, createItem, editItem, addComentario } from "./../controllers/libro.controller.js";
+import { getItem, getAllItems, getItems, getItemsFilter, createCategoria, createItem, editItem, addComentario } from "./../controllers/libro.controller.js";
 import checkToken from "./../utils/validators/auth.checkToken.js";
 import isAdmin from "./../utils/validators/admin.validate.js";
 

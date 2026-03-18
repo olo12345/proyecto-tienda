@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { authController } from "./../controllers/auth.controller.js";
-import { checkToken } from "./../utils/validators/auth.checkToken.js";
+import checkToken from "./../utils/validators/auth.checkToken.js";
 import { validateEmail } from "./../utils/validators/email.validate.js";
 import { verificarLogin } from "./../utils/validators/login.validate.js";
 

@@ -22,8 +22,8 @@ const getAllItems = async (_, res) => {
 
 const getItems = async (req, res) => {
     try {
-        const { limits, order_by, page } = req.query
-        const libros = await getItemsModel({ limits, page, order_by });
+        // const { limits, order_by, page } = req.query
+        const libros = await getItemsModel(req.query);
 
         // const librosPage = pagination ({data: libros, items:limits, page});
         // console.log("librosPage", librosPage);
