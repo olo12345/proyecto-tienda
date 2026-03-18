@@ -9,45 +9,49 @@ const BooksProvider = ({ children }) => {
     const [books, setBooks] = useLocalStorage('books', []);
     const [book, setBook, clearBook] = useLocalStorage('book', {});
 
-    const fetchBooks = async () => {
-        return getProducts()
-            .then(res => {
-                const tempBooks = res.data.map((book) =>
-                (
-                    {
-                        //se medio rompe porque la api se reinicia a veces y devuelve el producto inicializado.
-                        ...book,
-                        //Se ajusta por uso de api, no es necesario cuando haya backend
-                        stock: book.installments,
-                        category: book.style,
-                        sizeList: book.sizeList.some(value => value instanceof Object)
-                            ? book.sizeList
-                            : [] // Si sizeList no es un array de objetos, se asigna un array vacío para evitar errores
-                    })
-                )
-                // console.log("La función fetchBooks devuelve:", Fes.data)
-                setBooks(tempBooks)
-                console.log(tempBooks)
-                return { ...res, data: tempBooks };
+    const fetchBooks = async (params) => {
+        return getProducts(params)
+            .then(data => {
+                setBooks(data);
+
+                //todfa esta parte ya no será necesaria
+                // const tempBooks = res.data.map((book) =>
+                // (
+                //     {
+                //         //se medio rompe porque la api se reinicia a veces y devuelve el producto inicializado.
+                //         ...book,
+                //         //Se ajusta por uso de api, no es necesario cuando haya backend
+                //         stock: book.installments,
+                //         category: book.style,
+                //         sizeList: book.sizeList.some(value => value instanceof Object)
+                //             ? book.sizeList
+                //             : [] // Si sizeList no es un array de objetos, se asigna un array vacío para evitar errores
+                //     })
+                // )
+                // // console.log("La función fetchBooks devuelve:", Fes.data)
+                // setBooks(tempBooks)
+                // console.log(tempBooks)
+                return data;
             })
-            .catch(e => console.error("Ocurrió un error llamando libros desde la api", e));
+            .catch(e => console.error("Ocurrió un error llamando libros desde el back", e));
     }
 
     const addBook = (product) => {
         //temporal por ajuste de api
-        createProduct(product)
-            .then((res) => {
-                setBooks();
-                return res;
+        return createProduct(product)
+            .then((newBook) => {
+                fetchBooks();
+                //setBooks();
+                return newBook;
             })
     }
 
-    const updateBook = async (product) => {
+    const updateBook = async (id, product) => {
         //temporal por ajuste de api
-        return updateProduct(product.id, { ...product, installments: product.stock, style: product.category })
-            .then((res) => {
+        return updateProduct(id, product)
+            .then((updatedBook) => {
                 fetchBooks();
-                return res;
+                return updatedBook;
                 // return new Promise(resolve => resolve(res));
             })
     }
@@ -55,44 +59,40 @@ const BooksProvider = ({ children }) => {
     const updateUpdateBook = useEffectEvent((product) => updateBook(product));
 
     //Cuando esté el backend para entregar la lista de destacados
-    const getBooksByRating = () => {
-
-    }
+    // const getBooksByRating = () => {
+    // }
 
     const fetchBookByID = async (productId) => {
         //se medio rompe porque la api se reinicia a veces y devuelve el producto inicializado.
         return getProduct(productId)
-            .then((res) => {
-                res.data = { ...res.data, stock: res.data.installments, category: res.data.style }
-                setBook({ ...res.data, stock: res.data.installments, category: res.data.style });
-                return res;
+            .then((data) => {
+                // res.data = { ...res.data, stock: res.data.installments, category: res.data.style }
+                setBook(data);
+                return data;
             })
     }
 
 
     const removeBook = (productId) => {
-        deleteProduct(productId)
-            .then(() =>
-                setBooks())
-            .catch(
-                console.log("Error al eliminar el libro"));
-    };
+        return deleteProduct(productId)
+            .then(() => {
+                fetchBooks();
+    }) 
+    .catch(() => console.log("Ocurrió un error eliminando el libro desde el back"));
+};
 
     const updateFetchBooks = useEffectEvent(() => {
         return fetchBooks();
     })
 
+    const getBooksByRating = () => {
+        // Lógica para filtrar por calificacion en el front o llamar endpoint
+        return [...books].sort((a, b) => b.calificacion - a.calificacion);
+    }
+
     useEffect(() => {
-        updateFetchBooks().then((res) => {
-            // const initializedBooks = !res.data.some(book => book.sizeList.some(value => value instanceof Object))
-            res.data.forEach(book => {
-                if (!(book.sizeList instanceof Object)) {
-                    updateUpdateBook({ ...book, sizeList: [] })
-                        .then((res) => console.log("Libro actualizado para adaptación de api", res.data))
-                }
-            })
-        })
-    }, [setBook])
+        updateFetchBooks();
+    }, []);
 
     return (
         <BooksContext.Provider

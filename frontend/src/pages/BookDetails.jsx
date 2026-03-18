@@ -4,38 +4,31 @@ import { useAuth } from "../hooks/useAuth";
 import { useCart } from "../hooks/useCart";
 import { useBooks } from "./../hooks/useBooks";
 // import { getProduct, updateProduct } from "./../services/products";
+import { addComment } from "../services/products";
 
 function BookDetails() {
   const { id } = useParams(); // Captura el ID de la URL
   const { user } = useAuth();
   const navigate = useNavigate();
   const { addToCart } = useCart();
-  const { book, fetchBookByID, updateBook } = useBooks();
+  const { book, fetchBookByID } = useBooks();
 
-  const [reviews, setReviews] = useState([...book.sizeList]);
   const [loading, setLoading] = useState(true);
-
   const [newReview, setNewReview] = useState({ rating: 5, comment: "" });
-
+  // const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchBookData = async (id) => {
-      fetchBookByID(id).then(() => {
+    const loadData = async () => {
+      try {
+        await fetchBookByID(id);
         setLoading(false);
-      })
-
-        // Simulación de GET /reviews (reseñas previas)
-        // setReviews([
-        //   { id: 101, user_name: "Ana", rating: 5, comment: "Excelente material, muy detallado." }
-        // ]);
-        .catch((err) =>
-          console.log("Ocurrió un error al llamar el libro", err)
-        )
+      } catch (err) {
+        console.error("Error al llamar el libro", err);
+        setLoading(false);
+      }
     };
-    // Simulación de GET /books/:id
-    fetchBookData(id);
-    console.log(book);
-  }, [id, reviews]);
+    loadData();
+  }, [id]);
 
   const handleReviewSubmit = async (e) => {
     e.preventDefault();
@@ -53,37 +46,53 @@ function BookDetails() {
 
     // Payload exacto según tu contrato API REST para POST /reviews
     const reviewPayload = {
-      ...book,
+      libro_id: id,
+      comentario: newReview.comment,
+      calificacion: Number(newReview.rating),
+      usuario_id: user.id
       // sizeList: Number(newReview.rating),
       // currency: newReview.comment
-      sizeList: [...book.sizeList,
-      {
-        user_name: user.name,
-        id: Date.now(), // ID temporal para la review, en un backend real lo asignaría el servidor
-        rating: Number(newReview.rating),
-        comment: newReview.comment
-      }]
+      // sizeList: [...book.sizeList,
+      // {
+      //   user_name: user.name,
+      //   id: Date.now(), // ID temporal para la review, en un backend real lo asignaría el servidor
+      //   rating: Number(newReview.rating),
+      //   comment: newReview.comment
+      // }]
     };
 
-    console.log("Enviando reseña al backend:", reviewPayload);
-    // Aquí iría: await axios.post('/reviews', reviewPayload, { headers: ... })
-
-
-    // Actualizamos la vista temporalmente simulando el éxito
-    setReviews([...reviews, {
-      id: Date.now(),
-      // user_name: user.name,
-      // rating: reviewPayload.rating,
-      // comment: reviewPayload.comment
-      ...reviewPayload.sizeList[reviewPayload.sizeList.length - 1]
-    }]);
-    updateBook(reviewPayload)
-      .then((res) => {
-        console.log("Se ha subido la review", res.data)
-      })
-
-    setNewReview({ rating: 5, comment: "" });
+    try {
+      const res = await addComment(reviewPayload);
+      if (res) {
+        alert("¡Reseña enviada con éxito!");
+        setNewReview({ rating: 5, comment: "" });
+        fetchBookByID(id); // Recargamos el libro para ver la nueva reseña
+      }
+    } catch (err) {
+      console.error("Error al subir la review", err);
+      alert("No se pudo enviar la reseña.");
+    }
   };
+
+  //   console.log("Enviando reseña al backend:", reviewPayload);
+  //   // Aquí iría: await axios.post('/reviews', reviewPayload, { headers: ... })
+
+
+  //   // Actualizamos la vista temporalmente simulando el éxito
+  //   setReviews([...reviews, {
+  //     id: Date.now(),
+  //     // user_name: user.name,
+  //     // rating: reviewPayload.rating,
+  //     // comment: reviewPayload.comment
+  //     ...reviewPayload.sizeList[reviewPayload.sizeList.length - 1]
+  //   }]);
+  //   updateBook(reviewPayload)
+  //     .then((res) => {
+  //       console.log("Se ha subido la review", res.data)
+  //     })
+
+  //   setNewReview({ rating: 5, comment: "" });
+  // };
 
   const handleAddToCart = () => {
     if (!user) {
@@ -93,13 +102,13 @@ function BookDetails() {
       return;
     }
 
-    console.log(`Añadiendo ${book.title} al carrito`);
+    console.log(`Añadiendo ${book.libro_titulo} al carrito`);
     addToCart(book);
-    alert(`¡"${book.title}" añadido al carrito!`); // Feedback visual como en la gallery
+    alert(`¡"${book.libro_titulo}" añadido al carrito!`); // Feedback visual como en la gallery
   };
 
   if (loading) return <div style={{ textAlign: "center", padding: "50px", color: "var(--text-light)" }}>Cargando detalles...</div>;
-  if (!book) return <div style={{ textAlign: "center", padding: "50px", color: "var(--text-light)" }}>Libro no encontrado.</div>;
+  if (!book || !book.libro_titulo) return <div style={{ textAlign: "center", padding: "50px", color: "var(--text-light)" }}>Libro no encontrado.</div>;
 
   return (
     <div style={{ padding: "40px 20px", maxWidth: "1000px", margin: "0 auto", color: "var(--text-light)" }}>
@@ -121,8 +130,8 @@ function BookDetails() {
             overflow: "hidden"
           }}>
             <img
-              src={book.img}
-              alt={book.title}
+              src={book.libro_imagen}
+              alt={book.libro_titulo}
               style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.9 }}
               onError={(e) => {
                 e.target.style.display = 'none';
@@ -134,18 +143,12 @@ function BookDetails() {
 
         {/* Detalles del producto */}
         <div style={{ flex: "1.5", minWidth: "300px", display: "flex", flexDirection: "column" }}>
-          <h1 style={{ marginTop: 0, color: "var(--accent-cyan)", fontSize: "2.5rem", marginBottom: "10px" }}>{book.title}</h1>
-          <p style={{ color: "var(--text-muted)", fontWeight: "bold", textTransform: "uppercase", letterSpacing: "1px" }}>
-            Categoría: {book.category}
-          </p>
-          <p style={{ fontSize: "2rem", color: "var(--accent-gold)", fontWeight: "bold", margin: "15px 0" }}>
-            ${book.price.toLocaleString("es-CL")}
-          </p>
-          <p style={{ lineHeight: "1.8", color: "var(--text-light)", fontSize: "1.1rem", marginBottom: "20px" }}>
-            {book.description}
-          </p>
+          <h1 style={titleStyle}>{book.libro_titulo}</h1>
+          <p style={categoryStyle}>Autor: {book.libro_autor}</p>
+          <p style={priceStyle}>${Number(book.libro_precio).toLocaleString("es-CL")}</p>
+          <p style={descriptionStyle}>{book.libro_descripcion}</p>
           <p style={{ color: "var(--text-muted)", marginBottom: "30px" }}>
-            <strong>Stock disponible:</strong> {book.stock} unidades
+            <strong>Stock:</strong> {book.libro_stock} unidades
           </p>
 
           <button
@@ -181,7 +184,7 @@ function BookDetails() {
 
         {/* Lista de reseñas existentes */}
         <div style={{ marginBottom: "40px" }}>
-          {reviews.length === 0 ? (
+          {!book.comentarios || book.comentarios.length === 0 ? (
             <p style={{ color: "var(--text-muted)" }}>Aún no hay reseñas. ¡Sé el primero en opinar!</p>
           ) : (
             reviews.map(review => (
@@ -193,9 +196,9 @@ function BookDetails() {
                 backgroundColor: "var(--bg-card)"
               }}>
                 <p style={{ margin: "0 0 10px 0", color: "var(--accent-cyan)" }}>
-                  <strong>{review.user_name}</strong> <span style={{ color: "var(--text-muted)", marginLeft: "10px" }}>{"⭐".repeat(review.rating)}</span>
+                  <strong>{review.user_name}</strong> <span style={{ color: "var(--text-muted)", marginLeft: "10px" }}>{"⭐".repeat(comment.comentario_calificacion)}</span>
                 </p>
-                <p style={{ margin: 0, color: "var(--text-light)", lineHeight: "1.6" }}>{review.comment}</p>
+                <p style={{ margin: 0, color: "var(--text-light)", lineHeight: "1.6" }}>{comment.comentario_texto}</p>
               </div>
             ))
           )}

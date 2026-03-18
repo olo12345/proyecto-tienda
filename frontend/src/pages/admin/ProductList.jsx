@@ -24,8 +24,8 @@ const ProductList = () => {
     const confirmDelete = window.confirm("¿Estás seguro de eliminar este libro?");
     if (confirmDelete) {
       removeBook(id)
-        .then((res) => {
-          console.log("Libro eliminado:", res.data);
+        .then(() => {
+          console.log("Libro eliminado:");
           // Se actualiza la lista de libros después de eliminar
           // getBooks();
         })
@@ -97,10 +97,10 @@ const ProductList = () => {
                 onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.02)"}
                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
               >
-                <td style={{ padding: "15px", color: "var(--text-muted)" }}>{book.id}</td>
-                <td style={{ padding: "15px", fontWeight: "bold" }}>{book.title}</td>
+                <td style={{ padding: "15px", color: "var(--text-muted)" }}>{book.libro_id}</td>
+                <td style={{ padding: "15px", fontWeight: "bold" }}>{book.libro_titulo}</td>
                 <td style={{ padding: "15px", color: "var(--accent-gold)" }}>${book.price.toLocaleString("es-CL")}</td>
-                <td style={{ padding: "15px", color: "var(--text-light)" }}>{book.stock}</td>
+                <td style={{ padding: "15px", color: "var(--text-light)" }}>{book.libro_stock}</td>
                 <td style={{ padding: "15px", textAlign: "center", display: "flex", justifyContent: "center", gap: "10px" }}>
 
                   {/* Botón Editar */}

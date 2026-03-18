@@ -25,27 +25,27 @@ function Cart() {
       // Adaptamos para conectar con el back
       // se espera "id" y "cantidad"
       const formattedCart = cart.map((book) => ({
-        id: book.id,
-        cantidad: book.quantity // homogeneización de quantity a cantidad despue´s de error de comunicación
+        libro_id: book.libro_id,
+        cantidad: book.cantidad // homogeneización de quantity a cantidad despue´s de error de comunicación - rehomogeneización cambiando todo a español
       }));
 
-      // Petición a la API
-      const res = await apiProducts.post("/checkouts", formattedCart);
+      // Petición al ednpoint
+      const res = await apiProducts.post("/checkouts", { cart: formattedCart });
 
-      setMessage(`Pedido enviado correctamente! Orden N°: ${res.data.orden_id}`);
+      // el model de cheackout devolvía compraID
+      const idOrden = res.data.orden_id || res.data.compraId || res.data.id;
+      setMessage(`Pedido enviado correctamente! Orden N°: ${idOrden}`);
       setShowConfirm(true);
 
     } catch (error) {
       console.error("Error en el checkout:", error);
-      setMessage("Error de conexión con el servidor");
+      setMessage(error.response?.data?.message || "Error de conexión con el servidor");
       setShowConfirm(true);
     }
   };
 
   const handleConfirm = () => {
-    if (clearCart) {
-      clearCart();
-    }
+    if (clearCart) clearCart();
     setMessage("");
     setShowConfirm(false);
   };
@@ -80,30 +80,30 @@ function Cart() {
 
               <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
                 <div style={{ width: "70px", height: "70px", backgroundColor: "var(--bg-space)", borderRadius: "4px", border: "1px solid var(--bg-border)", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <img src={book.img} alt={book.title} style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.9 }}
+                  <img src={book.libro_imagen} alt={book.libro_titulo} style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.9 }}
                     onError={(e) => { e.target.style.display = 'none'; }}
                   />
                 </div>
                 <div>
-                  <h3 style={{ margin: "0 0 8px 0", fontSize: "1.1rem", color: "var(--text-light)" }}>{book.title}</h3>
+                  <h3 style={{ margin: "0 0 8px 0", fontSize: "1.1rem", color: "var(--text-light)" }}>{book.libro_titulo}</h3>
                   <p style={{ margin: 0, color: "var(--accent-gold)", fontWeight: "bold", fontSize: "1.1rem" }}>
-                    ${book.price.toLocaleString("es-CL")}
+                    ${book.libro_precio.toLocaleString("es-CL")}
                   </p>
                 </div>
               </div>
 
               <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
                 <button
-                  onClick={() => decrease(book.id, book.quantity)}
+                  onClick={() => decrease(book.libro_id, book.cantidad)}
                   style={{ padding: "5px 12px", cursor: "pointer", backgroundColor: "transparent", color: "var(--accent-cyan)", border: "1px solid var(--accent-cyan)", borderRadius: "4px", fontWeight: "bold", transition: "all 0.2s ease" }}
                   onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "var(--accent-cyan)"; e.currentTarget.style.color = "var(--bg-space)"; }}
                   onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "transparent"; e.currentTarget.style.color = "var(--accent-cyan)"; }}
                 >
                   -
                 </button>
-                <span style={{ fontWeight: "bold", fontSize: "1.2rem", minWidth: "20px", textAlign: "center" }}>{book.quantity}</span>
+                <span style={{ fontWeight: "bold", fontSize: "1.2rem", minWidth: "20px", textAlign: "center" }}>{book.cantidad}</span>
                 <button
-                  onClick={() => increase(book.id, book.quantity)}
+                  onClick={() => increase(book.libro_id, book.cantidad)}
                   style={{ padding: "5px 12px", cursor: "pointer", backgroundColor: "transparent", color: "var(--accent-cyan)", border: "1px solid var(--accent-cyan)", borderRadius: "4px", fontWeight: "bold", transition: "all 0.2s ease" }}
                   onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "var(--accent-cyan)"; e.currentTarget.style.color = "var(--bg-space)"; }}
                   onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "transparent"; e.currentTarget.style.color = "var(--accent-cyan)"; }}

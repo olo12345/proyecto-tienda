@@ -1,4 +1,4 @@
-import { useState, useEffect, useEffectEvent } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 // import { getProduct, updateProduct, createProduct } from "./../../services/products";
 import { useBooks } from "./../../hooks/useBooks"
@@ -12,13 +12,14 @@ function CreatePost() {
 
 
   const [formData, setFormData] = useState({
-    ...book ?? {
-      title: "",
-      description: "",
-      price: "",
-      category: "",
-      stock: ""
-    }
+      titulo: "",
+      autor: "",
+      descripcion: "",
+      precio: "",
+      categorias: "",
+      stock: "",
+      imagen_url: "" // ver si da tiempo de agregar la validación de seguridad que vi en ig 
+      // (para evitar que suban un virus solo por cambiarle la extensión)
   });
 
   const handleChange = (e) => {
@@ -28,84 +29,72 @@ function CreatePost() {
     });
   };
 
-
-  const updateFormData = useEffectEvent((book) => {
-    setFormData(book);
-  })
-
-  const updateFetchBook = useEffectEvent((id) => {
-    fetchBookByID(id)
-      .then((res) => {
-        if (res.status === 200) {
-          updateFormData(res.data);
-        }
-      })
-      .catch((err) => {
-        console.error("Error al actualizar la publicación:", err);
-        alert("Error al actualizar la publicación");
-      });
-  });
-
-
-  // Si estamos en modo edición, aquí cargaríamos los datos del libro
   useEffect(() => {
-
     if (isEditing) {
-      // clearForm();
       console.log("Modo edición activado para el libro con ID:", id);
-      updateFetchBook(id);
+      fetchBookByID(id)
+        .then((data) => {
+          if (data) {
+            // Mapeamos lo que viene del back al estado del form
+            setFormData({
+              titulo: data.libro_titulo || data.titulo || "",
+              autor: data.libro_autor || data.autor || "",
+              descripcion: data.libro_descripcion || data.descripcion || "",
+              precio: data.libro_precio || data.precio || "",
+              categorias: data.libro_categorias || data.categorias || "",
+              stock: data.libro_stock || data.stock || "",
+              imagen_url: data.libro_imagen || data.imagen_url || ""
+            });
+          }
+        })
+        .catch((err) => {
+          console.error("Error al obtener el libro:", err);
+        });
     }
-  }, [id, isEditing, navigate]);
+  }, [id, isEditing]);
 
-
-  // verificado, cumple con lo que pide el contrato
-
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Formateamos los datos según el contrato (price y stock deben ser números)
+    // Formateamos los datos según el contrato del backend
     const payloadToSend = {
-      ...book,
-      title: formData.title,
-      description: formData.description,
-      price: Number(formData.price),
-      category: formData.category,
-      stock: Number(formData.stock)
+      titulo: formData.titulo,
+      autor: formData.autor,
+      descripcion: formData.descripcion,
+      precio: Number(formData.precio),
+      categorias: formData.categorias,
+      stock: Number(formData.stock),
+      imagen_url: formData.imagen_url,
+      libro_fecha_publicacion: new Date().toISOString()
     };
 
     if (isEditing) {
       console.log("Actualizando publicación en backend:", payloadToSend);
       try {
-        const res = updateBook(payloadToSend)
-        if (res.status === 200) {
-          console.log("res", res)
+        const res = await updateBook(id, payloadToSend); // Pasamos ID y payload
+        if (res) {
           alert("Publicación actualizada con éxito");
+          navigate("/admin/store");
         }
       }
       catch (err) {
-        console.error("Error al actualizar la publicación:", err, "res");
+        console.error("Error al actualizar la publicación:", err);
         alert("Error al actualizar la publicación");
       };
     } else {
-      //Creación de libro
       console.log("Creando nueva publicación en backend:", payloadToSend);
       addBook(payloadToSend)
         .then((res) => {
-          console.log(res);
-          if (res.status === 201) {
+          if (res) {
             alert("Publicación creada con éxito");
             navigate("/admin/store");
-            // Redirigimos de vuelta al panel de administración
           }
         })
         .catch((err) => {
           console.error("Error al crear la publicación:", err);
           alert("Error al crear la publicación");
         })
-      // Aquí iría: await axios.post('/books', payloadToSend) estar atento
     }
-
   };
 
   return (
@@ -126,8 +115,8 @@ function CreatePost() {
           <label style={{ display: "block", marginBottom: "8px", fontWeight: "bold", color: "var(--text-muted)", fontSize: "0.9rem" }}>Título del Libro:</label>
           <input
             type="text"
-            name="title"
-            value={formData.title}
+            name="titulo"
+            value={formData.titulo}
             onChange={handleChange}
             required
             placeholder="Ej: The Art and Science of Premium Gin"
@@ -151,8 +140,47 @@ function CreatePost() {
           <label style={{ display: "block", marginBottom: "8px", fontWeight: "bold", color: "var(--text-muted)", fontSize: "0.9rem" }}>Categoría:</label>
           <input
             type="text"
-            name="category"
-            value={formData.category}
+            name="autor"
+            value={formData.autor}
+            onChange={handleChange}
+            required
+            placeholder="Ej: Destilación, Negocios, Programación..."
+            style={{
+              width: "100%",
+              padding: "12px",
+              borderRadius: "4px",
+              border: "1px solid var(--bg-border)",
+              backgroundColor: "var(--bg-space)",
+              color: "var(--text-light)",
+              boxSizing: "border-box",
+              outline: "none",
+              transition: "border-color 0.2s ease"
+            }}
+            onFocus={(e) => e.target.style.borderColor = "var(--accent-cyan)"}
+            onBlur={(e) => e.target.style.borderColor = "var(--bg-border)"}
+          />
+        </div>
+
+        {/* incorporado */}
+        <div style={{ marginBottom: "20px" }}>
+          <label style={{ display: "block", marginBottom: "8px", fontWeight: "bold", color: "var(--text-muted)", fontSize: "0.9rem" }}>URL de la Imagen:</label>
+          <input
+            type="text"
+            name="imagen_url"
+            value={formData.imagen_url}
+            onChange={handleChange}
+            required
+            placeholder="https://link-a-la-foto.jpg"
+            style={inputStyle}
+          />
+        </div>
+
+        <div style={{ marginBottom: "20px" }}>
+          <label style={{ display: "block", marginBottom: "8px", fontWeight: "bold", color: "var(--text-muted)", fontSize: "0.9rem" }}>Categoría:</label>
+          <input
+            type="text"
+            name="categorias"
+            value={formData.categorias}
             onChange={handleChange}
             required
             placeholder="Ej: Destilación, Negocios, Programación..."
@@ -177,8 +205,8 @@ function CreatePost() {
             <label style={{ display: "block", marginBottom: "8px", fontWeight: "bold", color: "var(--text-muted)", fontSize: "0.9rem" }}>Precio (CLP):</label>
             <input
               type="number"
-              name="price"
-              value={formData.price}
+              name="precio"
+              value={formData.precio}
               onChange={handleChange}
               required
               min="0"
@@ -227,8 +255,8 @@ function CreatePost() {
         <div style={{ marginBottom: "30px" }}>
           <label style={{ display: "block", marginBottom: "8px", fontWeight: "bold", color: "var(--text-muted)", fontSize: "0.9rem" }}>Descripción:</label>
           <textarea
-            name="description"
-            value={formData.description}
+            name="descripcion"
+            value={formData.descripcion}
             onChange={handleChange}
             required
             rows="5"

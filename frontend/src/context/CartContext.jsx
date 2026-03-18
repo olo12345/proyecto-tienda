@@ -10,30 +10,36 @@ export const CartProvider = ({ children }) => {
 
   const addToCart = (product) => {
     //temporal por ajuste de api
-    product = {...product, quantity: 1}
+    //product = {...product, quantity: 1}
+    const bookToAdd = {
+      ...product,
+      libro_id: product.libro_id || product.id, // Compatibilidad si el objeto trae id o libro_id
+      libro_precio: product.libro_precio || product.price,
+      cantidad: 1
+  };
 
     setCart((prev) => {
-      const exists = prev.find((item) => item.id === product.id)
+      const exists = prev.find((item) => item.libro_id === bookToAdd.libro_id);
 
       if (exists) {
-        return prev.map((item) => item.id === product.id
-          ? { ...item, quantity: item.quantity + 1 }
+        return prev.map((item) => item.libro_id === bookToAdd.libro_id
+          ? { ...item, cantidad: item.cantidad + 1 }
           : item
         )
       }
 
-      return [...prev, product]
+      return [...prev, boookToAdd]
     })
 
   }
 
   const removeFromCart = (productId) => {
-    setCart((prev) => prev.filter((item) => item.id !== productId))
+    setCart((prev) => prev.filter((item) => (item.libro_id || item.id) !== productId))
   }
 
-  const updateQuantity = (productId, quantity) => {
-    setCart((prev) => prev.map((item) => item.id === productId
-      ? { ...item, quantity: Math.max(1, quantity) }
+  const updateQuantity = (productId, newQuantity) => {
+    setCart((prev) => prev.map((item) => (item.libro_id || item.id) === productId
+    ? { ...item, cantidad: Math.max(1, newQuantity) }
       : item,
     ),
     );
@@ -41,8 +47,8 @@ export const CartProvider = ({ children }) => {
 
   // const clearCart = () => setCart([]);
 
-  const totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
-  const totalPrice = cart.reduce((acc, item) => acc + item.quantity * item.price, 0);
+  const totalItems = cart.reduce((acc, item) => acc + (item.cantidad || 0), 0);
+  const totalPrice = cart.reduce((acc, item) => acc + (item.cantidad * (item.libro_precio || 0)), 0);
 
   return (
     <CartContext.Provider
