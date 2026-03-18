@@ -1,36 +1,34 @@
 import pool from "./../db/dbconfig.js";
+import format from "pg-format";
 
 const registrarCompra = async (userId, cart) => {
-  const client = await pool.connect();
-
   try {
-    await client.query("BEGIN");
-
     // hay que tener una tabla "compras" o sería el carrito? verificar
-    const queryCompra = "INSERT INTO compras (usuario_id) VALUES ($1) RETURNING id;";
-    const resCompra = await client.query(queryCompra, [userId]);
+    const queryCompra = "INSERT INTO compras (usuario_id) VALUES ($1) RETURNING carrito_id;";
+    const resCompra = await pool.query(queryCompra, [userId]);
     const compraId = resCompra.rows[0].id;
 
-    const queryDetalle = "INSERT INTO detalle_compras (compra_id, libro_id, cantidad) VALUES ($1, $2, $3);";
-
+    let queryDetalle = "INSERT INTO carrito_libros (compra_id, libro_id, cantidad) VALUES";
+    let placeholders = []
+    let values = [];
     for (const item of cart) {
-      await client.query(queryDetalle, [compraId, item.id, item.cantidad]);
+      placeholders.push('(%s, %s, %s)');
+      values.push(compraId, item.id, item.cantidad);
     }
+    queryDetalle += placeholders.join(", ");
+    formattedQuery = format(queryDetalle, ...values);
+    await pool.query(formattedQuery);
 
     // Confirmamos los cambios en PostgreSQL
-    await client.query("COMMIT");
+    await pool.query("COMMIT");
 
     return compraId; // Devolvemos el número de orden generado
   } catch (error) {
     // Si algo falla, deshacemos todo
-    await client.query("ROLLBACK");
     throw error; // Lanzamos el error para que el controlador lo atrape
-  } finally {
-    // Siempre debemos liberar el cliente para que otros puedan usarlo
-    client.release();
   }
 };
 
-export const checkoutModel = {
+export {
   registrarCompra,
 };

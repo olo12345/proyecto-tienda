@@ -48,8 +48,10 @@ CREATE TABLE carritos (
 CREATE TABLE carrito_libros (
     carrito_id INT,
     libro_id INT,
+    cantidad SMALLINT,
     FOREIGN KEY(carrito_id) REFERENCES carritos(carrito_id) ON DELETE CASCADE,
     FOREIGN KEY(libro_id) REFERENCES libros(libro_id) ON DELETE CASCADE
+    CHECK (cantidad >= 0)
 );
 CREATE TYPE order_status AS ENUM(
     'pendiente',
