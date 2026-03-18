@@ -79,4 +79,9 @@ If you are developing a production application, we recommend using TypeScript wi
  - Se ajusta BookDetails para traer la información correcta (actualización de variables)
  - Se actualiza detalle de redirección en el login
  - Se ajusta Cart.jsx con los mismos detalles antes mencionados
- 
+
+## Cambios 18-03 - Carlos Carrillo O.
+ - Se ajusta el Gallery también con los nombres adecuados trabajados ayer.
+ - También se ajusta el CardBook (mismos detalles)
+ - También se ajusta el FilterBar (estética)
+ - Se genera archivo .env.example para traspasar información a los demás (SE DEBE BORRAR ANTES DE DEPLOYAR)

@@ -3,20 +3,19 @@ import { CardBook } from "./CardBook";
 import { getProducts } from "./../../services/products";
 import FilterBar from "./FilterBar"; // importamos la barra de filtros
 
-const RenderBooks = (param) => {
-  const { books } = param;
-  return books.length
-    ? books.map((book) => (
+const RenderBooks = ({ books }) => {
+  // const { books } = param;
+  if (!books.length) return <div style={{ color: "var(--text-muted)", textAlign: "center", width: "100%" }}>Cargando galería...</div>;
+    return books.map((book) => (
         <CardBook
-          title={book.title}
-          id={book.id}
-          price={book.price}
-          img={book.img}
-          key={new Date().getTime() + book.id} // tu forma original
-          rating={book.rating}
-        />
-      ))
-    : <div>"Cargando galería"</div>;
+        key={book.libro_id} // Usamos el ID real de la DB para estabilidad
+        id={book.libro_id}
+        title={book.libro_titulo}
+        price={book.libro_precio}
+        img={book.libro_imagen}
+        rating={book.calificacion || 0} // Usamos la calificación calculada por el backend
+      />
+      ));
 };
 
 function Gallery() {
@@ -30,15 +29,14 @@ function Gallery() {
 
   const getBooks = () => {
     getProducts()
-      .then((res) => {
-        const tempBooks = res.data.map((book) => ({
-          ...book,
-          stock: book.installments,
-          category: book.style,
-          rating: Math.floor(Math.random() * 5)
-        }));
-        setBooks(tempBooks);
-      })
+      .then((data) => {
+        // const tempBooks = res.data.map((book) => ({
+        //   ...book,
+        //   stock: book.installments,
+        //   category: book.style,
+        //   rating: Math.floor(Math.random() * 5)
+        setBooks(data);
+        })
       .catch((error) =>
         console.log("Ocurrió un error al obtener los libros", error)
       );
@@ -48,14 +46,22 @@ function Gallery() {
     getBooks();
   }, []);
 
-  const filteredBooks = books.filter((book) => {
-    return (
-      (filter.author === "" || book.author?.toLowerCase().includes(filter.author.toLowerCase())) &&
-      (filter.category === "" || book.category?.toLowerCase().includes(filter.category.toLowerCase())) &&
-      (filter.minPrice === "" || book.price >= Number(filter.minPrice)) &&
-      (filter.maxPrice === "" || book.price <= Number(filter.maxPrice))
-    );
-  });
+// Filtramos usando los nombres de columna de PostgreSQL
+const filteredBooks = books.filter((book) => {
+  const matchesAuthor = filter.author === "" || 
+    (book.libro_autor && book.libro_autor.toLowerCase().includes(filter.author.toLowerCase()));
+  
+  const matchesCategory = filter.category === "" || 
+    (book.libro_categorias && book.libro_categorias.toLowerCase().includes(filter.category.toLowerCase()));
+  
+  const matchesMinPrice = filter.minPrice === "" || 
+    Number(book.libro_precio) >= Number(filter.minPrice);
+  
+  const matchesMaxPrice = filter.maxPrice === "" || 
+    Number(book.libro_precio) <= Number(filter.maxPrice);
+
+  return matchesAuthor && matchesCategory && matchesMinPrice && matchesMaxPrice;
+});
 
   return (
     <div style={{ padding: "40px 20px", backgroundColor: "transparent", minHeight: "100vh" }}>
