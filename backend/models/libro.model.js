@@ -22,7 +22,7 @@ const getItemsModel = async ({ limits = 10, order_by = "libro_id_ASC", page = 1 
   if (libros.length === 0) {
     return [];
   }
-  //bien
+
   const librosId = libros.map(libro => libro.libro_id);
   let librosString= "'{" + librosId.join(",") + "}'";
 
@@ -43,9 +43,8 @@ const getItemsModel = async ({ limits = 10, order_by = "libro_id_ASC", page = 1 
       comentarios: comentarios
         .filter(comment => comment.libro_id === libro.libro_id),
       calificacion: comentarios.reduce((acc, comment) => acc + comment.comentario_calificacion, 0) / comentarios?.length || 0,
-    }
+    };
   })
-  console.log(librosCategoriasComentarios)
   return (librosCategoriasComentarios);
 }
 

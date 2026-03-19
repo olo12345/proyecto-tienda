@@ -18,7 +18,6 @@ app.use(express.json());
 app.use(cors());
 
 app.use(logger)
-app.get("/", (req, res) => res.send("Hola Mundo"))
 
 app.use("/api/auth", authRouter);
 app.use("/api/libros", libroRouter);

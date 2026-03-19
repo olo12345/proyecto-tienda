@@ -1,10 +1,10 @@
 import pool from "./../db/dbconfig.js";
 import format from "pg-format";
 
-const createOrder = async (userId, cart) => {
+const createOrderModel = async (userId, cart) => {
   try {
     // hay que tener una tabla "compras" o sería el carrito? verificar
-    const queryCompra = "INSERT INTO compras (usuario_id) VALUES ($1) RETURNING carrito_id;";
+    const queryCompra = "INSERT INTO pedidos (usuario_id) VALUES ($1) RETURNING carrito_id;";
     const resCompra = await pool.query(queryCompra, [userId]);
     const compraId = resCompra.rows[0].id;
 
@@ -29,7 +29,7 @@ const createOrder = async (userId, cart) => {
   }
 };
 
-const getCart = async (userId) => {
+const getCartModel = async (userId) => {
   const query = `SELECT cl.libro_id, cl.cantidad, l.libro_titulo, l.libro_precio
   FROM carrito_libros AS cl
   JOIN carritos AS c ON cl.compra_id = c.compra_id
@@ -39,7 +39,7 @@ const getCart = async (userId) => {
   return rows;
 }
 
-const deleteItem = async (userId, libroId) => {
+const deleteItemModel = async (userId, libroId) => {
   const query = `DELETE FROM carrito_libros AS cl
   USING carritos AS c
   WHERE cl.compra_id = c.compra_id
@@ -48,7 +48,7 @@ const deleteItem = async (userId, libroId) => {
   await pool.query(query, [userId, libroId]);
 }
 
-const deleteCart = async (userId) => {
+const deleteCartModel = async (userId) => {
   const query = `DELETE FROM carrito_libros AS cl
   USING carritos AS c
   WHERE cl.compra_id = c.compra_id
@@ -57,8 +57,8 @@ const deleteCart = async (userId) => {
 }
 
 export {
-  createOrder,
-  getCart,
-  deleteItem,
-  deleteCart
+  createOrderModel,
+  getCartModel,
+  deleteItemModel,
+  deleteCartModel
 };
