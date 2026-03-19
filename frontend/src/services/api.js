@@ -12,10 +12,10 @@ import axios from 'axios';
 
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 
-// Dejamos ambos apuntando al mismo sitio, pero mantenemos los nombres por 
+// Dejamos ambos apuntando al mismo sitio, pero mantenemos los nombres por
 // convención de lo que veniamos usando y así no cambiamos el resto del código
 export const apiProducts = axios.create({ baseURL: BASE_URL });
-export const apiUSERS = axios.create({ baseURL: BASE_URL });
+export const apiUsers = axios.create({ baseURL: BASE_URL });
 
 const injectToken = (config) => {
     const token = localStorage.getItem('token');

@@ -5,7 +5,7 @@ import { getProducts } from "./../../services/products";
 const getBooks = (setBooks) => {
   getProducts()
     .then((res) => {
-      const tempBooks = res.data.map((book) => ({
+      const tempBooks = res.data?.map((book) => ({
         // Se ajustan las propiedades por limitaciones de la api
         ...book,
         stock: book.installments,
@@ -27,7 +27,7 @@ function Home() {
   }, []);
 
   // Parte del filtro por calificación
-  const featuredBooks = books.filter(book => book.rating === 5);
+  const featuredBooks = books?.filter(book => book.rating === 5);
 
   return (
     <main style={{ backgroundColor: "transparent", minHeight: "100vh" }}>
@@ -85,7 +85,7 @@ function Home() {
         </h2>
 
         <div style={{ display: "flex", flexWrap: "wrap", gap: "30px", justifyContent: "center" }}>
-          {featuredBooks.map(book => (
+          {featuredBooks?.map(book => (
             <div
               key={book.id}
               onClick={() => navigate(`/store/book/${book.id}`)}
