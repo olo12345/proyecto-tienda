@@ -69,6 +69,7 @@ function FilterBar({ filter, setFilter }) {
         Limpiar
       </button>
     </div>
+    
   );
 }
 
