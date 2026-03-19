@@ -2,8 +2,6 @@
 import pool from "./../db/dbconfig.js"; // con esto sí tenemos una conexión a la db
 import format from "pg-format";
 
-
-
 const isEmailRegistered = async (email) => {
   const query = "SELECT * FROM usuarios WHERE usuario_email = $1";
   const result = await pool.query(query, [email]);

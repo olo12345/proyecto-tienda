@@ -1,6 +1,8 @@
 import cors from 'cors';
-import "dotenv/config";
+import dotenv from "dotenv";
 import express from "express";
+
+dotenv.config();
 
 //rutas
 import authRouter from "./routes/auth.routes.js";
@@ -16,6 +18,7 @@ app.use(express.json());
 app.use(cors());
 
 app.use(logger)
+app.get("/", (req, res) => res.send("Hola Mundo"))
 
 app.use("/api/auth", authRouter);
 app.use("/api/libros", libroRouter);
@@ -24,9 +27,9 @@ app.use((_, res) => {
   res.status(404).json({ error: "Not Found" });
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server is running on port http://localhost:${PORT}`);
-});
+const PORT = process.env.PORT || 5001;
+app.listen(PORT,
+  console.log(`Server is running on port http://localhost:${PORT}`)
+);
 
-export default app;
+// export default app;
