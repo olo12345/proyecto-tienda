@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getCart, createOrder } from "./../controllers/checkout.controller.js";
+// import { getCart, createOrder } from "./../controllers/checkout.controller.js";
 import checkToken from "./../utils/validators/auth.checkToken.js";
 
 const routes = Router();
