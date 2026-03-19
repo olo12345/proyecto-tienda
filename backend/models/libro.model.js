@@ -15,21 +15,23 @@ const getItemsModel = async ({ limits = 10, order_by = "libro_id_ASC", page = 1 
   // direccion = direccion.toUpperCase() === "ASC" ? "ASC" : "DESC";
   // const offset = (page - 1) * limits
   const sqlQuery = "SELECT * from libros";
-  console.log("sqlQuery", sqlQuery);
-  const result = await pool.query(sqlQuery);
-  console.log ("result",result);
+  // const result = await pool.query(sqlQuery);
+
 
   const { rows: libros } = await pool.query(sqlQuery);
   if (libros.length === 0) {
     return [];
   }
-  libroId = libros.map(libro => libro.libro_id);
+  //bien
+  const librosId = libros.map(libro => libro.libro_id);
+  let librosString= "'{" + librosId.join(",") + "}'";
 
   const categoriasQuery = format(`SELECT lc.libro_id, cat.categoria_nombre FROM categorias AS cat
     LEFT JOIN libros_categorias AS lc ON cat.categoria_id = lc.categoria_id
-    WHERE lc.libro_id = ANY(%s)`, libroId);
+    WHERE lc.libro_id = ANY(%s)`, librosString);
 
-  const comentariosQuery = format(`SELECT c.* FROM comentarios AS c WHERE c.libro_id = ANY(%s)`, libroId);
+
+  const comentariosQuery = format(`SELECT c.* FROM comentarios AS c WHERE c.libro_id = ANY(%s)`, librosString);
   const { rows: categorias } = await pool.query(categoriasQuery);
   const { rows: comentarios } = await pool.query(comentariosQuery);
   const librosCategoriasComentarios = libros.map(libro => {
@@ -43,6 +45,7 @@ const getItemsModel = async ({ limits = 10, order_by = "libro_id_ASC", page = 1 
       calificacion: comentarios.reduce((acc, comment) => acc + comment.comentario_calificacion, 0) / comentarios?.length || 0,
     }
   })
+  console.log(librosCategoriasComentarios)
   return (librosCategoriasComentarios);
 }
 
@@ -131,9 +134,9 @@ const editItemModel = async (id, { titulo, autor, precio, stock, categorias, des
   return (rows[0]);
 }
 
-const addComentarioModel = async ({ libroId, comentario, calificacion, usuarioId }) => {
+const addComentarioModel = async ({ librosId, comentario, calificacion, usuarioId }) => {
   const sqlQuery = `INSERT INTO comentarios (libro_id, comentario_texto, comentario_calificacion, usuario_id) VALUES (%s, %s, %s, %s) RETURNING *`;
-  const formattedQuery = format(sqlQuery, libroId, comentario, calificacion, usuarioId);
+  const formattedQuery = format(sqlQuery, librosId, comentario, calificacion, usuarioId);
   const { rows } = await pool.query(formattedQuery);
   return (rows[0]);
 }

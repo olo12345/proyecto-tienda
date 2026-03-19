@@ -1,6 +1,5 @@
-import "dotenv/config";
+// import "dotenv/config";
 import jwt from "jsonwebtoken";
-// import { nanoid } from "nanoid"; lo usamos en proytectos pasados pero no lo necesitamos ahora (usaremos bcrypt instead)
 import bcrypt from "bcrypt";
 import { authModel } from "./../models/auth.model.js";
 
