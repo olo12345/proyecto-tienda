@@ -1,31 +1,33 @@
-// import { readFile, writeFile } from "node:fs/promises"; en modelos anteriores leíamos de un archivo json para simular una db
-import pool from "./../db/dbconfig.js"; // con esto sí tenemos una conexión a la db
+import pool from "./../db/dbconfig.js";
 import format from "pg-format";
 
 const isEmailRegistered = async (email) => {
   const query = "SELECT * FROM usuarios WHERE usuario_email = $1";
   const result = await pool.query(query, [email]);
-  return (result.rowCount ? true : false);
+  return (result.rowCount > 0);
 };
 
-//Se deja abierta la inyección de rol para poder crear usuarios administradores
-const createUserModel = async ({ email, password, rol = 'user', edad, imagen = null }) => {
-  const values = [email, password,nombre, edad, rol, imagen];
-  const sqlQuery = "INSERT INTO usuarios ( usuario_email, usuario_password, usuario_nombre, usuario_edad, usuario_rol, usuario_imagen) VALUES ('%s', '%s', '%s, '%s, '%s, '%s')";
-  const formattedQuery = format(sqlQuery, ...values);
-  const { rowCount } = await pool.query(formattedQuery);
+// CORREGIDO: Ahora recibe "nombre"
+const createUserModel = async ({ nombre, email, password, rol = 'user', edad, imagen = null }) => {
+  const sqlQuery = format(
+    "INSERT INTO usuarios (usuario_email, usuario_password, usuario_nombre, usuario_edad, usuario_rol, usuario_imagen) VALUES (%L, %L, %L, %L, %L, %L) RETURNING *",
+    email, password, nombre, edad, rol, imagen
+  );
+  
+  const { rowCount } = await pool.query(sqlQuery);
   return rowCount;
 }
 
 const loginUserModel = async (email) => {
-    const sqlQuery = 'SELECT * FROM usuarios WHERE email = $1';
-    const values = [email];
-    const result = await pool.query(sqlQuery, values);
+    // CORREGIDO: El nombre de la columna en la bd es "usuario_email"
+    const sqlQuery = 'SELECT * FROM usuarios WHERE usuario_email = $1';
+    const result = await pool.query(sqlQuery, [email]);
     return result;
 }
 
 const verificarCredencialesModel = async (email) => {
-    const sqlQuery = 'SELECT email, rol FROM usuarios WHERE email = $1';
+    // CORREGIDO: Nombres de columnas según la tabla "usuarios"
+    const sqlQuery = 'SELECT usuario_email, usuario_rol FROM usuarios WHERE usuario_email = $1';
     const result = await pool.query(sqlQuery, [email]);
     return result;
 }

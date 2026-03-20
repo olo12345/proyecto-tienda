@@ -8,7 +8,7 @@ const routes = new Router();
 
 routes.post("/login", validateEmail, verificarLogin, authController.loginUser);
 
-routes.post("/register", validateEmail, verificarLogin, authController.createUser);
+routes.post("/register", validateEmail, authController.createUser); //eliminamos el middleware de validación de registro para permitir el registro sin token
 
 routes.use("/usuarios", checkToken);
 routes.get("/usuarios", authController.verificarCredenciales);

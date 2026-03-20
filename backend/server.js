@@ -1,5 +1,5 @@
-import cors from 'cors';
 import dotenv from "dotenv";
+import cors from 'cors';
 import express from "express";
 
 dotenv.config();
@@ -11,6 +11,8 @@ import libroRouter from "./routes/libro.routes.js";
 
 //helpers
 import logger from "./utils/helpers/logger.js";
+
+console.log("¿Mi secreto existe?:", process.env.JWT_SECRET);
 
 const app = express();
 

@@ -33,7 +33,7 @@ const AuthProvider = ({ children }) => {
             //lamada al back
             const response = await loginUser({email, password});
 
-            if (response.roken) {
+            if (response.token) { //había escrito "roken"!!!!!!!!!!!
                 const { token: jwtToken, user: userData } = response;
                 userData.role = userData.usuario_rol || userData.rol || "user";
 
