@@ -127,7 +127,7 @@ function Gallery() {
   marginBottom: "20px",
   display: "flex",
   justifyContent: "center"
-    }}>
+      }}>
         <select
           value={orderBy}
           onChange={(e) => setOrderBy(e.target.value)}
