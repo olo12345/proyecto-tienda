@@ -1,4 +1,4 @@
-import { createOrderModel, getCartModel, deleteItemModel } from "../models/checkout.model.js";
+import { createOrderModel, getCartModel, updateCartModel, deleteItemModel } from "../models/checkout.model.js";
 
 const createOrder = async (req, res) => {
     try {
@@ -22,6 +22,27 @@ const createOrder = async (req, res) => {
         return res.status(500).json({ error: "Error al procesar la compra" });
     }
 };
+
+const getCart = async (req, res) => {
+    try {
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ error: "Error al procesar la compra" })
+    }
+}
+
+const updateCart = async (req, res) => {
+    try {
+
+    } catch (error) {
+
+    }
+}
+
+const deleteItem = async (req, res) => {
+
+}
 
 export {
 

@@ -1,5 +1,4 @@
-// import { readFile } from "node:fs/promises"; again, la forma simulada de db
-import pool from "./../db/dbconfig.js"; // con esto sí tenemos una conexión a la db
+import pool from "./../db/dbconfig.js";
 import format from "pg-format";
 
 const getAllItemsModel = async ({ order_by = "libro_id_ASC" }) => {
@@ -10,21 +9,20 @@ const getAllItemsModel = async ({ order_by = "libro_id_ASC" }) => {
   return (rows);
 }
 
-const getItemsModel = async ({ limits = 10, order_by = "libro_id_ASC", page = 1 }) => {
-  // const [prefijo, campo, direccion] = order_by.split('_');
+const getItemsModel = async ({ limits = 3, order_by = "libro_id_ASC", page = 1 }) => {
+  const [prefijo, campo, direccion] = order_by.split('_');
   // direccion = direccion.toUpperCase() === "ASC" ? "ASC" : "DESC";
-  // const offset = (page - 1) * limits
-  const sqlQuery = "SELECT * from libros";
+  const offset = (page - 1) * limits;
+  const sqlQuery = format("SELECT * FROM libros ORDER BY %s_%s %s LIMIT %s OFFSET %s", prefijo, campo, direccion, limits, offset);
+
   // const result = await pool.query(sqlQuery);
-
-
   const { rows: libros } = await pool.query(sqlQuery);
   if (libros.length === 0) {
     return [];
   }
 
   const librosId = libros.map(libro => libro.libro_id);
-  let librosString= "'{" + librosId.join(",") + "}'";
+  let librosString = "'{" + librosId.join(",") + "}'";
 
   const categoriasQuery = format(`SELECT lc.libro_id, cat.categoria_nombre FROM categorias AS cat
     LEFT JOIN libros_categorias AS lc ON cat.categoria_id = lc.categoria_id
@@ -50,7 +48,7 @@ const getItemsModel = async ({ limits = 10, order_by = "libro_id_ASC", page = 1 
 
 const getItemModel = async (id) => {
   // Buscamos un libro específico por su id
-  const queryLibro = `${selectString} WHERE libro_id = $1`;
+  const queryLibro = `SELECT * FROM libros WHERE libro_id = $1`;
 
   //La query de las categorias
   const queryCategorias = `SELECT cat.categoria_nombre FROM categorias AS cat
@@ -61,14 +59,16 @@ const getItemModel = async (id) => {
   const queryComentarios = ` SELECT c.* FROM comentarios AS c
     WHERE c.libro_id = $1`;
 
-  const { rows: libroResult } = await pool.query(queryLibro, [id]);
-  const { rows: categorias } = await pool.query(queryCategorias, [id]);
-  const { rows: comentarios } = await pool.query(queryComentarios, [id]);
-  //Se retornan las columnas del libro más sus categorías y comentarios
-  return ({
-    ...libroResult, categorias, comentarios,
-    calificacion: comentarios.reduce((acc, comment) => acc + comment.comentario_calificacion, 0) / (comentarios?.length > 0 ? comentarios.length : 1) || 0,
-  });
+  const libroResult = await pool.query(queryLibro, [id]);
+  if (libroResult.rowCount > 0) {
+    const { rows: categorias } = await pool.query(queryCategorias, [id]);
+    const { rows: comentarios } = await pool.query(queryComentarios, [id]);
+    //Se retornan las columnas del libro más sus categorías y comentarios
+    return ({
+      ...libroResult.rows[0], categorias, comentarios,
+      calificacion: comentarios.reduce((acc, comment) => acc + comment.comentario_calificacion, 0) / (comentarios?.length > 0 ? comentarios.length : 1) || 0,
+    });
+  }
 };
 
 const getBookCategories = async (id) => {

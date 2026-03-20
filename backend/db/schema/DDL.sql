@@ -42,13 +42,14 @@ CREATE TABLE comentarios (
 CREATE TABLE carritos (
     carrito_id INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     usuario_id INT,
-    carrito_activo BOOLEAN,
+    carrito_activo BOOLEAN DEFAULT TRUE,
     FOREIGN KEY(usuario_id) REFERENCES usuarios(usuario_id) ON DELETE CASCADE
 );
 CREATE TABLE carrito_libros (
     carrito_id INT,
     libro_id INT,
     cantidad SMALLINT,
+    PRIMARY KEY (carrito_id, libro_id),
     FOREIGN KEY(carrito_id) REFERENCES carritos(carrito_id) ON DELETE CASCADE,
     FOREIGN KEY(libro_id) REFERENCES libros(libro_id) ON DELETE CASCADE,
     CHECK (cantidad >= 0)
