@@ -123,10 +123,23 @@ function Gallery() {
       <FilterBar filter={filter} setFilter={setFilter} />
 
       {/* ORDER BY */}
-      <div style={{ marginBottom: "20px" }}>
+      <div style={{ 
+  marginBottom: "20px",
+  display: "flex",
+  justifyContent: "center"
+    }}>
         <select
           value={orderBy}
           onChange={(e) => setOrderBy(e.target.value)}
+          style={{
+            padding: "12px",
+            backgroundColor: "var(--bg-space)",
+            border: "1px solid var(--bg-border)",
+            color: "var(--text-light)",
+            borderRadius: "4px",
+            fontSize: "0.9rem",
+            outline: "none"
+          }}
         >
           <option value="">Ordenar por</option>
           <option value="libro_titulo_ASC">Título A-Z</option>
