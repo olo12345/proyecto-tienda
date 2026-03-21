@@ -1,64 +1,89 @@
-import pool from "./../db/dbconfig.js";
-import format from "pg-format";
+import client from "./../db/dbconfig.js";
 
 const createOrderModel = async (userId, cart) => {
   try {
-    // hay que tener una tabla "compras" o sería el carrito? verificar
-    const queryCompra = "INSERT INTO pedidos (usuario_id) VALUES ($1) RETURNING carrito_id;";
-    const resCompra = await pool.query(queryCompra, [userId]);
-    const compraId = resCompra.rows[0].id;
+    //se utiliza un cliente para realizar una transacción y poder hacer rollback en caso de un error inesperado a mitad de proceso
+    const client = await pool.connect();
+    await client.query('BEGIN');
 
-    let queryDetalle = "INSERT INTO carrito_libros (compra_id, libro_id, cantidad) VALUES";
-    let placeholders = []
-    let values = [];
-    for (const item of cart) {
-      placeholders.push('(%s, %s, %s)');
-      values.push(compraId, item.id, item.cantidad);
-    }
-    queryDetalle += placeholders.join(", ");
-    formattedQuery = format(queryDetalle, ...values);
-    await pool.query(formattedQuery);
+    const librosId = '{' + cart.map((libro) => libro.libro_id) + '}';
+    const precioLibros = await client.query('SELECT libro_id, libro_precio FROM libros WHERE libro_id = ANY($1)', librosId)
+    const totalPrecio = precioLibros.reduce((acc, libroFront) => {
+      //Esto se hace para sacar los precios del backend y evitar manipulación maliciosa
+      const libro = precioLibros.rows.find(libroDb => libroDb.libro_id === libroFront.libro_id);
+      return acc + (libro.libro_precio * libroFront.libro_cantidad);
+    }, 0);
 
-    // Confirmamos los cambios en PostgreSQL
-    await pool.query("COMMIT");
 
-    return compraId; // Devolvemos el número de orden generado
+    const {rows: resultPedido} = await client.query(
+      'INSER INTO pedidos (usuario_id, pedido_costo_total, pedido_status) VALUES ($1, $2, $3) returning pedido_id',
+      [userId, totalPrecio, 'pagado']
+    );
+
+    await client.query('UPDATE carritos SET carrito_activo = FALSE WHERE carrito_id = $1', [cart.carrito_id])
+
+    await client.query("COMMIT");
+
+    return resultPedido; // Devolvemos el número de orden generado
   } catch (error) {
-    // Si algo falla, deshacemos todo
+    await client.query ('ROLLBACK');
     throw error; // Lanzamos el error para que el controlador lo atrape
+  }
+  finally {
+    client.release();
   }
 };
 
 const getCartModel = async (userId) => {
   const query = `SELECT cl.libro_id, cl.cantidad, l.libro_titulo, l.libro_precio
   FROM carrito_libros AS cl
-  JOIN carritos AS c ON cl.compra_id = c.compra_id
+  JOIN carritos AS c ON cl.carrito_id = c.carrito_id
   JOIN libros l ON cl.libro_id = l.libro_id
   WHERE c.usuario_id = $1`;
-  const { rows } = await pool.query(query, [userId]);
+  const { rows } = await client.query(query, [userId]);
   return rows;
+}
+
+const updateCartModel = async ({usuario_id, libro_id, libro_cantidad}) => {
+  const carritoResult = await pool.query('SELECT carrito_id FROM carritos WHERE usuario_id = $1', [usuario_id]);
+
+  if (carritoResult.rowcount === 0) {
+    const {rows: newCart} = await pool.query('INSER INTO carritos (usuario_id, carrito_activo) VALUES ($1, $2) RETURNING carrito_id', [usuario_id, 'TRUE']);
+  }
+  console.log('newCart', newCart);
+  const carritoId = newCart ? newCart[0].carrito_id : carritoResult.rows[0].carrito_id;
+
+  const addBookQuery = `INSERT INTO carrito_libros (carrito_id, libro_id, cantidad)
+  VALUES ($1, $2, $3)
+  ON CONFLICT (carrito_id, libro_id)
+  DO UPDATE SET cantidad = $3
+  WHERE carrito_id = $1 AND libro_id = $2`;
+
+  await pool.query(addBookQuery, [carritoId, libro_id, libro_cantidad]);
 }
 
 const deleteItemModel = async (userId, libroId) => {
   const query = `DELETE FROM carrito_libros AS cl
   USING carritos AS c
-  WHERE cl.compra_id = c.compra_id
+  WHERE cl.carrito_id = c.carrito_id
   AND c.usuario_id = $1
   AND cl.libro_id = $2`;
-  await pool.query(query, [userId, libroId]);
+  await client.query(query, [userId, libroId]);
 }
+
 
 const deleteCartModel = async (userId) => {
   const query = `DELETE FROM carrito_libros AS cl
   USING carritos AS c
-  WHERE cl.compra_id = c.compra_id
+  WHERE cl.carrito_id = c.carrito_id
   AND c.usuario_id = $1`;
-  await pool.query(query, [userId]);
+  await client.query(query, [userId]);
 }
 
 export {
   createOrderModel,
   getCartModel,
+  updateCartModel,
   deleteItemModel,
-  deleteCartModel
+  deleteCartModel,
 };

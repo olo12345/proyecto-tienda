@@ -38,7 +38,7 @@ const getItem = async (req, res) => {
     try {
         const { id } = req.params;
         const libro = await getItemModel(id);
-        console.log("se encontró el libro con ID", id, libro)
+        // console.log("se encontró el libro con ID", id, libro)
         if (!libro) {
             return res.status(404).json({ message: "Libro not found" });
         }
