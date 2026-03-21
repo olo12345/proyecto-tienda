@@ -6,7 +6,6 @@ import {
     createItemModel,
     editItemModel,
     addComentarioModel,
-    createCategoriaModel
 } from "./../models/libro.model.js";
 
 const getAllItems = async (_, res) => {
@@ -64,8 +63,10 @@ const getItemsFilter = async (req, res) => {
 
 const createItem = async (req, res) => {
     try {
-        const { titulo, autor, precio, stock, categorias, descripcion, imagen_url, libro_fecha_publicacion } = req.body;
-        const newLibro = await createItemModel({ titulo, autor, precio, stock, categorias, descripcion, imagen_url, libro_fecha_publicacion })
+        console.log("Creando el libro en controller", req.body);
+        const { libro_titulo, libro_autor, libro_precio, libro_stock, libro_categorias, libro_descripcion, libro_imagen, libro_fecha_publicacion } = req.body;
+        const newLibro = await createItemModel({ libro_titulo, libro_autor, libro_precio, libro_stock, libro_categorias, libro_descripcion, libro_imagen, libro_fecha_publicacion })
+        console.log("Libro creado correctamente", newLibro)
         res.status(201).json(newLibro);
 
     } catch (error) {
@@ -77,12 +78,13 @@ const createItem = async (req, res) => {
 const editItem = async (req, res) => {
     try {
         const { id } = req.params;
-        const { titulo, autor, precio, stock, categorias, descripcion, imagen_url, libro_fecha_publicacion } = req.body;
-        const updatedLibro = await editItemModel(id, { titulo, autor, precio, stock, categorias, descripcion, imagen_url, libro_fecha_publicacion })
+        const { libro_titulo, libro_autor, libro_precio, libro_stock, libro_categorias, libro_descripcion, libro_imagen_url, libro_fecha_publicacion } = req.body;
+        const updatedLibro = await editItemModel(id, { libro_titulo, libro_autor, libro_precio, libro_stock, libro_categorias, libro_descripcion, libro_imagen_url, libro_fecha_publicacion })
         res.status(200).json(updatedLibro);
     }
     catch (error) {
-        res.status(500).json({ error: error });
+        console.error(error);
+        res.status(500).json({ message: "Ocurrió un error al realizar la edición", error: error });
     }
 }
 
@@ -97,16 +99,6 @@ const addComentario = async (req, res) => {
     }
 }
 
-const createCategoria = async (req, res) => {
-    try {
-        const { nombreCategoria } = req.body;
-        const nuevaCategoria = await createCategoriaModel(nombreCategoria)
-        res.status(201).json(nuevaCategoria);
-    } catch (error) {
-        res.status(500).json({ error: error });
-    }
-}
-
 export {
     getItem,
     getAllItems,
@@ -115,7 +107,6 @@ export {
     createItem,
     editItem,
     addComentario,
-    createCategoria
 }
 
 // export const libroController = {

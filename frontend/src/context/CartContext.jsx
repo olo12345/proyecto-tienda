@@ -9,14 +9,13 @@ export const CartProvider = ({ children }) => {
   const [cart, setCart, clearCart] = useLocalStorage('cart', []);
 
   const addToCart = (product) => {
-    //temporal por ajuste de api
-    //product = {...product, quantity: 1}
     const bookToAdd = {
       ...product,
       libro_id: product.libro_id || product.id, // Compatibilidad si el objeto trae id o libro_id
       libro_precio: product.libro_precio || product.price,
       cantidad: 1
   };
+    console.log({totalPrice});
 
     setCart((prev) => {
       const exists = prev.find((item) => item.libro_id === bookToAdd.libro_id);
@@ -28,17 +27,18 @@ export const CartProvider = ({ children }) => {
         )
       }
 
-      return [...prev, boookToAdd]
+      return [...prev, bookToAdd]
     })
+    console.log({cart});
 
   }
 
   const removeFromCart = (productId) => {
-    setCart((prev) => prev.filter((item) => (item.libro_id || item.id) !== productId))
+    setCart((prev) => prev.filter((item) => item.libro_id !== productId))
   }
 
   const updateQuantity = (productId, newQuantity) => {
-    setCart((prev) => prev.map((item) => (item.libro_id || item.id) === productId
+    setCart((prev) => prev.map((item) => item.libro_id === productId
     ? { ...item, cantidad: Math.max(1, newQuantity) }
       : item,
     ),
@@ -48,7 +48,7 @@ export const CartProvider = ({ children }) => {
   // const clearCart = () => setCart([]);
 
   const totalItems = cart.reduce((acc, item) => acc + (item.cantidad || 0), 0);
-  const totalPrice = cart.reduce((acc, item) => acc + (item.cantidad * (item.libro_precio || 0)), 0);
+  const totalPrice = cart.reduce((acc, item) => acc + item.cantidad * item.libro_precio || 0, 0);
 
   return (
     <CartContext.Provider

@@ -37,13 +37,13 @@ const AuthProvider = ({ children }) => {
             if (response.token) { //había escrito "roken"!!!!!!!!!!!
                 const { token: jwtToken, user: userData } = response;
                 userData.role = userData.usuario_rol || userData.rol || "user";
-
+                userData.name = userData.nombre
                 setToken(jwtToken);
                 setUser(userData);
 
                 return { success: true };
             }
-            
+
             return { success: false, error: 'Credenciales inválidas' };
         } catch (error) {
             return {

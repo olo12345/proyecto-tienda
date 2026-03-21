@@ -6,20 +6,20 @@ import { useBooks } from "./../../hooks/useBooks"
 function CreatePost() {
   const navigate = useNavigate();
   const { id } = useParams(); // Si hay un ID en la URL, significa que estamos editando
-  const isEditing = Boolean(id);
+  let isEditing = Boolean(id);
 
-  const { book, fetchBookByID, updateBook, addBook } = useBooks();
+  const { fetchBookByID, updateBook, addBook } = useBooks();
 
 
   const [formData, setFormData] = useState({
-      titulo: "",
-      autor: "",
-      descripcion: "",
-      precio: "",
-      categorias: "",
-      stock: "",
-      imagen_url: "" // ver si da tiempo de agregar la validación de seguridad que vi en ig 
-      // (para evitar que suban un virus solo por cambiarle la extensión)
+    titulo: "",
+    autor: "",
+    descripcion: "",
+    precio: "",
+    categorias: "",
+    stock: "",
+    imagen_url: "" // ver si da tiempo de agregar la validación de seguridad que vi en ig
+    // (para evitar que suban un virus solo por cambiarle la extensión)
   });
 
 
@@ -44,28 +44,32 @@ function CreatePost() {
     });
   };
 
+
+  // const useFetchBookById = useEffectEvent((id) => fetchBookByID(id));
   useEffect(() => {
     if (isEditing) {
       console.log("Modo edición activado para el libro con ID:", id);
-      fetchBookByID(id)
+        fetchBookByID(id)
         .then((data) => {
           if (data) {
-            // Mapeamos lo que viene del back al estado del form
-            setFormData({
-              titulo: data.libro_titulo || "",
-              autor: data.libro_autor || "",
-              descripcion: data.libro_descripcion || "",
-              precio: data.libro_precio || "",
-              categorias: data.libro_categorias || "",
-              stock: data.libro_stock || "",
-              imagen_url: data.libro_imagen || ""
-            });
-          }
-        })
-        .catch((err) => {
-          console.error("Error al obtener el libro:", err);
-        });
-    }
+              // Mapeamos lo que viene del back al estado del form
+              // Pendiente mejorar con hateoas para evitar mapeo
+              console.log("modo edición data", data)
+              setFormData({
+                titulo: data.libro_titulo || "",
+                autor: data.libro_autor || "",
+                descripcion: data.libro_descripcion || "",
+                precio: data.libro_precio || "",
+                categorias: data.categorias?.length > 1 ? data.categorias.join(", ") : data.categorias[0].categoria_nombre  || "",
+                stock: data.libro_stock || "",
+                imagen_url: data.libro_imagen || ""
+              });
+            }
+          })
+          .catch((err) => {
+            console.error("Error al obtener el libro:", err);
+          });
+      };
   }, [id, isEditing, fetchBookByID]);
 
   const handleSubmit = async (e) => {
@@ -77,10 +81,10 @@ function CreatePost() {
       libro_autor: formData.autor,
       libro_descripcion: formData.descripcion,
       libro_precio: Number(formData.precio),
-      libro_categorias: formData.categorias,
+      libro_categorias: formData.categorias?.split(","),
       libro_stock: Number(formData.stock),
       libro_imagen: formData.imagen_url,
-      libro_fecha_publicacion: new Date().toISOString()
+      libro_fecha_publicacion: formData.fecha_publicacion || null,
     };
 
     if (isEditing) {
@@ -97,8 +101,8 @@ function CreatePost() {
         alert("Error al actualizar la publicación");
       };
     } else {
-      try{
-        console.log("Enviando nuevo libro a 'The Passenger Books'...");
+      try {
+        console.log("Enviando nuevo libro a 'The Passenger Books'...", payloadToSend);
         const res = await addBook(payloadToSend);
         if (res) {
           alert("¡Libro creado con éxito!");

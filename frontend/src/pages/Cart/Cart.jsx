@@ -1,6 +1,6 @@
 import { useState } from "react";
-import {useCart} from "./../../hooks/useCart"
-import { apiProducts } from "../../services/api";
+import { useCart } from "./../../hooks/useCart"
+import { apiProducts } from "./../../services/api";
 
 function Cart() {
   const { cart, updateQuantity, removeFromCart, totalPrice, clearCart } = useCart();
@@ -8,7 +8,7 @@ function Cart() {
   const [showConfirm, setShowConfirm] = useState(false);
 
   const increase = (id, count) => updateQuantity(id, count + 1)
-  const decrease = (id, count) => count === 1 ? removeFromCart(id) :updateQuantity(id, count - 1)
+  const decrease = (id, count) => count === 1 ? removeFromCart(id) : updateQuantity(id, count - 1)
 
 
   const handleCheckout = async () => {
@@ -22,18 +22,12 @@ function Cart() {
         return;
       }
 
-      // Adaptamos para conectar con el back
-      // se espera "id" y "cantidad"
-      const formattedCart = cart.map((book) => ({
-        libro_id: book.libro_id,
-        cantidad: book.cantidad // homogeneización de quantity a cantidad despue´s de error de comunicación - rehomogeneización cambiando todo a español
-      }));
-
       // Petición al ednpoint
-      const res = await apiProducts.post("/checkouts", { cart: formattedCart });
+      const res = await apiProducts.post("/checkouts/send", cart);
 
       // el model de cheackout devolvía compraID
-      const idOrden = res.data.orden_id || res.data.compraId || res.data.id;
+      console.log(res);
+      const idOrden = res.data.orden_id;
       setMessage(`Pedido enviado correctamente! Orden N°: ${idOrden}`);
       setShowConfirm(true);
 
@@ -75,7 +69,7 @@ function Cart() {
           boxShadow: "0 8px 30px rgba(0,0,0,0.3)"
         }}>
           {/* Mapeamos los libros */}
-          {cart.map((book) => (
+          {cart?.map((book) => (
             <div key={book.libro_id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid var(--bg-border)", paddingBottom: "20px", marginBottom: "20px" }}>
 
               <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
@@ -87,7 +81,7 @@ function Cart() {
                 <div>
                   <h3 style={{ margin: "0 0 8px 0", fontSize: "1.1rem", color: "var(--text-light)" }}>{book.libro_titulo}</h3>
                   <p style={{ margin: 0, color: "var(--accent-gold)", fontWeight: "bold", fontSize: "1.1rem" }}>
-                    ${book.libro_precio.toLocaleString("es-CL")}
+                    ${book.libro_precio?.toLocaleString("es-CL")}
                   </p>
                 </div>
               </div>
@@ -119,7 +113,7 @@ function Cart() {
           <div style={{ display: "flex", justifyContent: "space-between", marginTop: "30px", fontSize: "1.5rem", fontWeight: "bold" }}>
             <span style={{ color: "var(--text-light)" }}>Total:</span>
             <span style={{ color: "var(--accent-gold)", textShadow: "0 0 10px rgba(245, 166, 35, 0.2)" }}>
-              ${totalPrice.toLocaleString("es-CL")}
+              ${totalPrice?.toLocaleString("es-CL")}
             </span>
           </div>
 

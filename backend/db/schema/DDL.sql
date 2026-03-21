@@ -26,6 +26,7 @@ CREATE TABLE libros (
     libro_updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
     CHECK (libro_stock >= 0),
     CHECK (libro_precio >= 0)
+
 );
 CREATE TABLE comentarios (
     comentario_id INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
@@ -74,7 +75,7 @@ CREATE TABLE pedidos (
 );
 CREATE TABLE categorias (
     categoria_id INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    categoria_nombre VARCHAR(255) NOT NULL
+    categoria_nombre VARCHAR(255) NOT NULL UNIQUE
 );
 CREATE TABLE libros_categorias (
     libro_id INT,

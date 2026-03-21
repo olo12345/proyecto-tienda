@@ -7,7 +7,7 @@ const BooksContext = createContext()
 
 const BooksProvider = ({ children }) => {
     const [books, setBooks] = useLocalStorage('books', []);
-    const [book, setBook, clearBook] = useLocalStorage('book', {});
+    const [book, _, clearBook] = useLocalStorage('book', {});
 
     const fetchBooks = async (params) => {
         return getProducts(params)
@@ -56,18 +56,16 @@ const BooksProvider = ({ children }) => {
             })
     }
 
-    const updateUpdateBook = useEffectEvent((product) => updateBook(product));
+    // const updateUpdateBook = useEffectEvent((product) => updateBook(product));
 
     //Cuando esté el backend para entregar la lista de destacados
     // const getBooksByRating = () => {
     // }
 
     const fetchBookByID = async (productId) => {
-        //se medio rompe porque la api se reinicia a veces y devuelve el producto inicializado.
         return getProduct(productId)
             .then((data) => {
-                // res.data = { ...res.data, stock: res.data.installments, category: res.data.style }
-                setBook(data);
+                // setBook(data);
                 return data;
             })
     }
@@ -77,7 +75,7 @@ const BooksProvider = ({ children }) => {
         return deleteProduct(productId)
             .then(() => {
                 fetchBooks();
-    }) 
+    })
     .catch(() => console.log("Ocurrió un error eliminando el libro desde el back"));
 };
 

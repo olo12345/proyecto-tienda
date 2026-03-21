@@ -1,22 +1,21 @@
-import client from "./../db/dbconfig.js";
+import pool from "./../db/dbconfig.js";
 
 const createOrderModel = async (userId, cart) => {
+  const client = await pool.connect();
   try {
     //se utiliza un cliente para realizar una transacción y poder hacer rollback en caso de un error inesperado a mitad de proceso
-    const client = await pool.connect();
     await client.query('BEGIN');
 
     const librosId = '{' + cart.map((libro) => libro.libro_id) + '}';
-    const precioLibros = await client.query('SELECT libro_id, libro_precio FROM libros WHERE libro_id = ANY($1)', librosId)
-    const totalPrecio = precioLibros.reduce((acc, libroFront) => {
+    const { rows: precioLibros } = await client.query('SELECT libro_id, libro_precio FROM libros WHERE libro_id = ANY($1)', [librosId])
+    const totalPrecio = cart.reduce((acc, libroFront) => {
       //Esto se hace para sacar los precios del backend y evitar manipulación maliciosa
-      const libro = precioLibros.rows.find(libroDb => libroDb.libro_id === libroFront.libro_id);
-      return acc + (libro.libro_precio * libroFront.libro_cantidad);
+      const libro = precioLibros.find((libroDb) => libroDb.libro_id === libroFront.libro_id);
+      return acc + (libro.libro_precio * libroFront.cantidad);
     }, 0);
 
-
-    const {rows: resultPedido} = await client.query(
-      'INSER INTO pedidos (usuario_id, pedido_costo_total, pedido_status) VALUES ($1, $2, $3) returning pedido_id',
+    const { rows: resultPedido } = await client.query(
+      'INSERT INTO pedidos (usuario_id, pedido_costo_total, pedido_status) VALUES ($1, $2, $3) returning pedido_id',
       [userId, totalPrecio, 'pagado']
     );
 
@@ -24,9 +23,9 @@ const createOrderModel = async (userId, cart) => {
 
     await client.query("COMMIT");
 
-    return resultPedido; // Devolvemos el número de orden generado
+    return resultPedido[0].pedido_id; // Devolvemos el número de orden generado
   } catch (error) {
-    await client.query ('ROLLBACK');
+    await client.query('ROLLBACK');
     throw error; // Lanzamos el error para que el controlador lo atrape
   }
   finally {
@@ -41,16 +40,17 @@ const getCartModel = async (userId) => {
   JOIN libros l ON cl.libro_id = l.libro_id
   WHERE c.usuario_id = $1`;
   const { rows } = await client.query(query, [userId]);
-  return rows;
+  return rows[0];
 }
 
-const updateCartModel = async ({usuario_id, libro_id, libro_cantidad}) => {
+const updateCartModel = async ({ usuario_id, libro_id, libro_cantidad }) => {
   const carritoResult = await pool.query('SELECT carrito_id FROM carritos WHERE usuario_id = $1', [usuario_id]);
 
+  let newCart = [];
   if (carritoResult.rowcount === 0) {
-    const {rows: newCart} = await pool.query('INSER INTO carritos (usuario_id, carrito_activo) VALUES ($1, $2) RETURNING carrito_id', [usuario_id, 'TRUE']);
+    newCart = await pool.query('INSER INTO carritos (usuario_id, carrito_activo) VALUES ($1, $2) RETURNING carrito_id', [usuario_id, 'TRUE']).rows;
+    console.log('newCart', newCart);
   }
-  console.log('newCart', newCart);
   const carritoId = newCart ? newCart[0].carrito_id : carritoResult.rows[0].carrito_id;
 
   const addBookQuery = `INSERT INTO carrito_libros (carrito_id, libro_id, cantidad)
@@ -70,7 +70,6 @@ const deleteItemModel = async (userId, libroId) => {
   AND cl.libro_id = $2`;
   await client.query(query, [userId, libroId]);
 }
-
 
 const deleteCartModel = async (userId) => {
   const query = `DELETE FROM carrito_libros AS cl

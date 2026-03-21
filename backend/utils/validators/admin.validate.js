@@ -1,5 +1,6 @@
 const isAdmin = (req, res, next) => {
     const user = req.user;
+    console.log("admin req", user);
 
     // Validamos que exista el usuario, que tenga un rol y que sea exactamente 'admin'
     if (user && user.rol === 'admin') {

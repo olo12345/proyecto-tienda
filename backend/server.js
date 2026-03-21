@@ -25,7 +25,7 @@ app.use("/api/auth", authRouter);
 app.use("/api/libros", libroRouter);
 app.use("/api/checkouts", checkoutRouter);
 app.use((_, res) => {
-  res.status(404).json({ error: "Not Found" });
+  res.status(404).json({ error: "No se encontró la ruta especificada" });
 });
 
 const PORT = process.env.PORT || 5001;
