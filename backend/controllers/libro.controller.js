@@ -69,6 +69,7 @@ const createItem = async (req, res) => {
         res.status(201).json(newLibro);
 
     } catch (error) {
+        console.error("ERROR EN POSTGRESQL:", error.message, error.detail);
         res.status(500).json({ error: error });
     }
 }

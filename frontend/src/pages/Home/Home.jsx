@@ -87,8 +87,8 @@ function Home() {
         <div style={{ display: "flex", flexWrap: "wrap", gap: "30px", justifyContent: "center" }}>
           {featuredBooks?.map(book => (
             <div
-              key={book.id}
-              onClick={() => navigate(`/store/book/${book.id}`)}
+              key={book.libro_id}
+              onClick={() => navigate(`/store/book/${book.libro_id}`)}
               style={{
                 width: "220px",
                 border: "1px solid rgba(255, 255, 255, 0.1)",

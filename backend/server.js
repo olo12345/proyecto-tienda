@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 import cors from 'cors';
 import express from "express";
 
-dotenv.config();
+dotenv.config({ debug: true }); //cambio esto pa' ver por qué no funciona la w....
 
 //rutas
 import authRouter from "./routes/auth.routes.js";

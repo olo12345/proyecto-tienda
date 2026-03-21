@@ -9,7 +9,8 @@ const AuthContext = createContext();
 const AuthProvider = ({ children }) => {
 
     const [user, setUser, removeUser] = useLocalStorage('user', null, true);
-    const [token, setToken, removeToken] = useLocalStorage('token', null, true); // Se incorpora para conversación con el futuro bacj
+    const [token, setToken, removeToken] = useLocalStorage('token', null, false); // Se incorpora para conversación con el futuro bacj
+    // aquí ponemos esto falso por un posible doble cifrado
     const [initialLoading, setInitialLoading] = useState(true);
     const [authLoading, setAuthLoading] = useState(false);
 

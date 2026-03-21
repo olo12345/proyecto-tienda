@@ -76,7 +76,7 @@ function Cart() {
         }}>
           {/* Mapeamos los libros */}
           {cart.map((book) => (
-            <div key={book.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid var(--bg-border)", paddingBottom: "20px", marginBottom: "20px" }}>
+            <div key={book.libro_id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid var(--bg-border)", paddingBottom: "20px", marginBottom: "20px" }}>
 
               <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
                 <div style={{ width: "70px", height: "70px", backgroundColor: "var(--bg-space)", borderRadius: "4px", border: "1px solid var(--bg-border)", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>

@@ -22,6 +22,21 @@ function CreatePost() {
       // (para evitar que suban un virus solo por cambiarle la extensión)
   });
 
+
+  //incorporamos esta definición de estilo base
+  const inputStyle = {
+    width: "100%",
+    padding: "12px",
+    borderRadius: "4px",
+    border: "1px solid var(--bg-border)",
+    backgroundColor: "var(--bg-space)",
+    color: "var(--text-light)",
+    boxSizing: "border-box",
+    outline: "none",
+    transition: "border-color 0.2s ease"
+  };
+
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -37,13 +52,13 @@ function CreatePost() {
           if (data) {
             // Mapeamos lo que viene del back al estado del form
             setFormData({
-              titulo: data.libro_titulo || data.titulo || "",
-              autor: data.libro_autor || data.autor || "",
-              descripcion: data.libro_descripcion || data.descripcion || "",
-              precio: data.libro_precio || data.precio || "",
-              categorias: data.libro_categorias || data.categorias || "",
-              stock: data.libro_stock || data.stock || "",
-              imagen_url: data.libro_imagen || data.imagen_url || ""
+              titulo: data.libro_titulo || "",
+              autor: data.libro_autor || "",
+              descripcion: data.libro_descripcion || "",
+              precio: data.libro_precio || "",
+              categorias: data.libro_categorias || "",
+              stock: data.libro_stock || "",
+              imagen_url: data.libro_imagen || ""
             });
           }
         })
@@ -51,20 +66,20 @@ function CreatePost() {
           console.error("Error al obtener el libro:", err);
         });
     }
-  }, [id, isEditing]);
+  }, [id, isEditing, fetchBookByID]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     // Formateamos los datos según el contrato del backend
     const payloadToSend = {
-      titulo: formData.titulo,
-      autor: formData.autor,
-      descripcion: formData.descripcion,
-      precio: Number(formData.precio),
-      categorias: formData.categorias,
-      stock: Number(formData.stock),
-      imagen_url: formData.imagen_url,
+      libro_titulo: formData.titulo,
+      libro_autor: formData.autor,
+      libro_descripcion: formData.descripcion,
+      libro_precio: Number(formData.precio),
+      libro_categorias: formData.categorias,
+      libro_stock: Number(formData.stock),
+      libro_imagen: formData.imagen_url,
       libro_fecha_publicacion: new Date().toISOString()
     };
 
@@ -82,18 +97,17 @@ function CreatePost() {
         alert("Error al actualizar la publicación");
       };
     } else {
-      console.log("Creando nueva publicación en backend:", payloadToSend);
-      addBook(payloadToSend)
-        .then((res) => {
-          if (res) {
-            alert("Publicación creada con éxito");
-            navigate("/admin/store");
-          }
-        })
-        .catch((err) => {
-          console.error("Error al crear la publicación:", err);
-          alert("Error al crear la publicación");
-        })
+      try{
+        console.log("Enviando nuevo libro a 'The Passenger Books'...");
+        const res = await addBook(payloadToSend);
+        if (res) {
+          alert("¡Libro creado con éxito!");
+          navigate("/admin/store");
+        }
+      } catch (err) {
+        console.error("Error 401 Unauthorized:", err.response?.data || err.message);
+        alert("No tienes permisos para crear libros. Reintenta iniciando sesión.");
+      }
     }
   };
 
@@ -120,24 +134,14 @@ function CreatePost() {
             onChange={handleChange}
             required
             placeholder="Ej: The Art and Science of Premium Gin"
-            style={{
-              width: "100%",
-              padding: "12px",
-              borderRadius: "4px",
-              border: "1px solid var(--bg-border)",
-              backgroundColor: "var(--bg-space)",
-              color: "var(--text-light)",
-              boxSizing: "border-box",
-              outline: "none",
-              transition: "border-color 0.2s ease"
-            }}
+            style={inputStyle}
             onFocus={(e) => e.target.style.borderColor = "var(--accent-cyan)"}
             onBlur={(e) => e.target.style.borderColor = "var(--bg-border)"}
           />
         </div>
 
         <div style={{ marginBottom: "20px" }}>
-          <label style={{ display: "block", marginBottom: "8px", fontWeight: "bold", color: "var(--text-muted)", fontSize: "0.9rem" }}>Categoría:</label>
+          <label style={{ display: "block", marginBottom: "8px", fontWeight: "bold", color: "var(--text-muted)", fontSize: "0.9rem" }}>Autor:</label>
           <input
             type="text"
             name="autor"
@@ -145,17 +149,7 @@ function CreatePost() {
             onChange={handleChange}
             required
             placeholder="Ej: Destilación, Negocios, Programación..."
-            style={{
-              width: "100%",
-              padding: "12px",
-              borderRadius: "4px",
-              border: "1px solid var(--bg-border)",
-              backgroundColor: "var(--bg-space)",
-              color: "var(--text-light)",
-              boxSizing: "border-box",
-              outline: "none",
-              transition: "border-color 0.2s ease"
-            }}
+            style={inputStyle}
             onFocus={(e) => e.target.style.borderColor = "var(--accent-cyan)"}
             onBlur={(e) => e.target.style.borderColor = "var(--bg-border)"}
           />
@@ -184,17 +178,7 @@ function CreatePost() {
             onChange={handleChange}
             required
             placeholder="Ej: Destilación, Negocios, Programación..."
-            style={{
-              width: "100%",
-              padding: "12px",
-              borderRadius: "4px",
-              border: "1px solid var(--bg-border)",
-              backgroundColor: "var(--bg-space)",
-              color: "var(--text-light)",
-              boxSizing: "border-box",
-              outline: "none",
-              transition: "border-color 0.2s ease"
-            }}
+            style={inputStyle}
             onFocus={(e) => e.target.style.borderColor = "var(--accent-cyan)"}
             onBlur={(e) => e.target.style.borderColor = "var(--bg-border)"}
           />
@@ -210,17 +194,7 @@ function CreatePost() {
               onChange={handleChange}
               required
               min="0"
-              style={{
-                width: "100%",
-                padding: "12px",
-                borderRadius: "4px",
-                border: "1px solid var(--bg-border)",
-                backgroundColor: "var(--bg-space)",
-                color: "var(--text-light)",
-                boxSizing: "border-box",
-                outline: "none",
-                transition: "border-color 0.2s ease"
-              }}
+              style={inputStyle}
               onFocus={(e) => e.target.style.borderColor = "var(--accent-cyan)"}
               onBlur={(e) => e.target.style.borderColor = "var(--bg-border)"}
             />
@@ -235,17 +209,7 @@ function CreatePost() {
               onChange={handleChange}
               required
               min="0"
-              style={{
-                width: "100%",
-                padding: "12px",
-                borderRadius: "4px",
-                border: "1px solid var(--bg-border)",
-                backgroundColor: "var(--bg-space)",
-                color: "var(--text-light)",
-                boxSizing: "border-box",
-                outline: "none",
-                transition: "border-color 0.2s ease"
-              }}
+              style={inputStyle}
               onFocus={(e) => e.target.style.borderColor = "var(--accent-cyan)"}
               onBlur={(e) => e.target.style.borderColor = "var(--bg-border)"}
             />
@@ -261,18 +225,7 @@ function CreatePost() {
             required
             rows="5"
             placeholder="Escribe una descripción detallada del libro..."
-            style={{
-              width: "100%",
-              padding: "12px",
-              borderRadius: "4px",
-              border: "1px solid var(--bg-border)",
-              backgroundColor: "var(--bg-space)",
-              color: "var(--text-light)",
-              boxSizing: "border-box",
-              resize: "vertical",
-              outline: "none",
-              transition: "border-color 0.2s ease"
-            }}
+            style={inputStyle}
             onFocus={(e) => e.target.style.borderColor = "var(--accent-cyan)"}
             onBlur={(e) => e.target.style.borderColor = "var(--bg-border)"}
           />

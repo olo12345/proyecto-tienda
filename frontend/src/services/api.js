@@ -18,9 +18,9 @@ export const apiProducts = axios.create({ baseURL: BASE_URL });
 export const apiUsers = axios.create({ baseURL: BASE_URL });
 
 const injectToken = (config) => {
-    const token = localStorage.getItem('token');
+    let token = localStorage.getItem('token');
     if (token) {
-        const cleanToken = token.replace(/['"]+/g, '');
+        const cleanToken = token.replace(/^"|"$/g, '');
         config.headers.Authorization = `Bearer ${cleanToken}`;
     }
     return config;
