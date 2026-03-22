@@ -60,7 +60,9 @@ function CreatePost() {
                 autor: data.libro_autor || "",
                 descripcion: data.libro_descripcion || "",
                 precio: data.libro_precio || "",
-                categorias: data.categorias?.length > 1 ? data.categorias.join(", ") : data.categorias[0].categoria_nombre  || "",
+                categorias: data.categorias 
+                    ? data.categorias.map(c => typeof c === 'object' ? c.categoria_nombre : c).join(", ") 
+                    : "",
                 stock: data.libro_stock || "",
                 imagen_url: data.libro_imagen || ""
               });

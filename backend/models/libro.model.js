@@ -1,4 +1,5 @@
-import pool from "./../db/dbconfig.js";
+// import { readFile } from "node:fs/promises"; again, la forma simulada de db
+import pool from "./../db/dbconfig.js"; // con esto sí tenemos una conexión a la db
 import format from "pg-format";
 
 const getAllItemsModel = async ({ order_by = "libro_id_ASC" }) => {
@@ -13,9 +14,8 @@ const getItemsModel = async ({ limits = 10, order_by = "libro_id_ASC", page = 1 
   const [prefijo, campo, direccion] = order_by.split('_');
   // const dir = direccion.toUpperCase() === "ASC" ? "ASC" : "DESC";
   const offset = (page - 1) * limits;
-  const sqlQuery = format("SELECT * FROM libros ORDER BY %s_%s %s LIMIT %s OFFSET %s", prefijo, campo, direccion, limits, offset);
+  const sqlQuery = format("SELECT * FROM libros ORDER BY %I_%I %s LIMIT %L OFFSET %L", prefijo, campo, dir, limits, offset);
 
-  // const result = await pool.query(sqlQuery);
   const { rows: libros } = await pool.query(sqlQuery);
   if (libros.length === 0) return [];
 
@@ -47,19 +47,14 @@ const getItemsModel = async ({ limits = 10, order_by = "libro_id_ASC", page = 1 
 };
 
 const getItemModel = async (id) => {
-  // Buscamos un libro específico por su id
   const queryLibro = `SELECT * FROM libros WHERE libro_id = $1`;
-
-  //La query de las categorias
   const queryCategorias = `SELECT cat.categoria_nombre FROM categorias AS cat
     LEFT JOIN libros_categorias AS lcat ON cat.categoria_id = lcat.categoria_id
     WHERE lcat.libro_id = $1`;
 
-  //La query de los comentarios
   const queryComentarios = `SELECT c.*, u.usuario_nombre as username
-  FROM comentarios AS c
-  JOIN usuarios as u
-  USING (usuario_id)
+    FROM comentarios AS c
+    JOIN usuarios as u USING (usuario_id)
     WHERE c.libro_id = $1
     ORDER BY c.comentario_id DESC`;
 
@@ -67,10 +62,13 @@ const getItemModel = async (id) => {
   if (libroResult.rowCount > 0) {
     const { rows: categorias } = await pool.query(queryCategorias, [id]);
     const { rows: comentarios } = await pool.query(queryComentarios, [id]);
-    //Se retornan las columnas del libro más sus categorías y comentarios
     return ({
-      ...libroResult.rows[0], categorias, comentarios,
-      calificacion: comentarios.reduce((acc, comment) => acc + comment.comentario_calificacion, 0) / (comentarios?.length > 0 ? comentarios.length : 1) || 0,
+      ...libroResult.rows[0],
+      categorias: categorias.map(c => c.categoria_nombre),
+      comentarios,
+      calificacion: comentarios.length > 0
+        ? comentarios.reduce((acc, comment) => acc + comment.comentario_calificacion, 0) / comentarios.length
+        : 0,
     });
   }
 };
@@ -83,9 +81,7 @@ const getBookCategories = async (id) => {
   return rows;
 };
 
-const getItemsFilterModel = async (
-  { limits = 10, page = 1, order_by = "libro_id_ASC", search = "", precio_max, precio_min, categoria, autor }
-) => {
+const getItemsFilterModel = async ({ limits = 10, page = 1, order_by = "libro_id_ASC", search = "", precio_max, precio_min, categoria, autor }) => {
   const [prefijo, campo, direccion] = order_by.split('_');
   const dir = direccion.toUpperCase() === "ASC" ? "ASC" : "DESC";
   const offset = (page - 1) * limits;
@@ -101,8 +97,7 @@ const getItemsFilterModel = async (
   let fValues = [];
 
   if (search && search.trim() !== "") {
-    filtros.push("(libro_titulo ILIKE %L OR libro_autor ILIKE %L)");
-    fValues.push(`%${search}%`, `%${search}%`);
+    filtros.push(format("(libro_titulo ILIKE %L OR libro_autor ILIKE %L)", `%${search}%`, `%${search}%`));
   };
   if (precio_max) {
     filtros.push(format("libro_precio <= %s", precio_max));
@@ -163,21 +158,12 @@ const getItemsFilterModel = async (
 };
 
 const createItemModel = async (libroData) => {
-  let bookValues = []
-  let bookQuery = []
-  const { libro_categorias } = libroData;
-  // const { libro_titulo, libro_autor, libro_precio, libro_stock, libro_categorias, libro_descripcion, libro_imagen = "", libro_fecha_publicacion } = libroData;
-  for (let [key, value] of Object.entries(libroData)) {
-    if (value != null && key !== "libro_categorias") {
-      bookValues.push(value);
-      bookQuery.push(key);
-    }
-  }
-  const sqlQuery = `INSERT INTO libros (${bookQuery.join(",")})
- VALUES %L RETURNING *`;
-  // const sqlQueryCategorias = `INSERT INTO categorias (categoria_n)`
-  const formattedQueryLibros = format(sqlQuery, [bookValues]);
-  const { rows: libro } = await pool.query(formattedQueryLibros);
+  const { libro_titulo, libro_autor, libro_descripcion, libro_precio, libro_stock, libro_imagen, libro_categorias } = libroData;
+
+  const sqlQuery = `INSERT INTO libros (libro_titulo, libro_autor, libro_descripcion, libro_precio, libro_stock, libro_imagen)
+    VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`;
+
+  const { rows: libro } = await pool.query(sqlQuery, [libro_titulo, libro_autor, libro_descripcion, libro_precio, libro_stock, libro_imagen]);
   const libroId = libro[0].libro_id;
 
   if (libro_categorias) {
@@ -198,7 +184,7 @@ const createItemModel = async (libroData) => {
       };
     }
   }
-  return ({ ...libro[0] });
+  return libro[0];
 };
 
 const editItemModel = async (id, libroData) => {
@@ -248,24 +234,23 @@ const addComentarioModel = async (comentarioData) => {
 };
 
 const getBooksByCommentsModel = async () => {
-  const comentariosQuery = `SELECT  libro_id, AVG(comentario_calificacion) as calificacion FROM comentarios
-    GROUP BY libro_id
-    ORDER BY calificacion DESC LIMIT 10`;
+  const comentariosQuery = `SELECT libro_id, AVG(comentario_calificacion) as calificacion FROM comentarios
+    GROUP BY libro_id ORDER BY calificacion DESC LIMIT 10`;
   const { rows: comentarios } = await pool.query(comentariosQuery);
-  const librosQuery = `SELECT * FROM libros WHERE libro_id = ANY($1)`;
-  const librosId = comentarios.map((libro) => libro.libro_id);
-  const { rows: libros } = await pool.query(librosQuery, [librosId])
-  const librosCalificacion = libros.map((libro) => {
-    return { ...libro, ...comentarios.filter(c => c.libro_id === libro.libro_id)[0] }
-  });
-  return librosCalificacion;
+  if (comentarios.length === 0) return [];
+
+  const librosId = comentarios.map((l) => l.libro_id);
+  const { rows: libros } = await pool.query(`SELECT * FROM libros WHERE libro_id = ANY($1)`, [librosId]);
+
+  return libros.map((libro) => ({
+    ...libro,
+    ...comentarios.find(c => c.libro_id === libro.libro_id)
+  }));
 };
 
-const deleteItemModel = async (libroId = -1) => {
-  const sqlQuery = "DELETE FROM libros WHERE libro_id = $1";
-  console.log(sqlQuery, libroId);
-  pool.query(sqlQuery, [libroId])
-}
+const deleteItemModel = async (libroId) => {
+  await pool.query("DELETE FROM libros WHERE libro_id = $1", [libroId]);
+};
 
 export {
   getAllItemsModel,
@@ -279,8 +264,3 @@ export {
   addComentarioModel,
   deleteItemModel,
 };
-
-// export const libroModel = {
-//   getAllItemsModel,
-//   getItemsModel,
-// };
