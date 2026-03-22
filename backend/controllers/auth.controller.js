@@ -7,7 +7,10 @@ const loginUser = async (req, res) => {
   try {
     //crear req.user en middleware validador
     const { email, password } = req.body; // pruebo temporalmente desde el body (despues devolver a user)
-    const result = await authModel.loginUserModel(email);
+    //Agregamos una normalizacioón para que no haya porblemas con los espacios o mayúsculas en el email
+    const emailNormalizado = email.toLowerCase().trim();
+
+    const result = await authModel.loginUserModel(emailNormalizado);
     if (result.rowCount === 0) {
       return res.status(401).json({ message: "Email o contraseña incorrectos" });
   }
@@ -52,14 +55,17 @@ const loginUser = async (req, res) => {
 const createUser = async (req, res) => {
   try {
     const { email, password, nombre, edad, rol } = req.body;
-    if (await authModel.isEmailRegistered(email)) {
+    // normalizam,os acá también para que se guarde todo en minusculas en en la db
+    const emailLimpio = email.toLowerCase().trim();
+
+    if (await authModel.isEmailRegistered(emailLimpio)) {
       return res.status(400).json({ message: "Este email ya está en uso" });
     }
 
     const hashedPassword = bcrypt.hashSync(password, 10);
 
     const newUser = {
-      email,
+      email: emailLimpio,
       password: hashedPassword,
       nombre,
       edad: Number(edad),

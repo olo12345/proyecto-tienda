@@ -218,8 +218,8 @@ function Register() {
               />
             </div>
 
-            {/* Temporal rol de admin */}
-            <div style={{ marginBottom: "30px" }}>
+            {/* Temporal rol de admin activar para crear el primer admin si no quieren hacerlo desde la db*/}
+            {/* <div style={{ marginBottom: "30px" }}>
               <label style={{ display: "block", color: "var(--text-muted)", fontWeight: "bold", fontSize: "0.9rem" }}>Rol</label>
               <select
                 name="role"
@@ -243,7 +243,7 @@ function Register() {
                 <option value="user">Usuario</option>
                 <option value="admin">Admin</option>
               </select>
-            </div>
+            </div> */}
 
             <button
               type="submit"
