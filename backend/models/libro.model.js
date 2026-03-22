@@ -11,7 +11,7 @@ const getAllItemsModel = async ({ order_by = "libro_id_ASC" }) => {
 
 const getItemsModel = async ({ limits = 10, order_by = "libro_id_ASC", page = 1 }) => {
   const [prefijo, campo, direccion] = order_by.split('_');
-  // direccion = direccion.toUpperCase() === "ASC" ? "ASC" : "DESC";
+  // const dir = direccion.toUpperCase() === "ASC" ? "ASC" : "DESC";
   const offset = (page - 1) * limits;
   const sqlQuery = format("SELECT * FROM libros ORDER BY %s_%s %s LIMIT %s OFFSET %s", prefijo, campo, direccion, limits, offset);
 
@@ -89,6 +89,13 @@ const getItemsFilterModel = async (
   const [prefijo, campo, direccion] = order_by.split('_');
   const dir = direccion.toUpperCase() === "ASC" ? "ASC" : "DESC";
   const offset = (page - 1) * limits;
+  let resultCategorias = []
+  if (categoria) {
+    const categoriasQuery = (`SELECT lc.libro_id, cat.categoria_nombre FROM categorias AS cat
+    LEFT JOIN libros_categorias AS lc ON cat.categoria_id = lc.categoria_id
+    WHERE cat.categoria_nombre ILIKE $1`);
+    resultCategorias = await pool.query(categoriasQuery, [`%${categoria}%`]);
+  }
 
   let filtros = [];
   let fValues = [];
@@ -105,16 +112,17 @@ const getItemsFilterModel = async (
     filtros.push(format("libro_precio >= %s", precio_min));
     fValues.push(precio_min);
   };
-  if (categoria) {
-    filtros.push(`EXISTS (
-        SELECT 1 FROM categorias AS cat
-        JOIN libros_categorias lc ON cat.categoria_id = lc.categoria_id
-        WHERE lc.libro_id = l.libro_id AND cat.categoria_nombre = %s)`);
-    fValues.push(categoria);
-  }
   if (autor) {
     filtros.push("libro_autor = %s");
     fValues.push(autor)
+  }
+  //Si no coincide ninguna categoría, devuelve vacío
+  if (resultCategorias.rowcount === 0) return []
+  else {
+    filtros.push("libro_id = ANY(%L)")
+    const catValue = resultCategorias.rows.filter(cat => cat.libro_id !== null).map(cat => cat.libro_id)
+    console.log({ catValue });
+    fValues.push(`{${catValue}}`);
   }
 
   let sqlQuery = "SELECT l.* FROM libros AS l";
@@ -123,12 +131,35 @@ const getItemsFilterModel = async (
   }
   fValues.push(prefijo, campo, dir, limits, offset)
   sqlQuery += ' ORDER BY %s_%s %s LIMIT %s OFFSET %s';
-  console.log(fValues, { sqlQuery });
   const formattedQuery = format(sqlQuery, ...fValues)
-  console.log({ formattedQuery });
 
-  const { rows } = await pool.query(formattedQuery);
-  return rows;
+  const { rows: libros } = await pool.query(formattedQuery);
+  if (libros.length === 0) return [];
+
+  const librosId = libros.map(libro => libro.libro_id);
+  console.log({ librosId })
+  const comentariosQuery = `SELECT * FROM comentarios WHERE libro_id = ANY($1)`;
+  const { rows: comentarios } = await pool.query(comentariosQuery, [`{${librosId}}`]);
+
+  const categoriasQuery = `
+    SELECT lc.libro_id, cat.categoria_nombre FROM categorias AS cat
+    LEFT JOIN libros_categorias AS lc ON cat.categoria_id = lc.categoria_id
+    WHERE lc.libro_id = ANY($1)`;
+  const { rows: categorias } = await pool.query(categoriasQuery, [librosId]);
+  const librosResult = libros.map(libro => {
+    const libroComentarios = comentarios.filter(c => c.libro_id === libro.libro_id);
+    return {
+      ...libro,
+      categorias: categorias
+        .filter(cat => cat.libro_id === libro.libro_id)
+        .map(cat => cat.categoria_nombre),
+      comentarios: libroComentarios,
+      calificacion: libroComentarios.length > 0
+        ? libroComentarios.reduce((acc, c) => acc + c.comentario_calificacion, 0) / libroComentarios.length
+        : 0,
+    };
+  });
+  return librosResult
 };
 
 const createItemModel = async (libroData) => {
@@ -152,17 +183,19 @@ const createItemModel = async (libroData) => {
   if (libro_categorias) {
     for (const categoria of libro_categorias) {
       const nombreLimpio = categoria.trim().toLowerCase();
-
-      const { rows: resultCat } = await pool.query(
-        `INSERT INTO categorias (categoria_nombre)
+      let resultCat = [];
+      if (nombreLimpio) {
+        ({ rows: resultCat } = await pool.query(
+          `INSERT INTO categorias (categoria_nombre)
         VALUES ($1)
         ON CONFLICT (categoria_nombre) DO UPDATE SET categoria_nombre = EXCLUDED.categoria_nombre
         RETURNING categoria_id`,
-        [nombreLimpio]
-      );
-      const categoriaId = resultCat[0].categoria_id;
-      await pool.query('INSERT INTO libros_categorias (libro_id, categoria_id) VALUES ($1, $2)', [libroId, categoriaId])
-      console.log("categoria vinculada ok", categoriaId)
+          [nombreLimpio]
+        ));
+        const categoriaId = resultCat[0].categoria_id;
+        await pool.query('INSERT INTO libros_categorias (libro_id, categoria_id) VALUES ($1, $2)', [libroId, categoriaId])
+        console.log("categoria vinculada ok", categoriaId)
+      };
     }
   }
   return ({ ...libro[0] });
@@ -180,14 +213,8 @@ const editItemModel = async (id, libroData) => {
     }
   }
   const sqlQueryLibros = `UPDATE libros SET (${bookQuery.join(", ")}) = %L WHERE libro_id = %s RETURNING *`;
-  // const sqlQueryLibros = `UPDATE libros SET libro_titulo = %s, libro_autor = %s, libro_precio = %s, libro_stock = %s, libro_descripcion = %s, libro_imagen = %s, libro_fecha_publicacion = %s, libro_updated_at = NOW() WHERE libro_id = %s RETURNING *`;
-  // console.log(libroData);
-
-  console.log(sqlQueryLibros);
-  console.log(bookValues);
 
   const formattedQueryLibros = format(sqlQueryLibros, [bookValues], id);
-  console.log(formattedQueryLibros)
   const resultLibro = await pool.query(formattedQueryLibros);
 
   await pool.query('DELETE FROM libros_categorias WHERE libro_id = $1', [id])
@@ -195,18 +222,19 @@ const editItemModel = async (id, libroData) => {
   if (libro_categorias && libro_categorias.length > 0) {
     for (const categoria of libro_categorias) {
       const nombreLimpio = categoria.trim().toLowerCase();
-      console.log("entro if 1", nombreLimpio)
-      const { rows: resultCat } = await pool.query(
-        `INSERT INTO categorias (categoria_nombre)
+      let resultCat = [];
+      if (nombreLimpio) {
+        ({ rows: resultCat } = await pool.query(
+          `INSERT INTO categorias (categoria_nombre)
         VALUES ($1)
         ON CONFLICT (categoria_nombre) DO UPDATE SET categoria_nombre = EXCLUDED.categoria_nombre
         RETURNING categoria_id`,
-        [nombreLimpio]
-      );
-      console.log("resultCat ok", resultCat)
-      const categoriaId = resultCat[0].categoria_id;
-      await pool.query('INSERT INTO libros_categorias (libro_id, categoria_id) VALUES ($1, $2)', [id, categoriaId])
-      console.log("categoria vinculada ok", categoriaId)
+          [nombreLimpio]
+        ));
+        const categoriaId = resultCat[0].categoria_id;
+        await pool.query('INSERT INTO libros_categorias (libro_id, categoria_id) VALUES ($1, $2)', [id, categoriaId])
+        console.log("categoria vinculada ok", categoriaId)
+      };
     }
   }
   return (resultLibro.rowCount);

@@ -5,11 +5,15 @@ info:
 
 http:
   method: GET
-  url: http://localhost:5001/api/libros/filter?search=harr
+  url: http://localhost:5001/api/libros?categoria=fic
   params:
-    - name: search
-      value: harr
+    - name: categoria
+      value: fic
       type: query
+    - name: search
+      value: ""
+      type: query
+      disabled: true
   auth: inherit
 
 settings:

@@ -8,7 +8,7 @@ function CreatePost() {
   const { id } = useParams(); // Si hay un ID en la URL, significa que estamos editando
   let isEditing = Boolean(id);
 
-  const { fetchBookByID, updateBook, addBook } = useBooks();
+  const { fetchBookById, updateBook, addBook } = useBooks();
 
 
   const [formData, setFormData] = useState({
@@ -45,11 +45,11 @@ function CreatePost() {
   };
 
 
-  // const useFetchBookById = useEffectEvent((id) => fetchBookByID(id));
+  // const useFetchBookById = useEffectEvent((id) => fetchBookById(id));
   useEffect(() => {
     if (isEditing) {
       console.log("Modo edición activado para el libro con ID:", id);
-        fetchBookByID(id)
+        fetchBookById(id)
         .then((data) => {
           if (data) {
               // Mapeamos lo que viene del back al estado del form
@@ -70,7 +70,7 @@ function CreatePost() {
             console.error("Error al obtener el libro:", err);
           });
       };
-  }, [id, isEditing, fetchBookByID]);
+  }, [id, isEditing, fetchBookById]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

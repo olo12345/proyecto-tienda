@@ -53,8 +53,9 @@ const getItem = async (req, res) => {
 
 const getItemsFilter = async (req, res) => {
     try {
-        const librosFilter = await getItemsFilterModel(req.query);
-        res.status(200).json(librosFilter[0])
+        const filtros = req.query;
+        const librosFilter = await getItemsFilterModel({...filtros, limits: undefined});
+        res.status(200).json(librosFilter)
     } catch (error) {
         console.error(error);
         if (error.code == 42703) {
