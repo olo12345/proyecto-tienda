@@ -89,34 +89,50 @@ const getBookComments = async (id) => {
   return rows;
 }
 
-const getItemsFilterModel = async ({ limits = 10, page = 1, order_by = "libro_id_ASC", search, precio_max, precio_min, categoria, autor }) => {
+const getItemsFilterModel = async ({ limits = 10, page = 1, order_by = "libro_id_ASC", search = "", precio_max, precio_min, categoria, autor }) => {
   const [prefijo, campo, direccion] = order_by.split('_');
   const dir = direccion.toUpperCase() === "ASC" ? "ASC" : "DESC";
   const offset = (page - 1) * limits;
 
   let filtros = [];
+  let fValues = [];
 
-  if (search) {
-    filtros.push(format("(LOWER(libro_titulo) LIKE LOWER(%L) OR LOWER(libro_autor) LIKE LOWER(%L))", `%${search}%`, `%${search}%`));
-  }
-  if (precio_max) filtros.push(format("libro_precio <= %L", precio_max));
-  if (precio_min) filtros.push(format("libro_precio >= %L", precio_min));
+  if (search && search.trim() !== "") {
+    filtros.push("(LOWER(libro_titulo) LIKE LOWER(%s) OR LOWER(libro_autor) LIKE LOWER(%s))");
+    fValues.push(`%${search}%`, `%${search}%`);
+  };
+  if (precio_max) {
+    filtros.push(format("libro_precio <= %s", precio_max));
+    fValues.push(precio_max);
+  };
+  if (precio_min) {
+    filtros.push(format("libro_precio >= %s", precio_min));
+    fValues.push(precio_min);
+  };
   if (categoria) {
-    filtros.push(format(`EXISTS (
-        SELECT 1 FROM categorias cat
+    filtros.push(`EXISTS (
+        SELECT 1 FROM categorias AS cat
         JOIN libros_categorias lc ON cat.categoria_id = lc.categoria_id
-        WHERE lc.libro_id = l.libro_id AND cat.categoria_nombre = %L)`, categoria));
+        WHERE lc.libro_id = l.libro_id AND cat.categoria_nombre = %s)`);
+    fValues.push(categoria);
   }
-  if (autor) filtros.push(format("libro_autor = %L", autor));
+  if (autor) {
+    filtros.push("libro_autor = %s");
+    fValues.push(autor)
+  }
 
   // let sqlQuery = 'SELECT * FROM libros AS l LEFT JOIN comentarios AS c ON l.libro_id = c.libro_id LEFT JOIN libros_categorias lc ON l.libro_id = lc.libro_id LEFT JOIN categorias cat ON lc.categoria_id = cat.categoria_id ';
   //GROUP BY l.libro_id, lc.libro_id, c.comentario_id, lc.categoria_id, cat.categoria_id
-  let sqlQuery = "SELECT l.* from libros as l";
+  let sqlQuery = "SELECT l.* FROM libros AS l";
   if (filtros.length > 0) {
     sqlQuery += ` WHERE ${filtros.join(' AND ')}`;
   }
 
-  sqlQuery += format(' ORDER BY %I_%I %s LIMIT %L OFFSET %L', prefijo, campo, dir, limits, offset);
+  console.log(fValues, {sqlQuery});
+
+  sqlQuery += ' ORDER BY %s_%s %s LIMIT %s OFFSET %s';
+  const formattedQuery = format(sqlQuery, ...fValues, prefijo, campo, dir, limits, offset)
+  console.log({formattedQuery});
 
   const { rows } = await pool.query(sqlQuery);
   return rows;

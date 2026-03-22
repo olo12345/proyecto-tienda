@@ -10,6 +10,7 @@ function Cart() {
   const increase = (id, count) => updateQuantity(id, count + 1)
   const decrease = (id, count) => count === 1 ? removeFromCart(id) : updateQuantity(id, count - 1)
 
+  // useEffect(() => if (!cart)  )
 
   const handleCheckout = async () => {
     try {
@@ -26,7 +27,6 @@ function Cart() {
       const res = await apiProducts.post("/checkouts/send", cart);
 
       // el model de cheackout devolvía compraID
-      console.log(res);
       const idOrden = res.data.orden_id;
       setMessage(`Pedido enviado correctamente! Orden N°: ${idOrden}`);
       setShowConfirm(true);

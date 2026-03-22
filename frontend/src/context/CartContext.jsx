@@ -6,7 +6,7 @@ const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
 
-  const [cart, setCart, clearCart] = useLocalStorage('cart', []);
+  const [cart, setCart, _] = useLocalStorage('cart', []);
 
   const addToCart = (product) => {
     const bookToAdd = {
@@ -15,7 +15,6 @@ export const CartProvider = ({ children }) => {
       libro_precio: product.libro_precio || product.price,
       cantidad: 1
   };
-    console.log({totalPrice});
 
     setCart((prev) => {
       const exists = prev.find((item) => item.libro_id === bookToAdd.libro_id);
@@ -29,7 +28,6 @@ export const CartProvider = ({ children }) => {
 
       return [...prev, bookToAdd]
     })
-    console.log({cart});
 
   }
 
@@ -45,13 +43,14 @@ export const CartProvider = ({ children }) => {
     );
   };
 
-  // const clearCart = () => setCart([]);
+  const clearCart = () => setCart([]);
 
-  const totalItems = cart.reduce((acc, item) => acc + (item.cantidad || 0), 0);
-  const totalPrice = cart.reduce((acc, item) => acc + item.cantidad * item.libro_precio || 0, 0);
+  const totalItems = cart?.reduce((acc, item) => acc + (item.cantidad || 0), 0) || 0;
+  const totalPrice = cart?.reduce((acc, item) => acc + item.cantidad * item.libro_precio || 0, 0);
 
   return (
     <CartContext.Provider
+
       value={{
         cart,
         addToCart,

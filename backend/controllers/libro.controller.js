@@ -23,7 +23,7 @@ const getItems = async (req, res) => {
     try {
         // const { limits, order_by, page } = req.query
         const libros = await getItemsModel(req.query);
-
+        console.log("getItems", libros);
         // const librosPage = pagination ({data: libros, items:limits, page});
         // console.log("librosPage", librosPage);
         res.status(200).json(libros);
@@ -50,9 +50,11 @@ const getItem = async (req, res) => {
 
 const getItemsFilter = async (req, res) => {
     try {
+        console.log("getItemsFilter",req.query);
         const librosFilter = await getItemsFilterModel(req.query);
         res.status(200).json(librosFilter)
     } catch (error) {
+        console.error(error);
         if (error.code == 42703) {
             res.status(400).json({ error: "Valor de filtro no admitido" });
             return;
@@ -77,9 +79,10 @@ const createItem = async (req, res) => {
 
 const editItem = async (req, res) => {
     try {
+        console.log()
         const { id } = req.params;
-        const { libro_titulo, libro_autor, libro_precio, libro_stock, libro_categorias, libro_descripcion, libro_imagen_url, libro_fecha_publicacion } = req.body;
-        const updatedLibro = await editItemModel(id, { libro_titulo, libro_autor, libro_precio, libro_stock, libro_categorias, libro_descripcion, libro_imagen_url, libro_fecha_publicacion })
+        const { libro_titulo, libro_autor, libro_precio, libro_stock, libro_categorias, libro_descripcion, libro_imagen, libro_fecha_publicacion } = req.body;
+        const updatedLibro = await editItemModel(id, { libro_titulo, libro_autor, libro_precio, libro_stock, libro_categorias, libro_descripcion, libro_imagen, libro_fecha_publicacion })
         res.status(200).json(updatedLibro);
     }
     catch (error) {
