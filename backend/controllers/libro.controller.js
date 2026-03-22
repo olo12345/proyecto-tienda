@@ -6,6 +6,8 @@ import {
     createItemModel,
     editItemModel,
     addComentarioModel,
+    getBooksByCommentsModel,
+    deleteItemModel,
 } from "./../models/libro.model.js";
 
 const getAllItems = async (_, res) => {
@@ -36,8 +38,9 @@ const getItems = async (req, res) => {
 const getItem = async (req, res) => {
     try {
         const { id } = req.params;
+        console.log('getItem', id)
         const libro = await getItemModel(id);
-        // console.log("se encontró el libro con ID", id, libro)
+        console.log({libro});
         if (!libro) {
             return res.status(404).json({ message: "Libro not found" });
         }
@@ -50,9 +53,8 @@ const getItem = async (req, res) => {
 
 const getItemsFilter = async (req, res) => {
     try {
-        console.log("getItemsFilter",req.query);
         const librosFilter = await getItemsFilterModel(req.query);
-        res.status(200).json(librosFilter)
+        res.status(200).json(librosFilter[0])
     } catch (error) {
         console.error(error);
         if (error.code == 42703) {
@@ -79,7 +81,6 @@ const createItem = async (req, res) => {
 
 const editItem = async (req, res) => {
     try {
-        console.log()
         const { id } = req.params;
         const { libro_titulo, libro_autor, libro_precio, libro_stock, libro_categorias, libro_descripcion, libro_imagen, libro_fecha_publicacion } = req.body;
         const updatedLibro = await editItemModel(id, { libro_titulo, libro_autor, libro_precio, libro_stock, libro_categorias, libro_descripcion, libro_imagen, libro_fecha_publicacion })
@@ -93,12 +94,35 @@ const editItem = async (req, res) => {
 
 const addComentario = async (req, res) => {
     try {
-        const { libroId } = req.params;
-        const { comentario, calificacion, usuarioId } = req.body;
-        const nuevoComentario = await addComentarioModel({ libroId, comentario, calificacion, usuarioId })
+        const { id: libroId } = req.params;
+        console.log("addComentario", req.body)
+        const { comentario, calificacion, usuario_id } = req.body;
+        const nuevoComentario = await addComentarioModel({ libroId, comentario, calificacion, usuario_id })
         res.status(201).json(nuevoComentario);
     } catch (error) {
         res.status(500).json({ error: error });
+    }
+}
+
+const getBooksByComments = async (req, res) => {
+    try {
+        const libros = await getBooksByCommentsModel();
+        res.status(200).json(libros);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: error });
+    }
+}
+
+const deleteItem = async (req, res) => {
+    try {
+        const { id } = req.params;
+        console.log("deleteItem", id)
+        if (id) deleteItemModel(id);
+        res.send(200);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ mensage: "Error al eliminar el libro", error: error });
     }
 }
 
@@ -110,6 +134,8 @@ export {
     createItem,
     editItem,
     addComentario,
+    getBooksByComments,
+    deleteItem,
 }
 
 // export const libroController = {

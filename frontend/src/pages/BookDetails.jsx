@@ -4,31 +4,34 @@ import { useAuth } from "../hooks/useAuth";
 import { useCart } from "../hooks/useCart";
 import { useBooks } from "./../hooks/useBooks";
 // import { getProduct, updateProduct } from "./../services/products";
-import { addComment } from "../services/products";
+import { addReview } from "./../services/products";
 
 function BookDetails() {
   const { id } = useParams(); // Captura el ID de la URL
   const { user } = useAuth();
   const navigate = useNavigate();
   const { addToCart } = useCart();
-  const { book, fetchBookByID } = useBooks();
+  const { book, fetchBookById } = useBooks();
 
   const [loading, setLoading] = useState(true);
-  const [newReview, setNewReview] = useState({ rating: 5, comment: "" });
-  // const [loading, setLoading] = useState(true);
+  const [newReview, setNewReview] = useState({ rating: 5, review: "" });
+
+
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        await fetchBookByID(id);
-        setLoading(false);
+        const data = await fetchBookById(id);
+        if (data) {
+          setLoading(false);
+        }
       } catch (err) {
         console.error("Error al llamar el libro", err);
         setLoading(false);
       }
     };
     loadData();
-  }, [id]);
+  }, [id, fetchBookById]);
 
   const handleReviewSubmit = async (e) => {
     e.preventDefault();
@@ -47,26 +50,26 @@ function BookDetails() {
     // Payload exacto según tu contrato API REST para POST /reviews
     const reviewPayload = {
       libro_id: id,
-      comentario: newReview.comment,
+      comentario: newReview.review,
       calificacion: Number(newReview.rating),
       usuario_id: user.id
       // sizeList: Number(newReview.rating),
-      // currency: newReview.comment
+      // currency: newReview.review
       // sizeList: [...book.sizeList,
       // {
       //   user_name: user.name,
       //   id: Date.now(), // ID temporal para la review, en un backend real lo asignaría el servidor
       //   rating: Number(newReview.rating),
-      //   comment: newReview.comment
+      //   review: newReview.review
       // }]
     };
 
     try {
-      const res = await addComment(reviewPayload);
+      const res = await addReview(id, reviewPayload);
       if (res) {
         alert("¡Reseña enviada con éxito!");
-        setNewReview({ rating: 5, comment: "" });
-        fetchBookByID(id); // Recargamos el libro para ver la nueva reseña
+        setNewReview({ rating: 5, review: "" });
+        fetchBookById(id); // Recargamos el libro para ver la nueva reseña
       }
     } catch (err) {
       console.error("Error al subir la review", err);
@@ -83,7 +86,7 @@ function BookDetails() {
   //     id: Date.now(),
   //     // user_name: user.name,
   //     // rating: reviewPayload.rating,
-  //     // comment: reviewPayload.comment
+  //     // review: reviewPayload.review
   //     ...reviewPayload.sizeList[reviewPayload.sizeList.length - 1]
   //   }]);
   //   updateBook(reviewPayload)
@@ -91,7 +94,7 @@ function BookDetails() {
   //       console.log("Se ha subido la review", res.data)
   //     })
 
-  //   setNewReview({ rating: 5, comment: "" });
+  //   setNewReview({ rating: 5, review: "" });
   // };
 
   const handleAddToCart = () => {
@@ -106,13 +109,11 @@ function BookDetails() {
     addToCart(book);
     alert(`¡"${book.libro_titulo}" añadido al carrito!`); // Feedback visual como en la gallery
   };
-
   if (loading) return <div style={{ textAlign: "center", padding: "50px", color: "var(--text-light)" }}>Cargando detalles...</div>;
   if (!book || !book.libro_titulo) return <div style={{ textAlign: "center", padding: "50px", color: "var(--text-light)" }}>Libro no encontrado.</div>;
 
   return (
     <div style={{ padding: "40px 20px", maxWidth: "1000px", margin: "0 auto", color: "var(--text-light)" }}>
-
       {/* Sección Superior: Detalles del Libro */}
       <div style={{ display: "flex", gap: "40px", flexWrap: "wrap", marginBottom: "50px" }}>
 
@@ -135,7 +136,7 @@ function BookDetails() {
               style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.9 }}
               onError={(e) => {
                 e.target.style.display = 'none';
-                e.target.parentElement.innerHTML = '<span style="color: var(--text-muted)">Foto del Producto</span>';
+                // e.target.parentElement.innerHTML = '<span style="color: var(--text-muted)">Foto del Producto</span>';
               }}
             />
           </div>
@@ -143,10 +144,10 @@ function BookDetails() {
 
         {/* Detalles del producto */}
         <div style={{ flex: "1.5", minWidth: "300px", display: "flex", flexDirection: "column" }}>
-          <h1 style={titleStyle}>{book.libro_titulo}</h1>
-          <p style={categoryStyle}>Autor: {book.libro_autor}</p>
-          <p style={priceStyle}>${Number(book.libro_precio).toLocaleString("es-CL")}</p>
-          <p style={descriptionStyle}>{book.libro_descripcion}</p>
+          <h1 className="titleStyle">{book.libro_titulo}</h1>
+          <p className='categoryStyle'>Autor: {book.libro_autor}</p>
+          <p className='priceStyle'>${Number(book.libro_precio).toLocaleString("es-CL")}</p>
+          <p className='descriptionStyle'>{book.libro_descripcion}</p>
           <p style={{ color: "var(--text-muted)", marginBottom: "30px" }}>
             <strong>Stock:</strong> {book.libro_stock} unidades
           </p>
@@ -187,8 +188,8 @@ function BookDetails() {
           {!book.comentarios || book.comentarios.length === 0 ? (
             <p style={{ color: "var(--text-muted)" }}>Aún no hay reseñas. ¡Sé el primero en opinar!</p>
           ) : (
-            reviews.map(review => (
-              <div key={review.id} style={{
+            book.comentarios.map(review => (
+              <div key={review.comentario_id} style={{
                 border: "1px solid var(--bg-border)",
                 padding: "20px",
                 borderRadius: "8px",
@@ -196,9 +197,9 @@ function BookDetails() {
                 backgroundColor: "var(--bg-card)"
               }}>
                 <p style={{ margin: "0 0 10px 0", color: "var(--accent-cyan)" }}>
-                  <strong>{review.user_name}</strong> <span style={{ color: "var(--text-muted)", marginLeft: "10px" }}>{"⭐".repeat(comment.comentario_calificacion)}</span>
+                  <strong>{review.username}</strong> <span style={{ color: "var(--text-muted)", marginLeft: "10px" }}>{"⭐".repeat(review.comentario_calificacion)}</span>
                 </p>
-                <p style={{ margin: 0, color: "var(--text-light)", lineHeight: "1.6" }}>{comment.comentario_texto}</p>
+                <p style={{ margin: 0, color: "var(--text-light)", lineHeight: "1.6" }}>{review.comentario_texto}</p>
               </div>
             ))
           )}
@@ -245,8 +246,8 @@ function BookDetails() {
               <div style={{ marginBottom: "20px" }}>
                 <label style={{ display: "block", marginBottom: "8px", color: "var(--text-muted)", fontWeight: "bold" }}>Comentario:</label>
                 <textarea
-                  value={newReview.comment}
-                  onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })}
+                  value={newReview.review}
+                  onChange={(e) => setNewReview({ ...newReview, review: e.target.value })}
                   required
                   rows="4"
                   style={{
@@ -275,14 +276,14 @@ function BookDetails() {
                 textTransform: "uppercase",
                 transition: "all 0.2s ease"
               }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = "var(--accent-cyan)";
-                  e.currentTarget.style.color = "var(--bg-space)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = "transparent";
-                  e.currentTarget.style.color = "var(--accent-cyan)";
-                }}
+                // onMouseEnter={(e) => {
+                //   e.currentTarget.style.backgroundColor = "var(--accent-cyan)";
+                //   e.currentTarget.style.color = "var(--bg-space)";
+                // }}
+                // onMouseLeave={(e) => {
+                //   e.currentTarget.style.backgroundColor = "transparent";
+                //   e.currentTarget.style.color = "var(--accent-cyan)";
+                // }}
               >
                 Enviar Reseña
               </button>

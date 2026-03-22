@@ -19,7 +19,15 @@ const createOrderModel = async (userId, cart) => {
       [userId, totalPrecio, 'pagado']
     );
 
+    for (const libro of cart) {
+    await client.query(
+        'UPDATE libros SET libro_stock = libro_stock - $1 WHERE libro_id = $2',
+        [libro.cantidad, libro.libro_id]
+    );
+  }
+
     await client.query('UPDATE carritos SET carrito_activo = FALSE WHERE carrito_id = $1', [cart.carrito_id])
+
 
     await client.query("COMMIT");
 

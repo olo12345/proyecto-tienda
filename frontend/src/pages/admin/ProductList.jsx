@@ -4,19 +4,19 @@ import { useNavigate } from "react-router-dom"; //esto para poder ir a la parte 
 import { useBooks } from "./../../hooks/useBooks"
 
 const ProductList = () => {
-  const { books, removeBook, clearBook } = useBooks();
+  const { books, removeBook } = useBooks();
   const navigate = useNavigate();
 
 
   const handleAdd = () => {
     console.log("Abrir formulario para añadir nuevo libro"); // esto es pa ver que hace
-    clearBook(); // Limpiar el estado del libro antes de navegar a la página de creación
+    // clearBook(); // Limpiar el estado del libro antes de navegar a la página de creación
     navigate("/admin/store/books/new"); //esto lo hace
   };
 
   const handleEdit = (id) => {
     console.log("Editar el libro con ID:", id);
-    clearBook(); // Limpiar el estado del libro antes de navegar a la página de creación
+    // clearBook(); // Limpiar el estado del libro antes de navegar a la página de creación
     navigate(`/admin/store/edit/${id}`);
   };
 
@@ -25,15 +25,9 @@ const ProductList = () => {
     if (confirmDelete) {
       removeBook(id)
         .then(() => {
-          console.log("Libro eliminado:");
-          // Se actualiza la lista de libros después de eliminar
-          // getBooks();
+          console.log("Libro eliminado en la base de datos, ID:", id);
         })
         .catch((error) => console.log("Ocurrió un error al eliminar el libro", error));
-      // Para simular la eliminación sin backend, se puede filtrar el libro eliminado:
-      // const updatedBooks = books.filter((book) => book.id !== id);
-      // setBooks(updatedBooks);
-      console.log("Libro eliminado en la base de datos, ID:", id);
     }
   };
 

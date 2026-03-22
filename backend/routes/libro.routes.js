@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getItem, getAllItems, getItems, getItemsFilter, createItem, editItem, addComentario } from "./../controllers/libro.controller.js";
+import { getItem, getAllItems, getItems, getItemsFilter, createItem, editItem, addComentario, getBooksByComments, deleteItem } from "./../controllers/libro.controller.js";
 import checkToken from "./../utils/validators/auth.checkToken.js";
 import isAdmin from "./../utils/validators/admin.validate.js";
 
@@ -7,8 +7,9 @@ import isAdmin from "./../utils/validators/admin.validate.js";
 const routes = Router();
 
 routes.get("/", getItems);
+routes.get("/destacados", getBooksByComments)
 routes.get("/filter", getItemsFilter);
-routes.get("/:id", getItem);
+routes.get("/libro/:id", getItem);
 //autenticación requerida para agregar comentarios y otros endpoints de administración
 routes.use(checkToken);
 
@@ -20,5 +21,6 @@ routes.use(isAdmin);
 routes.get("/all", getAllItems);
 routes.post("/", createItem);
 routes.put("/:id", editItem);
+routes.delete("/:id", deleteItem);
 
 export default routes;

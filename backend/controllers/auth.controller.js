@@ -8,12 +8,12 @@ const loginUser = async (req, res) => {
     //crear req.user en middleware validador
     const { email, password } = req.body; // pruebo temporalmente desde el body (despues devolver a user)
     const result = await authModel.loginUserModel(email);
-    if (result.rowCount === 0) { 
-      return res.status(401).json({ message: "Email o contraseña incorrectos" }); 
+    if (result.rowCount === 0) {
+      return res.status(401).json({ message: "Email o contraseña incorrectos" });
   }
 
       const user = result.rows[0];
-  
+
       const hashedPass = user.usuario_password;
       if (!hashedPass) { //este if pa ver si aqui está el error
         return res.status(500).json({ error: "Error en la estructura de la base de datos" });
@@ -24,21 +24,22 @@ const loginUser = async (req, res) => {
         return res.status(401).json({ message: "Email o contraseña incorrectos" });
       }
 
-      const payload = { 
-        email: user.usuario_email, 
-        rol: user.usuario_rol 
+      const payload = {
+        email: user.usuario_email,
+        rol: user.usuario_rol
       };
-    
+
       const secret = process.env.JWT_SECRET || "clave_temporal_de_emergencia_2026";
       const token = jwt.sign(payload, secret, { expiresIn: "2h" });
 
-      return res.status(200).json({ 
+      return res.status(200).json({
         message: "Bienvenido a The Passenger Books",
         token,
         user: {
           nombre: user.usuario_nombre,
           email: user.usuario_email,
-          rol: user.usuario_rol
+          rol: user.usuario_rol,
+          id: user.usuario_id,
         }
       });
 
@@ -57,12 +58,12 @@ const createUser = async (req, res) => {
 
     const hashedPassword = bcrypt.hashSync(password, 10);
 
-    const newUser = { 
-      email, 
-      password: hashedPassword, 
-      nombre, 
-      edad: Number(edad), 
-      rol: rol || 'user' 
+    const newUser = {
+      email,
+      password: hashedPassword,
+      nombre,
+      edad: Number(edad),
+      rol: rol || 'user'
     };
 
     const success = await authModel.createUserModel(newUser);
@@ -81,7 +82,7 @@ const verificarCredenciales = async (req, res) => {
     // Este viene del middleware checkToken.....................
     const { email } = req.user;
     const result = await authModel.verificarCredencialesModel(email);
-    
+
     if (result.rowCount === 0) {
       return res.status(404).json({ message: "Usuario no encontrado" });
     }

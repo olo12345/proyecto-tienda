@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { useCart } from "./../../hooks/useCart"
 import { apiProducts } from "./../../services/api";
+import { useBooks } from "./../../hooks/useBooks";
 
 function Cart() {
   const { cart, updateQuantity, removeFromCart, totalPrice, clearCart } = useCart();
   const [message, setMessage] = useState("");
   const [showConfirm, setShowConfirm] = useState(false);
+  const {fetchBooks} = useBooks();
 
   const increase = (id, count) => updateQuantity(id, count + 1)
   const decrease = (id, count) => count === 1 ? removeFromCart(id) : updateQuantity(id, count - 1)
@@ -28,6 +30,7 @@ function Cart() {
 
       // el model de cheackout devolvía compraID
       const idOrden = res.data.orden_id;
+      fetchBooks();
       setMessage(`Pedido enviado correctamente! Orden N°: ${idOrden}`);
       setShowConfirm(true);
 

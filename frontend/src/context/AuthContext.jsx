@@ -33,9 +33,9 @@ const AuthProvider = ({ children }) => {
         try {
             //lamada al back
             const response = await loginUser({email, password});
-
             if (response.token) { //había escrito "roken"!!!!!!!!!!!
                 const { token: jwtToken, user: userData } = response;
+                console.log({userData});
                 userData.role = userData.usuario_rol || userData.rol || "user";
                 userData.name = userData.nombre
                 setToken(jwtToken);

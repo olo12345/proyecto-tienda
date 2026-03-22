@@ -1,17 +1,15 @@
 import pool from "./../db/dbconfig.js";
 import format from "pg-format";
 
-const BASE_SELECT = "SELECT * FROM libros";
-
 const getAllItemsModel = async ({ order_by = "libro_id_ASC" }) => {
   const [prefijo, campo, direccion] = order_by.split('_');
   const dir = direccion.toUpperCase() === "ASC" ? "ASC" : "DESC";
   const sqlQuery = format('SELECT * from libros order by %I_%I %s', prefijo, campo, dir);
   const { rows } = await pool.query(sqlQuery);
   return rows;
-}
+};
 
-const getItemsModel = async ({ limits = 3, order_by = "libro_id_ASC", page = 1 }) => {
+const getItemsModel = async ({ limits = 10, order_by = "libro_id_ASC", page = 1 }) => {
   const [prefijo, campo, direccion] = order_by.split('_');
   // direccion = direccion.toUpperCase() === "ASC" ? "ASC" : "DESC";
   const offset = (page - 1) * limits;
@@ -22,7 +20,6 @@ const getItemsModel = async ({ limits = 3, order_by = "libro_id_ASC", page = 1 }
   if (libros.length === 0) return [];
 
   const librosId = libros.map(libro => libro.libro_id);
-  let librosString = "'{" + librosId.join(",") + "}'";
 
   const categoriasQuery = `
     SELECT lc.libro_id, cat.categoria_nombre FROM categorias AS cat
@@ -47,7 +44,7 @@ const getItemsModel = async ({ limits = 3, order_by = "libro_id_ASC", page = 1 }
         : 0,
     };
   });
-}
+};
 
 const getItemModel = async (id) => {
   // Buscamos un libro específico por su id
@@ -59,8 +56,12 @@ const getItemModel = async (id) => {
     WHERE lcat.libro_id = $1`;
 
   //La query de los comentarios
-  const queryComentarios = ` SELECT c.* FROM comentarios AS c
-    WHERE c.libro_id = $1`;
+  const queryComentarios = `SELECT c.*, u.usuario_nombre as username
+  FROM comentarios AS c
+  JOIN usuarios as u
+  USING (usuario_id)
+    WHERE c.libro_id = $1
+    ORDER BY c.comentario_id DESC`;
 
   const libroResult = await pool.query(queryLibro, [id]);
   if (libroResult.rowCount > 0) {
@@ -80,16 +81,11 @@ const getBookCategories = async (id) => {
     WHERE lcat.libro_id = $1`;
   const { rows } = await pool.query(query, [id]);
   return rows;
-}
+};
 
-const getBookComments = async (id) => {
-  const query = ` SELECT c.* FROM comentarios AS c
-    WHERE c.libro_id = $1`;
-  const { rows } = await pool.query(query, [id]);
-  return rows;
-}
-
-const getItemsFilterModel = async ({ limits = 10, page = 1, order_by = "libro_id_ASC", search = "", precio_max, precio_min, categoria, autor }) => {
+const getItemsFilterModel = async (
+  { limits = 10, page = 1, order_by = "libro_id_ASC", search = "", precio_max, precio_min, categoria, autor }
+) => {
   const [prefijo, campo, direccion] = order_by.split('_');
   const dir = direccion.toUpperCase() === "ASC" ? "ASC" : "DESC";
   const offset = (page - 1) * limits;
@@ -98,7 +94,7 @@ const getItemsFilterModel = async ({ limits = 10, page = 1, order_by = "libro_id
   let fValues = [];
 
   if (search && search.trim() !== "") {
-    filtros.push("(LOWER(libro_titulo) LIKE LOWER(%s) OR LOWER(libro_autor) LIKE LOWER(%s))");
+    filtros.push("(libro_titulo ILIKE %L OR libro_autor ILIKE %L)");
     fValues.push(`%${search}%`, `%${search}%`);
   };
   if (precio_max) {
@@ -121,22 +117,19 @@ const getItemsFilterModel = async ({ limits = 10, page = 1, order_by = "libro_id
     fValues.push(autor)
   }
 
-  // let sqlQuery = 'SELECT * FROM libros AS l LEFT JOIN comentarios AS c ON l.libro_id = c.libro_id LEFT JOIN libros_categorias lc ON l.libro_id = lc.libro_id LEFT JOIN categorias cat ON lc.categoria_id = cat.categoria_id ';
-  //GROUP BY l.libro_id, lc.libro_id, c.comentario_id, lc.categoria_id, cat.categoria_id
   let sqlQuery = "SELECT l.* FROM libros AS l";
   if (filtros.length > 0) {
     sqlQuery += ` WHERE ${filtros.join(' AND ')}`;
   }
-
-  console.log(fValues, {sqlQuery});
-
+  fValues.push(prefijo, campo, dir, limits, offset)
   sqlQuery += ' ORDER BY %s_%s %s LIMIT %s OFFSET %s';
-  const formattedQuery = format(sqlQuery, ...fValues, prefijo, campo, dir, limits, offset)
-  console.log({formattedQuery});
+  console.log(fValues, { sqlQuery });
+  const formattedQuery = format(sqlQuery, ...fValues)
+  console.log({ formattedQuery });
 
-  const { rows } = await pool.query(sqlQuery);
+  const { rows } = await pool.query(formattedQuery);
   return rows;
-}
+};
 
 const createItemModel = async (libroData) => {
   let bookValues = []
@@ -173,7 +166,7 @@ const createItemModel = async (libroData) => {
     }
   }
   return ({ ...libro[0] });
-}
+};
 
 const editItemModel = async (id, libroData) => {
   const { libro_categorias } = libroData;
@@ -217,12 +210,33 @@ const editItemModel = async (id, libroData) => {
     }
   }
   return (resultLibro.rowCount);
-}
+};
 
-const addComentarioModel = async ({ librosId, comentario, calificacion, usuarioId }) => {
+const addComentarioModel = async (comentarioData) => {
+  const { libroId, comentario, calificacion, usuario_id } = comentarioData;
   const sqlQuery = `INSERT INTO comentarios (libro_id, comentario_texto, comentario_calificacion, usuario_id) VALUES ($1, $2, $3, $4) RETURNING *`;
-  const { rows } = await pool.query(sqlQuery, [librosId, comentario, calificacion, usuarioId]);
+  const { rows } = await pool.query(sqlQuery, [libroId, comentario, calificacion, usuario_id]);
   return rows[0];
+};
+
+const getBooksByCommentsModel = async () => {
+  const comentariosQuery = `SELECT  libro_id, AVG(comentario_calificacion) as calificacion FROM comentarios
+    GROUP BY libro_id
+    ORDER BY calificacion DESC LIMIT 10`;
+  const { rows: comentarios } = await pool.query(comentariosQuery);
+  const librosQuery = `SELECT * FROM libros WHERE libro_id = ANY($1)`;
+  const librosId = comentarios.map((libro) => libro.libro_id);
+  const { rows: libros } = await pool.query(librosQuery, [librosId])
+  const librosCalificacion = libros.map((libro) => {
+    return { ...libro, ...comentarios.filter(c => c.libro_id === libro.libro_id)[0] }
+  });
+  return librosCalificacion;
+};
+
+const deleteItemModel = async (libroId = -1) => {
+  const sqlQuery = "DELETE FROM libros WHERE libro_id = $1";
+  console.log(sqlQuery, libroId);
+  pool.query(sqlQuery, [libroId])
 }
 
 export {
@@ -231,10 +245,11 @@ export {
   getItemModel,
   getItemsFilterModel,
   getBookCategories,
-  getBookComments,
+  getBooksByCommentsModel,
   createItemModel,
   editItemModel,
   addComentarioModel,
+  deleteItemModel,
 };
 
 // export const libroModel = {
