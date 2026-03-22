@@ -47,16 +47,17 @@ const getCartModel = async (userId) => {
   JOIN carritos AS c ON cl.carrito_id = c.carrito_id
   JOIN libros l ON cl.libro_id = l.libro_id
   WHERE c.usuario_id = $1`;
-  const { rows } = await client.query(query, [userId]);
-  return rows[0];
+  const { rows } = await pool.query(query, [userId]);
+  return rows;
 }
 
 const updateCartModel = async ({ usuario_id, libro_id, libro_cantidad }) => {
   const carritoResult = await pool.query('SELECT carrito_id FROM carritos WHERE usuario_id = $1', [usuario_id]);
 
   let newCart = [];
-  if (carritoResult.rowcount === 0) {
-    newCart = await pool.query('INSER INTO carritos (usuario_id, carrito_activo) VALUES ($1, $2) RETURNING carrito_id', [usuario_id, 'TRUE']).rows;
+  if (carritoResult.rowCount === 0) {
+    const result = await pool.query('INSERT INTO carritos (usuario_id, carrito_activo) VALUES ($1, $2) RETURNING carrito_id', [usuario_id, true]);
+    newCart = result.rows;
     console.log('newCart', newCart);
   }
   const carritoId = newCart ? newCart[0].carrito_id : carritoResult.rows[0].carrito_id;
@@ -76,7 +77,7 @@ const deleteItemModel = async (userId, libroId) => {
   WHERE cl.carrito_id = c.carrito_id
   AND c.usuario_id = $1
   AND cl.libro_id = $2`;
-  await client.query(query, [userId, libroId]);
+  await pool.query(query, [userId, libroId]);
 }
 
 const deleteCartModel = async (userId) => {

@@ -1,11 +1,13 @@
 import {apiProducts} from './api.js';
 
 export const getAllProducts = () => {
-    apiProducts.get('/libros/all').then(res => res.data);
+    return apiProducts.get('/libros/all').then(res => res.data);
 }
 
-export const getProducts = (params) =>
-    apiProducts.get('/libros', { params }).then(res => res.data);
+export const getProducts = (params) => {
+    // Enviar directamente los params que vienen del componente
+    return apiProducts.get('/libros', { params }).then(res => res.data);
+};
 
 export const getProduct = (id) =>
     apiProducts.get(`/libros/libro/${id}`).then(res => res.data);

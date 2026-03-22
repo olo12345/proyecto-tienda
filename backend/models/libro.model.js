@@ -133,29 +133,31 @@ const getItemsFilterModel = async ({
   precio_min,
   categoria,
   autor,
-}) => {
+ }) => {
   const [prefijo, campo, direccion] = order_by.split("_");
   const dir = direccion.toUpperCase() === "ASC" ? "ASC" : "DESC";
   const offset = (page - 1) * limits;
+
+  const columnaOrden = `${prefijo}_${campo}`;
 
   let filtros = [];
   let fValues = [];
 
   if (search && search.trim() !== "") {
-    filtros.push("(libro_titulo ILIKE %L OR libro_autor ILIKE %L)"),
+    filtros.push("(libro_titulo ILIKE %L OR libro_autor ILIKE %L)"); //aquí había una coma en vz de punto y ocma
       fValues.push(`%${search}%`, `%${search}%`);
   };
   if (precio_max) {
-    filtros.push("libro_precio <= %s");
+    filtros.push("libro_precio <= %L"); // caambiamos %s por %L para que SQL lo entianda como valor
     fValues.push(precio_max);
   };
   if (precio_min) {
-    filtros.push("libro_precio >= %s");
+    filtros.push("libro_precio >= %L"); // cambiamos %s por %L para que SQL lo entianda como valor
     fValues.push(precio_min);
   };
   if (autor) {
-    filtros.push("libro_autor = %s");
-    fValues.push(autor)
+    filtros.push("libro_autor ILIKE %L");
+    fValues.push(`%${autor}%`)
   }
 
   if (categoria) {
@@ -167,19 +169,19 @@ const getItemsFilterModel = async ({
     `;
     const resultCategorias = await pool.query(categoriasQuery, [`%${categoria}%`]);
     //Si no coincide ninguna categoría, devuelve vacío
-    if (resultCategorias.rowCount === 0) return []
-      filtros.push("libro_id = ANY(%L)")
-      const catValue = resultCategorias.rows.filter(cat => cat.libro_id !== null).map(cat => cat.libro_id)
-      console.log({ catValue });
-      fValues.push(`{${catValue}}`);
+    if (resultCategorias.rowCount === 0) return [];
+    const catValue = resultCategorias.rows.filter(cat => cat.libro_id !== null).map(cat => cat.libro_id);
+    console.log({ catValue });
+    // Usar formato SQL directo para el array de IDs
+    filtros.push(`l.libro_id = ANY(ARRAY[${catValue.join(',')}])`);
   }
 
   let sqlQuery = "SELECT l.* FROM libros AS l";
   if (filtros.length > 0) {
     sqlQuery += ` WHERE ${filtros.join(" AND ")}`;
   }
-  fValues.push(prefijo, campo, dir, limits, offset)
-  sqlQuery += ' ORDER BY %s_%s %s LIMIT %s OFFSET %s';
+  fValues.push(columnaOrden, dir, limits, offset);
+  sqlQuery += ' ORDER BY %I %s LIMIT %L OFFSET %L';
 
   const formattedQuery = format(sqlQuery, ...fValues)
   const { rows: libros } = await pool.query(formattedQuery);
@@ -190,13 +192,13 @@ const getItemsFilterModel = async ({
   const comentariosQuery = `SELECT * FROM comentarios WHERE libro_id = ANY($1)`;
   const { rows: comentarios } = await pool.query(comentariosQuery, [librosId]);
 
-  const categoriasQuery = `
+  const relCategoriasQuery = `
     SELECT lc.libro_id, cat.categoria_nombre
     FROM categorias AS cat
     LEFT JOIN libros_categorias AS lc ON cat.categoria_id = lc.categoria_id
     WHERE lc.libro_id = ANY($1)
   `;
-  const { rows: categorias } = await pool.query(categoriasQuery, [librosId]);
+  const { rows: categoriasRelacionadas } = await pool.query(relCategoriasQuery, [librosId]);
 
   const librosResult = libros.map((libro) => {
     const libroComentarios = comentarios.filter(
@@ -205,7 +207,7 @@ const getItemsFilterModel = async ({
 
     return {
       ...libro,
-      categorias: categorias
+      categorias: categoriasRelacionadas
         .filter((cat) => cat.libro_id === libro.libro_id)
         .map((cat) => cat.categoria_nombre),
       comentarios: libroComentarios,
@@ -338,7 +340,7 @@ const editItemModel = async (id, libroData) => {
     }
   }
 
-  return resultLibro.rowCount;
+  return resultLibro.rows[0];
 };
 
 const addComentarioModel = async (comentarioData) => {

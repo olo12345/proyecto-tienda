@@ -55,8 +55,7 @@ const deleteItem = async (req, res) => {
     try {
         const {id: libro_id} = req.params
         const { id: usuario_id } = req.user;
-        res.send(req);
-        deleteItem(usuario_id, libro_id);
+        await deleteItemModel(usuario_id, libro_id);
         res.status(200).json({ message: "Se eliminó el libro correctamente" });
     } catch (error) {
         console.log(error);
