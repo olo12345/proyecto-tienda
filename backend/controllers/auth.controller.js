@@ -1,56 +1,102 @@
-import "dotenv/config";
+ import "dotenv/config";
 import jwt from "jsonwebtoken";
-// import { nanoid } from "nanoid"; lo usamos en proytectos pasados pero no lo necesitamos ahora (usaremos bcrypt instead)
 import bcrypt from "bcrypt";
 import { authModel } from "./../models/auth.model.js";
 
 const loginUser = async (req, res) => {
   try {
     //crear req.user en middleware validador
-    const { email = "", password = "" } = req.user;
-    const result = await authModel.loginUserModel(email)
-    if (!result.rowCount) throw { code: 404, message: "No se encontró ningún usuario con estas credenciales" };
-    else {
-      const hashedPass = result.rows[0].password;
-      const passMatch = bcrypt.compareSync(password, hashedPass)
-      if (!passMatch) throw { code: 404, message: "No se encontró ningún usuario con estas credenciales" };
-      else {
-        const payload = { email, rol: req.body.rol };
-        const token = jwt.sign(payload, process.env.JWT_SECRET);
-        res.send(token);
-      }
+    const { email, password } = req.body; // pruebo temporalmente desde el body (despues devolver a user)
+    //Agregamos una normalizacioón para que no haya porblemas con los espacios o mayúsculas en el email
+    const emailNormalizado = email.toLowerCase().trim();
+
+    const result = await authModel.loginUserModel(emailNormalizado);
+    if (result.rowCount === 0) {
+      return res.status(401).json({ message: "Email o contraseña incorrectos" });
+  }
+
+      const user = result.rows[0];
+
+      const hashedPass = user.usuario_password;
+      if (!hashedPass) { //este if pa ver si aqui está el error
+        return res.status(500).json({ error: "Error en la estructura de la base de datos" });
     }
+
+      const passMatch = bcrypt.compareSync(password, hashedPass)
+      if (!passMatch) {
+        return res.status(401).json({ message: "Email o contraseña incorrectos" });
+      }
+
+      const payload = {
+        email: user.usuario_email,
+        rol: user.usuario_rol
+      };
+
+      const secret = process.env.JWT_SECRET || "clave_temporal_de_emergencia_2026";
+      const token = jwt.sign(payload, secret, { expiresIn: "2h" });
+
+      return res.status(200).json({
+        message: "Bienvenido a The Passenger Books",
+        token,
+        user: {
+          nombre: user.usuario_nombre,
+          email: user.usuario_email,
+          rol: user.usuario_rol,
+          id: user.usuario_id,
+        }
+      });
+
   } catch (error) {
-    // console.log(error);
-    return res.status(500).json({ error: "Server error" });
+     console.log("ERROR EN EL AUTH.CONTROLLER (login user)", error);
+    return res.status(500).json({ error: "Server error", detail: error.message });
   }
 };
 
 const createUser = async (req, res) => {
   try {
-    const { email = "", password = "" } = req.body;
-    if (await authModel.isEmailRegistered(email)) throw { code: 400, message: "Ya existe un usuario registrado con ese email" };
-    else {
-      const hashedPassword = await bcrypt.hash(password, 10);
-      const newUser = { ...req.body, password: hashedPassword };
-      const success = await authModel.createUserModel(newUser);
-      if (success) res.status(201).send("Se creó el usuario correctamente");
+    const { email, password, nombre, edad, rol } = req.body;
+    // normalizam,os acá también para que se guarde todo en minusculas en en la db
+    const emailLimpio = email.toLowerCase().trim();
+
+    if (await authModel.isEmailRegistered(emailLimpio)) {
+      return res.status(400).json({ message: "Este email ya está en uso" });
     }
+
+    const hashedPassword = bcrypt.hashSync(password, 10);
+
+    const newUser = {
+      email: emailLimpio,
+      password: hashedPassword,
+      nombre,
+      edad: Number(edad),
+      rol: rol || 'user'
+    };
+
+    const success = await authModel.createUserModel(newUser);
+
+    if (success) {
+      return res.status(201).json({ message: "Usuario creado con éxito. Ya puedes iniciar sesión!" });
+    }
+
   } catch (error) {
-    // console.log(error);
-    return res.status(500).json({ error: "Server error" });
-  }
+     console.log("ERROR EN EL AUTH.CONTROLLER (create user)", error);
+    return res.status(500).json({ error: "No se pudo completar el registro" });  }
 };
 
 const verificarCredenciales = async (req, res) => {
   try {
+    // Este viene del middleware checkToken.....................
     const { email } = req.user;
     const result = await authModel.verificarCredencialesModel(email);
-    if (result.rowCount) console.log(`el usuario ${email} ha sido verificado correctamente`);
-    res.status(200).send(result.rows);
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ message: "Usuario no encontrado" });
+    }
+
+    return res.status(200).json(result.rows[0]);
   }
-  catch (err) {
-    res.status(500).send(err);
+  catch (error) {
+    return res.status(500).json({ error: error.message });
   }
 }
 

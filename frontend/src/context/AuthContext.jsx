@@ -1,16 +1,23 @@
-import { createContext, useEffect, useState } from "react";
+import { createContext, useEffect, useState, useCallback } from "react";
 import { useLocalStorage } from './../hooks/useLocalStorage';
 import { setupInterceptors } from './../services/api';
-import { getUsers } from './../services/users';
+//import { getUsers } from './../services/users'; se reemplaza por loginUser
+import { loginUser } from './../services/users'; // Este es el nuevo servicio para login que se conecta con el backend real
 
 const AuthContext = createContext();
 
 const AuthProvider = ({ children }) => {
 
     const [user, setUser, removeUser] = useLocalStorage('user', null, true);
-    // const [token, setToken, removeToken] = useLocalStorage('token', null, true); // Se incorpora para conversación con el futuro bacj
+    const [token, setToken, removeToken] = useLocalStorage('token', null, false); // Se incorpora para conversación con el futuro bacj
+    // aquí ponemos esto falso por un posible doble cifrado
     const [initialLoading, setInitialLoading] = useState(true);
     const [authLoading, setAuthLoading] = useState(false);
+
+    const logout = useCallback(async () => {
+        removeUser();
+        removeToken(); //Para que no quede flotando por ahí
+    }, [removeUser, removeToken]);
 
     useEffect(() => {
         setInitialLoading(false);
@@ -18,63 +25,40 @@ const AuthProvider = ({ children }) => {
 
     useEffect(() => {
         setupInterceptors(logout)
-    }, []); // se corrije para configurar los interceptores una vez que el componente se monta
+    }, [logout]); // se corrije para configurar los interceptores una vez que el componente se monta
 
     const login = async (email, password) => {
         setAuthLoading(true);
 
         try {
-            //No será necesario cuando haya backend
-            const users = await getUsers();
-            const foundUser = users.data.find((user) => user.email === email);
-            console.log(email, password, users)
-            if (foundUser && password === '123456') {
-                foundUser.role = foundUser.status || "user"; // Adaptamos el uso de la api para que el status de cambie a rol y si no tiene status, se le asigna el rol normal "user"
-                setUser(foundUser);
+            //lamada al back
+            const response = await loginUser({email, password});
+            if (response.token) { //había escrito "roken"!!!!!!!!!!!
+                const { token: jwtToken, user: userData } = response;
+                console.log({userData});
+                userData.role = userData.usuario_rol || userData.rol || "user";
+                userData.name = userData.nombre
+                setToken(jwtToken);
+                setUser(userData);
+
                 return { success: true };
-                // const fakeToken = "mock_jwt_token_123456789";
-
-                // const contractUser = {
-                //     id: foundUser.id,
-                //     email: foundUser.email,
-                //     name: foundUser.name,
-                //     age: foundUser.age,
-                //     role: foundUser.role || "comprador" // Convertimos 'role' a 'rol' (just in case) y el rol será mientras comprador
-                // };
-
-                // setToken(fakeToken); // 1. Guardamos el token para el api.js
-                // setUser(contractUser); // 2. Guardamos el usuario
-
-                // return { success: true };
-
             }
+
             return { success: false, error: 'Credenciales inválidas' };
-        } catch {
+        } catch (error) {
             return {
                 success: false,
-                error: 'Error de conexión'
+                error: error.response?.data?.message || 'Error de autenticación'
             }
         }
         finally {
             setAuthLoading(false);
         }
     }
-
-    const logout = async () => {
-        // try {
-        //     await api.post('/logout');
-        // } catch (error) {
-        //     console.error('error', error)
-        // }
-        removeUser();
-        // removeToken(); //Para que no quede flotando por ahí
-    }
-
-    return (
-        <AuthContext.Provider value={{ user, login, logout, initialLoading, authLoading }}>
-            {children}
-        </AuthContext.Provider>
-    )
+    return (<AuthContext.Provider value={{ user, token, login, logout, initialLoading, authLoading }}>
+        {children}
+    </AuthContext.Provider>
+)
 }
 
 export default AuthProvider

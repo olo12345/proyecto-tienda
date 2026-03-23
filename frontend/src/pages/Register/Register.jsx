@@ -28,23 +28,55 @@ function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // const payloadToSend = {
+    //   ...formData,
+    //   //Se adapta el uso de la api para guardar el rol en status
+    //   status: formData.role,
+    //   age: Number(formData.age) // El contrato exige que la edad sea un número (Validado con esto)
+    // };
+
+    if (formData.password !== formData.confirm_password) {
+      alert("Las contraseñas no coinciden");
+      return;
+    }
+
+    // Mapeamos los datos al contrato de auth.model.js
     const payloadToSend = {
-      ...formData,
-      //Se adapta el uso de la api para guardar el rol en status
-      status: formData.role,
-      age: Number(formData.age) // El contrato exige que la edad sea un número (Validado con esto)
+      nombre: formData.name,       // Cambiado de "name" a "nombre"
+      email: formData.email,
+      edad: Number(formData.age),  // El contrato exige que la edad sea un número (Validado con esto)
+      password: formData.password,
+      rol: formData.role,          // Cambiado de "status" a "rol" para el back real
+      imagen: null                 // El modelo espera este campo, lo enviamos null por ahora
     };
+
     console.log("Payload a enviar para registro:", payloadToSend); // Agregado para depuración
+
     createUser(payloadToSend)
-      .then((res) => {console.log(res)
-        if (res.status === 201) {
+      .then((res) => {
+        console.log("Respuesta del servidor:", res);
+        // Como el service retorna res.data, si 'res' existe es que fue exitoso
+        if (res) {
           alert("Usuario creado exitosamente");
-          navigate( "/login"); // Redirige al login después de un registro exitoso
+          navigate("/login"); 
         }
       })
-      .catch((error) => console.log("Ocurrió un error al crear el usuario", error))
-    // ver lo de axios - - - - >>>>>> axios.post('/register', payloadToSend)...
+      .catch((error) => {
+        console.error("Ocurrió un error al crear el usuario", error);
+        alert(error.response?.data?.message || "Error al registrar usuario");
+      });
   };
+
+  //   createUser(payloadToSend)
+  //     .then((res) => {console.log(res)
+  //       if (res.status === 201) {
+  //         alert("Usuario creado exitosamente");
+  //         navigate( "/login"); // Redirige al login después de un registro exitoso
+  //       }
+  //     })
+  //     .catch((error) => console.log("Ocurrió un error al crear el usuario", error))
+  //   // ver lo de axios - - - - >>>>>> axios.post('/register', payloadToSend)...
+  // };
 
   return (
     user
@@ -186,8 +218,8 @@ function Register() {
               />
             </div>
 
-            {/* Temporal rol de admin */}
-            <div style={{ marginBottom: "30px" }}>
+            {/* Temporal rol de admin activar para crear el primer admin si no quieren hacerlo desde la db*/}
+            {/* <div style={{ marginBottom: "30px" }}>
               <label style={{ display: "block", color: "var(--text-muted)", fontWeight: "bold", fontSize: "0.9rem" }}>Rol</label>
               <select
                 name="role"
@@ -211,7 +243,7 @@ function Register() {
                 <option value="user">Usuario</option>
                 <option value="admin">Admin</option>
               </select>
-            </div>
+            </div> */}
 
             <button
               type="submit"

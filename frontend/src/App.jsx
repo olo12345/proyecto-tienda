@@ -21,12 +21,13 @@ import BookDetails from "./pages/BookDetails"
 import NotFound from "./pages/NotFound"
 import Cart from "./pages/Cart/Cart"
 import ProductList from "./pages/admin/ProductList"
-
+import AuthProvider from "./context/AuthContext"
 
 
 function App() {
   return (
     <>
+    <AuthProvider>
       <BooksProvider>
         <CartProvider>
           <FavoritesProvider>
@@ -125,6 +126,7 @@ function App() {
           </FavoritesProvider>
         </CartProvider>
       </BooksProvider>
+    </AuthProvider>
     </>
   )
 }

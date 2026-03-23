@@ -4,38 +4,34 @@ import { useAuth } from "../hooks/useAuth";
 import { useCart } from "../hooks/useCart";
 import { useBooks } from "./../hooks/useBooks";
 // import { getProduct, updateProduct } from "./../services/products";
+import { addReview } from "./../services/products";
 
 function BookDetails() {
   const { id } = useParams(); // Captura el ID de la URL
   const { user } = useAuth();
   const navigate = useNavigate();
   const { addToCart } = useCart();
-  const { book, fetchBookByID, updateBook } = useBooks();
+  const { book, fetchBookById } = useBooks();
 
-  const [reviews, setReviews] = useState([...book.sizeList]);
   const [loading, setLoading] = useState(true);
+  const [newReview, setNewReview] = useState({ rating: 5, review: "" });
 
-  const [newReview, setNewReview] = useState({ rating: 5, comment: "" });
 
 
   useEffect(() => {
-    const fetchBookData = async (id) => {
-      fetchBookByID(id).then(() => {
+    const loadData = async () => {
+      try {
+        const data = await fetchBookById(id);
+        if (data) {
+          setLoading(false);
+        }
+      } catch (err) {
+        console.error("Error al llamar el libro", err);
         setLoading(false);
-      })
-
-        // Simulación de GET /reviews (reseñas previas)
-        // setReviews([
-        //   { id: 101, user_name: "Ana", rating: 5, comment: "Excelente material, muy detallado." }
-        // ]);
-        .catch((err) =>
-          console.log("Ocurrió un error al llamar el libro", err)
-        )
+      }
     };
-    // Simulación de GET /books/:id
-    fetchBookData(id);
-    console.log(book);
-  }, [id, reviews]);
+    loadData();
+  }, [id, fetchBookById]);
 
   const handleReviewSubmit = async (e) => {
     e.preventDefault();
@@ -53,37 +49,53 @@ function BookDetails() {
 
     // Payload exacto según tu contrato API REST para POST /reviews
     const reviewPayload = {
-      ...book,
+      libro_id: id,
+      comentario: newReview.review,
+      calificacion: Number(newReview.rating),
+      usuario_id: user.id
       // sizeList: Number(newReview.rating),
-      // currency: newReview.comment
-      sizeList: [...book.sizeList,
-      {
-        user_name: user.name,
-        id: Date.now(), // ID temporal para la review, en un backend real lo asignaría el servidor
-        rating: Number(newReview.rating),
-        comment: newReview.comment
-      }]
+      // currency: newReview.review
+      // sizeList: [...book.sizeList,
+      // {
+      //   user_name: user.name,
+      //   id: Date.now(), // ID temporal para la review, en un backend real lo asignaría el servidor
+      //   rating: Number(newReview.rating),
+      //   review: newReview.review
+      // }]
     };
 
-    console.log("Enviando reseña al backend:", reviewPayload);
-    // Aquí iría: await axios.post('/reviews', reviewPayload, { headers: ... })
-
-
-    // Actualizamos la vista temporalmente simulando el éxito
-    setReviews([...reviews, {
-      id: Date.now(),
-      // user_name: user.name,
-      // rating: reviewPayload.rating,
-      // comment: reviewPayload.comment
-      ...reviewPayload.sizeList[reviewPayload.sizeList.length - 1]
-    }]);
-    updateBook(reviewPayload)
-      .then((res) => {
-        console.log("Se ha subido la review", res.data)
-      })
-
-    setNewReview({ rating: 5, comment: "" });
+    try {
+      const res = await addReview(id, reviewPayload);
+      if (res) {
+        alert("¡Reseña enviada con éxito!");
+        setNewReview({ rating: 5, review: "" });
+        fetchBookById(id); // Recargamos el libro para ver la nueva reseña
+      }
+    } catch (err) {
+      console.error("Error al subir la review", err);
+      alert("No se pudo enviar la reseña.");
+    }
   };
+
+  //   console.log("Enviando reseña al backend:", reviewPayload);
+  //   // Aquí iría: await axios.post('/reviews', reviewPayload, { headers: ... })
+
+
+  //   // Actualizamos la vista temporalmente simulando el éxito
+  //   setReviews([...reviews, {
+  //     id: Date.now(),
+  //     // user_name: user.name,
+  //     // rating: reviewPayload.rating,
+  //     // review: reviewPayload.review
+  //     ...reviewPayload.sizeList[reviewPayload.sizeList.length - 1]
+  //   }]);
+  //   updateBook(reviewPayload)
+  //     .then((res) => {
+  //       console.log("Se ha subido la review", res.data)
+  //     })
+
+  //   setNewReview({ rating: 5, review: "" });
+  // };
 
   const handleAddToCart = () => {
     if (!user) {
@@ -93,17 +105,15 @@ function BookDetails() {
       return;
     }
 
-    console.log(`Añadiendo ${book.title} al carrito`);
+    console.log(`Añadiendo ${book.libro_titulo} al carrito`);
     addToCart(book);
-    alert(`¡"${book.title}" añadido al carrito!`); // Feedback visual como en la gallery
+    alert(`¡"${book.libro_titulo}" añadido al carrito!`); // Feedback visual como en la gallery
   };
-
   if (loading) return <div style={{ textAlign: "center", padding: "50px", color: "var(--text-light)" }}>Cargando detalles...</div>;
-  if (!book) return <div style={{ textAlign: "center", padding: "50px", color: "var(--text-light)" }}>Libro no encontrado.</div>;
+  if (!book || !book.libro_titulo) return <div style={{ textAlign: "center", padding: "50px", color: "var(--text-light)" }}>Libro no encontrado.</div>;
 
   return (
     <div style={{ padding: "40px 20px", maxWidth: "1000px", margin: "0 auto", color: "var(--text-light)" }}>
-
       {/* Sección Superior: Detalles del Libro */}
       <div style={{ display: "flex", gap: "40px", flexWrap: "wrap", marginBottom: "50px" }}>
 
@@ -121,12 +131,12 @@ function BookDetails() {
             overflow: "hidden"
           }}>
             <img
-              src={book.img}
-              alt={book.title}
+              src={book.libro_imagen}
+              alt={book.libro_titulo}
               style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.9 }}
               onError={(e) => {
                 e.target.style.display = 'none';
-                e.target.parentElement.innerHTML = '<span style="color: var(--text-muted)">Foto del Producto</span>';
+                // e.target.parentElement.innerHTML = '<span style="color: var(--text-muted)">Foto del Producto</span>';
               }}
             />
           </div>
@@ -134,18 +144,12 @@ function BookDetails() {
 
         {/* Detalles del producto */}
         <div style={{ flex: "1.5", minWidth: "300px", display: "flex", flexDirection: "column" }}>
-          <h1 style={{ marginTop: 0, color: "var(--accent-cyan)", fontSize: "2.5rem", marginBottom: "10px" }}>{book.title}</h1>
-          <p style={{ color: "var(--text-muted)", fontWeight: "bold", textTransform: "uppercase", letterSpacing: "1px" }}>
-            Categoría: {book.category}
-          </p>
-          <p style={{ fontSize: "2rem", color: "var(--accent-gold)", fontWeight: "bold", margin: "15px 0" }}>
-            ${book.price.toLocaleString("es-CL")}
-          </p>
-          <p style={{ lineHeight: "1.8", color: "var(--text-light)", fontSize: "1.1rem", marginBottom: "20px" }}>
-            {book.description}
-          </p>
+          <h1 className="titleStyle">{book.libro_titulo}</h1>
+          <p className='categoryStyle'>Autor: {book.libro_autor}</p>
+          <p className='priceStyle'>${Number(book.libro_precio).toLocaleString("es-CL")}</p>
+          <p className='descriptionStyle'>{book.libro_descripcion}</p>
           <p style={{ color: "var(--text-muted)", marginBottom: "30px" }}>
-            <strong>Stock disponible:</strong> {book.stock} unidades
+            <strong>Stock:</strong> {book.libro_stock} unidades
           </p>
 
           <button
@@ -181,11 +185,11 @@ function BookDetails() {
 
         {/* Lista de reseñas existentes */}
         <div style={{ marginBottom: "40px" }}>
-          {reviews.length === 0 ? (
+          {!book.comentarios || book.comentarios.length === 0 ? (
             <p style={{ color: "var(--text-muted)" }}>Aún no hay reseñas. ¡Sé el primero en opinar!</p>
           ) : (
-            reviews.map(review => (
-              <div key={review.id} style={{
+            book.comentarios.map(review => (
+              <div key={review.comentario_id} style={{
                 border: "1px solid var(--bg-border)",
                 padding: "20px",
                 borderRadius: "8px",
@@ -193,9 +197,9 @@ function BookDetails() {
                 backgroundColor: "var(--bg-card)"
               }}>
                 <p style={{ margin: "0 0 10px 0", color: "var(--accent-cyan)" }}>
-                  <strong>{review.user_name}</strong> <span style={{ color: "var(--text-muted)", marginLeft: "10px" }}>{"⭐".repeat(review.rating)}</span>
+                  <strong>{review.username}</strong> <span style={{ color: "var(--text-muted)", marginLeft: "10px" }}>{"⭐".repeat(review.comentario_calificacion)}</span>
                 </p>
-                <p style={{ margin: 0, color: "var(--text-light)", lineHeight: "1.6" }}>{review.comment}</p>
+                <p style={{ margin: 0, color: "var(--text-light)", lineHeight: "1.6" }}>{review.comentario_texto}</p>
               </div>
             ))
           )}
@@ -242,8 +246,8 @@ function BookDetails() {
               <div style={{ marginBottom: "20px" }}>
                 <label style={{ display: "block", marginBottom: "8px", color: "var(--text-muted)", fontWeight: "bold" }}>Comentario:</label>
                 <textarea
-                  value={newReview.comment}
-                  onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })}
+                  value={newReview.review}
+                  onChange={(e) => setNewReview({ ...newReview, review: e.target.value })}
                   required
                   rows="4"
                   style={{
@@ -272,14 +276,14 @@ function BookDetails() {
                 textTransform: "uppercase",
                 transition: "all 0.2s ease"
               }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = "var(--accent-cyan)";
-                  e.currentTarget.style.color = "var(--bg-space)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = "transparent";
-                  e.currentTarget.style.color = "var(--accent-cyan)";
-                }}
+                // onMouseEnter={(e) => {
+                //   e.currentTarget.style.backgroundColor = "var(--accent-cyan)";
+                //   e.currentTarget.style.color = "var(--bg-space)";
+                // }}
+                // onMouseLeave={(e) => {
+                //   e.currentTarget.style.backgroundColor = "transparent";
+                //   e.currentTarget.style.color = "var(--accent-cyan)";
+                // }}
               >
                 Enviar Reseña
               </button>

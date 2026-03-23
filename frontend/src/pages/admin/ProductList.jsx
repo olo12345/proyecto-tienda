@@ -4,19 +4,19 @@ import { useNavigate } from "react-router-dom"; //esto para poder ir a la parte 
 import { useBooks } from "./../../hooks/useBooks"
 
 const ProductList = () => {
-  const { books, removeBook, clearBook } = useBooks();
+  const { books, removeBook } = useBooks();
   const navigate = useNavigate();
 
 
   const handleAdd = () => {
     console.log("Abrir formulario para añadir nuevo libro"); // esto es pa ver que hace
-    clearBook(); // Limpiar el estado del libro antes de navegar a la página de creación
+    // clearBook(); // Limpiar el estado del libro antes de navegar a la página de creación
     navigate("/admin/store/books/new"); //esto lo hace
   };
 
   const handleEdit = (id) => {
     console.log("Editar el libro con ID:", id);
-    clearBook(); // Limpiar el estado del libro antes de navegar a la página de creación
+    // clearBook(); // Limpiar el estado del libro antes de navegar a la página de creación
     navigate(`/admin/store/edit/${id}`);
   };
 
@@ -24,16 +24,10 @@ const ProductList = () => {
     const confirmDelete = window.confirm("¿Estás seguro de eliminar este libro?");
     if (confirmDelete) {
       removeBook(id)
-        .then((res) => {
-          console.log("Libro eliminado:", res.data);
-          // Se actualiza la lista de libros después de eliminar
-          // getBooks();
+        .then(() => {
+          console.log("Libro eliminado en la base de datos, ID:", id);
         })
         .catch((error) => console.log("Ocurrió un error al eliminar el libro", error));
-      // Para simular la eliminación sin backend, se puede filtrar el libro eliminado:
-      // const updatedBooks = books.filter((book) => book.id !== id);
-      // setBooks(updatedBooks);
-      console.log("Libro eliminado en la base de datos, ID:", id);
     }
   };
 
@@ -93,19 +87,19 @@ const ProductList = () => {
           </thead>
           <tbody>
             {books && books.map((book) => (
-              <tr key={book.id} style={{ borderBottom: "1px solid var(--bg-border)", transition: "background-color 0.2s ease" }}
+              <tr key={book.libro_id} style={{ borderBottom: "1px solid var(--bg-border)", transition: "background-color 0.2s ease" }}
                 onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.02)"}
                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
               >
-                <td style={{ padding: "15px", color: "var(--text-muted)" }}>{book.id}</td>
-                <td style={{ padding: "15px", fontWeight: "bold" }}>{book.title}</td>
-                <td style={{ padding: "15px", color: "var(--accent-gold)" }}>${book.price.toLocaleString("es-CL")}</td>
-                <td style={{ padding: "15px", color: "var(--text-light)" }}>{book.stock}</td>
+                <td style={{ padding: "15px", color: "var(--text-muted)" }}>{book.libro_id}</td>
+                <td style={{ padding: "15px", fontWeight: "bold" }}>{book.libro_titulo}</td>
+                <td style={{ padding: "15px", color: "var(--accent-gold)" }}>${book.libro_precio.toLocaleString("es-CL")}</td>
+                <td style={{ padding: "15px", color: "var(--text-light)" }}>{book.libro_stock}</td>
                 <td style={{ padding: "15px", textAlign: "center", display: "flex", justifyContent: "center", gap: "10px" }}>
 
                   {/* Botón Editar */}
                   <button
-                    onClick={() => handleEdit(book.id)}
+                    onClick={() => handleEdit(book.libro_id)}
                     style={{
                       padding: "6px 12px",
                       backgroundColor: "transparent",
@@ -130,7 +124,7 @@ const ProductList = () => {
 
                   {/* Botón Eliminar */}
                   <button
-                    onClick={() => handleDelete(book.id)}
+                    onClick={() => handleDelete(book.libro_id)}
                     style={{
                       padding: "6px 12px",
                       backgroundColor: "transparent",

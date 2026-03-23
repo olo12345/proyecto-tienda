@@ -9,5 +9,6 @@ export const verificarLogin = (req, res, next) => {
             .status(400)
             .json({ error: "la contraseña debe ser de al menos 6 caratctéres" });
     }
+    req.user = { email, password };
     next();
 };

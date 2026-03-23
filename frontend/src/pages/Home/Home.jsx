@@ -1,33 +1,18 @@
-import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getProducts } from "./../../services/products";
+import { useBooks } from "./../../hooks/useBooks"
 
-const getBooks = (setBooks) => {
-  getProducts()
-    .then((res) => {
-      const tempBooks = res.data.map((book) => ({
-        // Se ajustan las propiedades por limitaciones de la api
-        ...book,
-        stock: book.installments,
-        category: book.style,
-        //Se pone rating random por ajuste de api, en backend cargará de allí
-        rating: Math.floor(Math.random() * 6)
-      }))
-      setBooks(tempBooks);
-    })
-    .catch((error) => console.log("Ocurrió un error al obtener los libros", error))
-}
 
 function Home() {
-  const [books, setBooks] = useState([]);
+  // const [featuredBooks, setFeaturedBooks] = useState([]);
   const navigate = useNavigate();
+  const { highlights } = useBooks();
 
-  useEffect(() => {
-    getBooks(setBooks);
-  }, []);
 
   // Parte del filtro por calificación
-  const featuredBooks = books.filter(book => book.rating === 5);
+  // const getFeaturedBooks = async () => {
+  //   setFeaturedBooks( await getHighlights);
+  //   console.log(featuredBooks);
+  // };
 
   return (
     <main style={{ backgroundColor: "transparent", minHeight: "100vh" }}>
@@ -85,10 +70,10 @@ function Home() {
         </h2>
 
         <div style={{ display: "flex", flexWrap: "wrap", gap: "30px", justifyContent: "center" }}>
-          {featuredBooks.map(book => (
+          {highlights && highlights.map(book => (
             <div
-              key={book.id}
-              onClick={() => navigate(`/store/book/${book.id}`)}
+              key={book.libro_id}
+              onClick={() => navigate(`/store/book/${book.libro_id}`)}
               style={{
                 width: "220px",
                 border: "1px solid rgba(255, 255, 255, 0.1)",
@@ -122,8 +107,8 @@ function Home() {
                 border: "1px solid rgba(255,255,255,0.05)"
               }}>
                 <img
-                  src={book.img}
-                  alt={book.title}
+                  src={book.libro_imagen}
+                  alt={book.libro_titulo}
                   style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.8 }}
                   onError={(e) => {
                     e.target.style.display = 'none';
@@ -131,11 +116,11 @@ function Home() {
                   }}
                 />
               </div>
-              <h4 style={{ color: "var(--text-light)", margin: "0 0 10px 0", fontSize: "1.1rem" }}>{book.title}</h4>
+              <h4 style={{ color: "var(--text-light)", margin: "0 0 10px 0", fontSize: "1.1rem" }}>{book.libro_titulo}</h4>
               <p style={{ color: "var(--accent-gold)", fontWeight: "bold", margin: "0 0 10px 0", fontSize: "1.2rem" }}>
-                ${book.price.toLocaleString("es-CL")}
+                ${book.libro_precio.toLocaleString("es-CL")}
               </p>
-              <p style={{ margin: 0 }}>{"⭐".repeat(book.rating)}</p>
+              <p style={{ margin: 0 }}>{"⭐".repeat(book?.calificacion)}</p>
             </div>
           ))}
         </div>

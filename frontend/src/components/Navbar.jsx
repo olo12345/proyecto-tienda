@@ -26,12 +26,12 @@ function Navbar() {
 
       <NavLink to="/" style={{ fontFamily: "'The Foregen', sans-serif", color: "var(--accent-cyan)", textDecoration: "none", fontSize: "1.5rem", letterSpacing: "1px", textTransform: "uppercase", whiteSpace: "nowrap" }}>The Passenger Books</NavLink>
 
-      <div style={{ position: "relative", flex: "1", maxWidth: "400px", display: "flex", alignItems: "center", marginLeft: "20px" }}>
+      {/* <div style={{ position: "relative", flex: "1", maxWidth: "400px", display: "flex", alignItems: "center", marginLeft: "20px" }}>
         <span style={{ position: "absolute", left: "12px", color: "var(--text-muted)" }}>🔍</span>
         <input
           type="text"
           placeholder="Search..."
-          value={searchTerm}                                  /* Pendiente con ver como conectar esto*/
+          value={searchTerm}                                 
           onChange={handleSearch}
           style={{
             width: "100%",
@@ -44,7 +44,7 @@ function Navbar() {
             fontSize: "14px"
           }}
         />
-      </div>
+      </div> */}
 
       {!user && (
         <>

@@ -30,6 +30,7 @@ function Login() {
 
     if (result.success) {
       console.log("Login exitoso, redirigiendo...");
+      navigate("/profile");
     } else {
       setError(result.error || "Error al iniciar sesión");
     }

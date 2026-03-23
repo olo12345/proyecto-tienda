@@ -61,3 +61,27 @@ If you are developing a production application, we recommend using TypeScript wi
  - Empezamos el proceso de beutificación de la web
  - Se incorporas nuevas fonts específicas para la página
  - Se deja todo estilizado
+
+## Cambios 17-03 - Carlos Carrillo O.
+ - Se actualiza api.js para que se pueda comunicar con back
+   - front busca variable "VITE_API_URL"
+ - Se actualiza el AuthContext.jsx para que se comunique con el back
+ - Se actualiza el users.js (services) para que se comunique en el mismo idioma con el back
+ - Se ajustan las rutas de products.js para que coincida con la logica de libro.model.js
+   - Se incorpora la adición de comentarios
+ - Se actualiza el CreatePost.jsx para que envíe exactamente lo que pide el back (también se homogeneizan nombres a españiol)
+ - Se actualiza tamnbien el BooksContext.jsx ajustando consistencia y el ajuste para el uso de filtros (params)
+ - Se ajusta el CartContext.jsx para que pueda conversar con lo que necesitamos en el checkout.models.js
+ - Tamnién se ajusta el FavoritesContext.jsx (se mejora para evitar duplicidad, sincronización de id)
+ - Se incorpora el AuthProvider al App.jsx
+ - Se actualiza productList.jsx con los nombres de variable en español creadas anteriormente para interactuar con el back
+ - Se ajusta register también con las variables como corresponde según el conrtrato de auth.models.jsx
+ - Se ajusta BookDetails para traer la información correcta (actualización de variables)
+ - Se actualiza detalle de redirección en el login
+ - Se ajusta Cart.jsx con los mismos detalles antes mencionados
+
+## Cambios 18-03 - Carlos Carrillo O.
+ - Se ajusta el Gallery también con los nombres adecuados trabajados ayer.
+ - También se ajusta el CardBook (mismos detalles)
+ - También se ajusta el FilterBar (estética)
+ - Se genera archivo .env.example para traspasar información a los demás (SE DEBE BORRAR ANTES DE DEPLOYAR)
