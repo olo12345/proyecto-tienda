@@ -10,7 +10,7 @@ import axios from 'axios';
 //     // withCredentials:true
 // });
 
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+const BASE_URL = import.meta.env.VITE_API_URL || 'https://the-passenger-books.onrender.com/';
 
 // Dejamos ambos apuntando al mismo sitio, pero mantenemos los nombres por
 // convención de lo que veniamos usando y así no cambiamos el resto del código
