@@ -1,0 +1,80 @@
+info:
+  name: Post login
+  type: http
+  seq: 7
+
+http:
+  method: POST
+  url: https://the-passenger-books.onrender.com/api/auth/login
+  body:
+    type: json
+    data: |-
+      {
+            "email": "orlando@admin.com",
+            "password": "123456"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+examples:
+  - name: Respuesta de login token
+    request:
+      url: https://the-passenger-books.onrender.com/api/auth/login
+      method: POST
+      body:
+        type: json
+        data: |-
+          {
+                "email": "orlando@admin.com",
+                "password": "123456"
+          }
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: date
+          value: Tue, 24 Mar 2026 01:03:46 GMT
+        - name: content-type
+          value: application/json; charset=utf-8
+        - name: content-length
+          value: "264"
+        - name: connection
+          value: keep-alive
+        - name: cf-ray
+          value: 9e11c20ac8092f8c-SCL
+        - name: access-control-allow-origin
+          value: "*"
+        - name: etag
+          value: W/"13e-kn464ly8ZWBZjENzL254UMf8NQ8"
+        - name: rndr-id
+          value: 85c4b8bf-84ec-45d0
+        - name: vary
+          value: Accept-Encoding
+        - name: x-powered-by
+          value: Express
+        - name: x-render-origin-server
+          value: Render
+        - name: cf-cache-status
+          value: DYNAMIC
+        - name: server
+          value: cloudflare
+        - name: alt-svc
+          value: h3=":443"; ma=86400
+      body:
+        type: json
+        data: |-
+          {
+            "message": "Bienvenido a The Passenger Books",
+            "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Im9ybGFuZG9AYWRtaW4uY29tIiwicm9sIjoiYWRtaW4iLCJpYXQiOjE3NzQzMTQyMjYsImV4cCI6MTc3NDMyMTQyNn0.S5-2SG3YW70GjMdXuPCUthw0RyCSwBrT8O4vSCgXgIc",
+            "user": {
+              "nombre": "Orlando",
+              "email": "orlando@admin.com",
+              "rol": "admin",
+              "id": 5
+            }
+          }

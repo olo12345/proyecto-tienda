@@ -5,7 +5,7 @@ info:
 
 http:
   method: GET
-  url: http://localhost:5001/api/libros
+  url: https://the-passenger-books.onrender.com/api/libros
   auth: inherit
 
 settings:

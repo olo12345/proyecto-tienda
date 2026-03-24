@@ -1,0 +1,26 @@
+info:
+  name: Post registrar usuario
+  type: http
+  seq: 6
+
+http:
+  method: POST
+  url: https://the-passenger-books.onrender.com/api/auth/register
+  body:
+    type: json
+    data: |-
+      {
+        "nombre": "Orlando",
+            "email": "orlando@admin.com",
+            "edad": "31",
+            "password": "123456",
+            "rol": "admin",
+            "imagen": "null" 
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

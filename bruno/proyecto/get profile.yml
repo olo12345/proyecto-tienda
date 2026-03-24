@@ -1,11 +1,11 @@
 info:
-  name: libro destacados
+  name: get profile
   type: http
-  seq: 5
+  seq: 8
 
 http:
   method: GET
-  url: https://the-passenger-books.onrender.com/api/libros/destacados
+  url: ""
   auth: inherit
 
 settings:

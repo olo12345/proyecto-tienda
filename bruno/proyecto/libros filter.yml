@@ -5,7 +5,7 @@ info:
 
 http:
   method: GET
-  url: http://localhost:5001/api/libros?categoria=fic
+  url: https://the-passenger-books.onrender.com/api/libros?categoria=fic
   params:
     - name: categoria
       value: fic

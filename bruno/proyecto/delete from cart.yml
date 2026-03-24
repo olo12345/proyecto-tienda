@@ -5,7 +5,7 @@ info:
 
 http:
   method: DELETE
-  url: http://localhost:5001/api/libros/1
+  url: https://the-passenger-books.onrender.com/api/libros/1
   auth: inherit
 
 settings:
